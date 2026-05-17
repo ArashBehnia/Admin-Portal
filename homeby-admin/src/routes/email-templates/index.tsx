@@ -24,7 +24,7 @@ function RouteComponent() {
             <tbody>
               <tr className="border-b border-border hover:bg-page transition-colors h-row cursor-pointer">
                 <td className="px-4 py-3 font-medium text-text">
-                  <Link to="/email-templates/welcome-agency" className="hover:text-accent">Welcome Agency</Link>
+                  <Link to="/email-templates/$id" params={{ id: 'welcome-agency' }} className="hover:text-accent">Welcome Agency</Link>
                 </td>
                 <td className="px-4 py-3 text-muted">Welcome to HomeBy Admin!</td>
                 <td className="px-4 py-3">

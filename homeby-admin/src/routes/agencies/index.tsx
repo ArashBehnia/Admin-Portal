@@ -35,7 +35,7 @@ function RouteComponent() {
             <tbody>
               <tr className="border-b border-border hover:bg-page transition-colors h-row cursor-pointer">
                 <td className="px-4 py-3 font-medium text-text">
-                  <Link to={`/agencies/${1}`} className="hover:text-accent">LJ Hooker</Link>
+                  <Link to="/agencies/$id" params={{ id: '1' }} className="hover:text-accent">LJ Hooker</Link>
                 </td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-1 rounded bg-green-50 text-success text-xs font-medium">Active</span>
@@ -45,7 +45,7 @@ function RouteComponent() {
               </tr>
               <tr className="hover:bg-page transition-colors h-row cursor-pointer">
                 <td className="px-4 py-3 font-medium text-text">
-                  <Link to={`/agencies/${2}`} className="hover:text-accent">McGrath</Link>
+                  <Link to="/agencies/$id" params={{ id: '2' }} className="hover:text-accent">McGrath</Link>
                 </td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-1 rounded bg-amber-50 text-warning text-xs font-medium">Pending</span>
