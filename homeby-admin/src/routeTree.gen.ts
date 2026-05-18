@@ -12,13 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
-import { Route as EmailTemplatesIdRouteImport } from './routes/email-templates/$id'
 import { Route as AgenciesIdRouteImport } from './routes/agencies/$id'
 
 const StaffRoute = StaffRouteImport.update({
@@ -34,6 +33,11 @@ const LoginRoute = LoginRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailTemplatesRoute = EmailTemplatesRouteImport.update({
+  id: '/email-templates',
+  path: '/email-templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -56,19 +60,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmailTemplatesIndexRoute = EmailTemplatesIndexRouteImport.update({
-  id: '/email-templates/',
-  path: '/email-templates/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AgenciesIndexRoute = AgenciesIndexRouteImport.update({
   id: '/agencies/',
   path: '/agencies/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailTemplatesIdRoute = EmailTemplatesIdRouteImport.update({
-  id: '/email-templates/$id',
-  path: '/email-templates/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgenciesIdRoute = AgenciesIdRouteImport.update({
@@ -82,26 +76,24 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
+  '/email-templates': typeof EmailTemplatesRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/agencies/$id': typeof AgenciesIdRoute
-  '/email-templates/$id': typeof EmailTemplatesIdRoute
   '/agencies/': typeof AgenciesIndexRoute
-  '/email-templates/': typeof EmailTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
+  '/email-templates': typeof EmailTemplatesRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/agencies/$id': typeof AgenciesIdRoute
-  '/email-templates/$id': typeof EmailTemplatesIdRoute
   '/agencies': typeof AgenciesIndexRoute
-  '/email-templates': typeof EmailTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,13 +101,12 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
+  '/email-templates': typeof EmailTemplatesRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/agencies/$id': typeof AgenciesIdRoute
-  '/email-templates/$id': typeof EmailTemplatesIdRoute
   '/agencies/': typeof AgenciesIndexRoute
-  '/email-templates/': typeof EmailTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -124,39 +115,36 @@ export interface FileRouteTypes {
     | '/agents'
     | '/applications'
     | '/dashboard'
+    | '/email-templates'
     | '/integrations'
     | '/login'
     | '/staff'
     | '/agencies/$id'
-    | '/email-templates/$id'
     | '/agencies/'
-    | '/email-templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agents'
     | '/applications'
     | '/dashboard'
+    | '/email-templates'
     | '/integrations'
     | '/login'
     | '/staff'
     | '/agencies/$id'
-    | '/email-templates/$id'
     | '/agencies'
-    | '/email-templates'
   id:
     | '__root__'
     | '/'
     | '/agents'
     | '/applications'
     | '/dashboard'
+    | '/email-templates'
     | '/integrations'
     | '/login'
     | '/staff'
     | '/agencies/$id'
-    | '/email-templates/$id'
     | '/agencies/'
-    | '/email-templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,13 +152,12 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   ApplicationsRoute: typeof ApplicationsRoute
   DashboardRoute: typeof DashboardRoute
+  EmailTemplatesRoute: typeof EmailTemplatesRoute
   IntegrationsRoute: typeof IntegrationsRoute
   LoginRoute: typeof LoginRoute
   StaffRoute: typeof StaffRoute
   AgenciesIdRoute: typeof AgenciesIdRoute
-  EmailTemplatesIdRoute: typeof EmailTemplatesIdRoute
   AgenciesIndexRoute: typeof AgenciesIndexRoute
-  EmailTemplatesIndexRoute: typeof EmailTemplatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -194,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-templates': {
+      id: '/email-templates'
+      path: '/email-templates'
+      fullPath: '/email-templates'
+      preLoaderRoute: typeof EmailTemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -224,25 +218,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email-templates/': {
-      id: '/email-templates/'
-      path: '/email-templates'
-      fullPath: '/email-templates/'
-      preLoaderRoute: typeof EmailTemplatesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/agencies/': {
       id: '/agencies/'
       path: '/agencies'
       fullPath: '/agencies/'
       preLoaderRoute: typeof AgenciesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email-templates/$id': {
-      id: '/email-templates/$id'
-      path: '/email-templates/$id'
-      fullPath: '/email-templates/$id'
-      preLoaderRoute: typeof EmailTemplatesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agencies/$id': {
@@ -260,13 +240,12 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   ApplicationsRoute: ApplicationsRoute,
   DashboardRoute: DashboardRoute,
+  EmailTemplatesRoute: EmailTemplatesRoute,
   IntegrationsRoute: IntegrationsRoute,
   LoginRoute: LoginRoute,
   StaffRoute: StaffRoute,
   AgenciesIdRoute: AgenciesIdRoute,
-  EmailTemplatesIdRoute: EmailTemplatesIdRoute,
   AgenciesIndexRoute: AgenciesIndexRoute,
-  EmailTemplatesIndexRoute: EmailTemplatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
