@@ -4,6 +4,11 @@
 
 @layer base {
   body {
-    @apply bg-page text-text font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    @apply bg-page text-text antialiased;
+  }
+
+  * {
+    font-family: 'Inter', sans-serif;
   }
 }
