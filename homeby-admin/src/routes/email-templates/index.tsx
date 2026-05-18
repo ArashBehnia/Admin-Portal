@@ -1,10 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/email-templates/')({
-  component: RouteComponent,
-})
 
-function RouteComponent() {
+
+const RouteComponent = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -38,3 +36,7 @@ function RouteComponent() {
     </div>
   )
 }
+
+export const Route = createFileRoute('/email-templates/')({
+  component: RouteComponent,
+})

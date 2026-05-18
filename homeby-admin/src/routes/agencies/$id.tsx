@@ -2,11 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/agencies/$id')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
+const RouteComponent = () => {
   const { id } = Route.useParams() as { id: string }
 
   return (
@@ -45,3 +41,7 @@ function RouteComponent() {
     </div>
   )
 }
+
+export const Route = createFileRoute('/agencies/$id')({
+  component: RouteComponent,
+})
