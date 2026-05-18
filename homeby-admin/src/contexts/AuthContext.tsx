@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType, UserRole } from '../types/auth';
-import { setApiToken } from '../lib/axios';
+import { setApiTokens, registerTokenRefreshCallback } from '../lib/axios';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -9,17 +9,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [staffId, setStaffId] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
-  // Sync token to Axios when accessToken changes
+  // Sync tokens to Axios when accessToken or refreshToken changes
   useEffect(() => {
-    setApiToken(accessToken);
-  }, [accessToken]);
+    setApiTokens(accessToken, refreshToken);
+  }, [accessToken, refreshToken]);
 
-  const login = (token: string, newRole: UserRole, newName: string, newStaffId: string) => {
+  // Register token refresh callback once on mount to keep Context and Axios state in sync
+  useEffect(() => {
+    registerTokenRefreshCallback((newAccess, newRefresh) => {
+      setAccessToken(newAccess);
+      setRefreshToken(newRefresh);
+    });
+  }, []);
+
+  const login = (token: string, rToken: string, newRole: UserRole, newName: string, newStaffId: string) => {
     setAccessToken(token);
+    setRefreshToken(rToken);
     setRole(newRole);
     setName(newName);
     setStaffId(newStaffId);
+  };
+
+  const updateTokens = (token: string, rToken: string) => {
+    setAccessToken(token);
+    setRefreshToken(rToken);
   };
 
   const logout = () => {
@@ -27,10 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStaffId(null);
     setName(null);
     setAccessToken(null);
+    setRefreshToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ role, staffId, name, accessToken, login, logout }}>
+    <AuthContext.Provider value={{ role, staffId, name, accessToken, refreshToken, login, updateTokens, logout }}>
       {children}
     </AuthContext.Provider>
   );

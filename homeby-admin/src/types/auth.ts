@@ -5,7 +5,9 @@ export interface AuthContextType {
   staffId: string | null;
   name: string | null;
   accessToken: string | null;
-  login: (token: string, role: UserRole, name: string, staffId: string) => void;
+  refreshToken: string | null;
+  login: (token: string, refreshToken: string, role: UserRole, name: string, staffId: string) => void;
+  updateTokens: (token: string, refreshToken: string) => void;
   logout: () => void;
 }
 

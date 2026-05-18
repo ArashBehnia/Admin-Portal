@@ -13,15 +13,35 @@ const api = axios.create({
 // is to inject the token or handle it at the component level, OR export a setter for the token.
 // For the demo, we'll keep a reference here.
 
-let currentToken: string | null = null;
+let currentAccessToken: string | null = null;
+let currentRefreshToken: string | null = null;
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
+let onTokenRefresh: ((accessToken: string, refreshToken: string) => void) | null = null;
 
-export const setApiToken = (token: string | null) => {
-  currentToken = token;
+export const setApiTokens = (accessToken: string | null, refreshToken: string | null) => {
+  currentAccessToken = accessToken;
+  currentRefreshToken = refreshToken;
+};
+
+export const registerTokenRefreshCallback = (callback: (accessToken: string, refreshToken: string) => void) => {
+  onTokenRefresh = callback;
+};
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token!);
+    }
+  });
+  failedQueue = [];
 };
 
 api.interceptors.request.use((config) => {
-  if (currentToken) {
-    config.headers.Authorization = `Bearer ${currentToken}`;
+  if (currentAccessToken) {
+    config.headers.Authorization = `Bearer ${currentAccessToken}`;
   }
   return config;
 });
@@ -29,11 +49,65 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // 401 Unauthorized handling (token refresh logic mock)
-    if (error.response?.status === 401) {
-      // Logic for refresh would go here
-      // if refresh fails, redirect to /login
-      window.location.href = '/login';
+    const originalRequest = error.config;
+
+    // 401 Unauthorized handling (token refresh logic)
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/token/refresh')) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (token: string) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              resolve(api(originalRequest));
+            },
+            reject: (err: any) => {
+              reject(err);
+            }
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        if (!currentRefreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Call the refresh endpoint directly using global axios to avoid interceptor recursion
+        const response = await axios.post<{
+          'access-token': string;
+          'refresh-token': string;
+          'expires-at': string;
+        }>(`${api.defaults.baseURL || 'https://admin-api.homeby.com.au'}/auth/token/refresh`, {
+          'refresh-token': currentRefreshToken
+        });
+
+        const newAccessToken = response.data['access-token'];
+        const newRefreshToken = response.data['refresh-token'];
+
+        // Update in-memory bindings in this module
+        setApiTokens(newAccessToken, newRefreshToken);
+
+        // Sync back to React Context if callback is registered
+        if (onTokenRefresh) {
+          onTokenRefresh(newAccessToken, newRefreshToken);
+        }
+
+        processQueue(null, newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // Clear tokens and redirect
+        setApiTokens(null, null);
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
     return Promise.reject(error);
   }

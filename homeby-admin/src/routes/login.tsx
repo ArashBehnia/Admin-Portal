@@ -158,6 +158,7 @@ function RouteComponent() {
       const data = response.data
       login(
         data['access-token'],
+        data['refresh-token'],
         data.role,
         data.name || 'Admin Staff',
         data['staff-id'] || 'staff-id'
@@ -167,7 +168,7 @@ function RouteComponent() {
       console.warn('API verify failed, checking mock OTP code...', err)
 
       if (code === '000000') {
-        login('mock-jwt-access-token', 'superadmin', 'Arash Behnia', 'staff-arash')
+        login('mock-jwt-access-token', 'mock-jwt-refresh-token', 'superadmin', 'Arash Behnia', 'staff-arash')
         navigate({ to: '/dashboard' })
       } else {
         setError(err.response?.data?.message || 'Invalid verification code. Please try again.')
