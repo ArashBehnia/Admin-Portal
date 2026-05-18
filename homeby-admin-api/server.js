@@ -18,60 +18,46 @@ let activeMfaSessions = new Map(); // sessionToken -> mfaSessionDetails
 // 1. Agencies list state
 let agencies = [
   {
-    id: '1',
-    name: 'LJ Hooker',
-    status: 'Active',
-    tier: 'Enterprise',
-    state: 'NSW',
-    listingsCount: 142,
-    onboardingStage: 'Live', // Applied -> Approved -> CRM Connected -> Syncing -> Validation -> Live
-    notes: 'LJ Hooker key enterprise account. High volume syncing active.',
-    crmConnected: true,
-    syncing: true,
-    validated: true,
-    billing: { plan: 'Enterprise', rate: '$2,500/mo', status: 'Paid', nextBilling: '2026-06-01' }
+    id: '1', name: 'Ray White Bondi', status: 'Healthy', method: 'FTP', crm: 'Box+Dice', listings24h: 47, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '14 min ago'
   },
   {
-    id: '2',
-    name: 'McGrath',
-    status: 'Warning',
-    tier: 'Pro',
-    state: 'VIC',
-    listingsCount: 8,
-    onboardingStage: 'Validation',
-    notes: 'Awaiting feed schema mapping adjustments.',
-    crmConnected: true,
-    syncing: true,
-    validated: false,
-    billing: { plan: 'Pro', rate: '$950/mo', status: 'Paid', nextBilling: '2026-06-05' }
+    id: '2', name: 'McGrath Surry Hills', status: 'Healthy', method: 'API', crm: 'VaultRE', listings24h: 23, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '1 hour ago'
   },
   {
-    id: '3',
-    name: 'Ray White Double Bay',
-    status: 'Pending',
-    tier: 'Enterprise',
-    state: 'NSW',
-    listingsCount: 0,
-    onboardingStage: 'Applied',
-    notes: 'Newly registered agency. Onboarding queue priority.',
-    crmConnected: false,
-    syncing: false,
-    validated: false,
-    billing: { plan: 'Enterprise', rate: '$2,500/mo', status: 'Unpaid', nextBilling: 'On Activation' }
+    id: '3', name: 'Belle Property Mosman', status: 'Healthy', method: 'FTP', crm: 'AgentBox', listings24h: 31, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '2 hours ago'
   },
   {
-    id: '4',
-    name: 'Raine & Horne Corporate',
-    status: 'Inactive',
-    tier: 'Basic',
-    state: 'QLD',
-    listingsCount: 12,
-    onboardingStage: 'CRM Connected',
-    notes: 'CRM credentials setup completed. Sync pending feed operations review.',
-    crmConnected: true,
-    syncing: false,
-    validated: false,
-    billing: { plan: 'Basic', rate: '$450/mo', status: 'Suspended', nextBilling: 'N/A' }
+    id: '4', name: 'LJ Hooker Parramatta', status: 'Healthy', method: 'API', crm: 'Rex Software', listings24h: 18, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '3 hours ago'
+  },
+  {
+    id: '5', name: 'Stone Real Estate Newtown', status: 'Healthy', method: 'FTP', crm: 'Box+Dice', listings24h: 29, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '4 hours ago'
+  },
+  {
+    id: '6', name: 'Harcourts Melbourne', status: 'Healthy', method: 'FTP', crm: 'VaultRE', listings24h: 52, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '5 hours ago'
+  },
+  {
+    id: '7', name: 'Ray White Carlton', status: 'Healthy', method: 'FTP', crm: 'MyDesktop', listings24h: 14, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '6 hours ago'
+  },
+  {
+    id: '8', name: 'McGrath Double Bay', status: 'Healthy', method: 'API', crm: 'AgentBox', listings24h: 38, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '8 hours ago'
+  },
+  {
+    id: '9', name: 'Jellis Craig Fitzroy', status: 'Healthy', method: 'FTP', crm: 'Rex Software', listings24h: 22, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '11 hours ago'
+  },
+  {
+    id: '10', name: 'Nelson Alexander', status: 'Healthy', method: 'FTP', crm: 'Box+Dice', listings24h: 19, errors24h: 0, distribution: '4/4', onboarding: 'Live', lastSync: '12 hours ago'
+  },
+  {
+    id: '11', name: 'Barry Plant Doncaster', status: 'Healthy', method: 'Internal', crm: 'HomeBy Internal', listings24h: 14, errors24h: 0, distribution: 'HomeBy only', onboarding: 'Live', lastSync: 'Live - real time'
+  },
+  {
+    id: '12', name: 'Hocking Stuart Richmond', status: 'Failing', method: 'FTP', crm: 'VaultRE', listings24h: 0, errors24h: 14, distribution: '2/4', onboarding: 'CRM Connected', lastSync: '3 days ago'
+  },
+  {
+    id: '13', name: 'First National Geelong', status: 'Failing', method: 'FTP', crm: 'Manual', listings24h: 0, errors24h: 28, distribution: 'Failing', onboarding: 'Approved', lastSync: '5 days ago'
+  },
+  {
+    id: '14', name: 'First Home Buyers Melbourne', status: 'Pending setup', method: 'FTP', crm: 'AgentBox', listings24h: 0, errors24h: null, distribution: 'Not set up', onboarding: 'Approved', lastSync: 'Never'
   }
 ];
 
@@ -394,14 +380,28 @@ app.get('/dashboard/system-health', (req, res) => {
 
 // GET /integrations/feeds
 app.get('/integrations/feeds', (req, res) => {
-  res.json(agencies.map(a => ({
-    id: a.id,
-    agencyName: a.name,
-    status: a.status,
-    lastSync: '2026-05-17T22:30:00Z',
-    syncType: 'XML FTP',
-    frequency: 'Hourly'
-  })));
+  const stats = {
+    total: agencies.length,
+    healthy: agencies.filter(a => a.status === 'Healthy').length,
+    warning: agencies.filter(a => a.status === 'Warning').length,
+    failing: agencies.filter(a => a.status === 'Failing').length
+  };
+
+  res.json({
+    stats,
+    feeds: agencies.map(a => ({
+      id: a.id,
+      agencyName: a.name,
+      crm: a.crm,
+      method: a.method,
+      status: a.status,
+      lastSync: a.lastSync,
+      listings24h: a.listings24h,
+      errors24h: a.errors24h,
+      distribution: a.distribution,
+      onboarding: a.onboarding
+    }))
+  });
 });
 
 // GET /integrations/feeds/:agencyId

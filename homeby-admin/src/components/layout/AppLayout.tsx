@@ -50,7 +50,7 @@ export const AppLayout = () => {
         <div className="min-h-screen bg-page flex w-full">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-text/50 z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
                 />
