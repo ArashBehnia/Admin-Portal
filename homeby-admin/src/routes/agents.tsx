@@ -61,9 +61,9 @@ const RouteComponent = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-content mx-auto">
             {/* Header */}
-            <div>
+            <div className="my-6">
                 <h1 className="text-2xl font-bold text-text">Agents</h1>
                 <p className="text-sm text-muted">
                     Search and manage all agents across all agencies.
@@ -81,7 +81,7 @@ const RouteComponent = () => {
                     className="pl-9 pr-4 py-2 w-full bg-card border border-border rounded-md text-sm text-text placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-colors"
                 />
             </div>
-            <p className="text-xs text-muted">
+            <p className="text-xs text-muted my-6">
                 Showing all agents. Use search to filter by name, email, licence or agency.
             </p>
 
@@ -108,7 +108,7 @@ const RouteComponent = () => {
                                     <th className="px-6 py-4 hidden md:table-cell">Agency</th>
                                     <th className="px-6 py-4 hidden md:table-cell">Role</th>
                                     <th className="px-6 py-4 hidden lg:table-cell">Last login</th>
-                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4 hidden lg:table-cell">Status</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -138,7 +138,7 @@ const RouteComponent = () => {
                                             <td className="px-6 py-4 hidden lg:table-cell text-muted">
                                                 {agent.lastLogin}
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 hidden lg:table-cell">
                                                 <span
                                                     className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded ${agent.status === "Active"
                                                         ? "bg-success/10 text-success "
@@ -335,20 +335,21 @@ const RouteComponent = () => {
                             {/* Actions Tab */}
                             {activeTab === "actions" && (
                                 <div className="space-y-3">
-                                    <button className="w-full py-2.5 px-4 bg-page border border-border hover:bg-page/70 text-text font-medium rounded-md text-sm transition-all text-left shadow-sm">
+                                    <button className="w-full py-2.5 px-4  text-text font-medium rounded-md text-sm transition-all text-left">
                                         Reset password
                                     </button>
-                                    <button className="w-full py-2.5 px-4 bg-page border border-border hover:bg-page/70 text-text font-medium rounded-md text-sm transition-all text-left shadow-sm">
+                                    <div className="h-[1px] w-full bg-border" />
+                                    <button className="w-full py-2.5 px-4  text-text font-medium rounded-md text-sm transition-all text-left">
                                         Change role
                                     </button>
-                                    <button className="w-full py-2.5 px-4 bg-page border border-border hover:bg-page/70 text-text font-medium rounded-md text-sm transition-all text-left shadow-sm">
+                                    <div className="h-[1px] w-full bg-border" />
+                                    <button className="w-full py-2.5 px-4  text-text font-medium rounded-md text-sm transition-all text-left">
                                         Transfer to another agency
                                     </button>
-                                    <div className="pt-4 border-t border-border/60">
-                                        <button className="w-full py-2.5 px-4 bg-red-50 hover:bg-red-100 text-danger border border-red-200 font-semibold rounded-md text-sm transition-all text-left shadow-sm">
-                                            Deactivate account
-                                        </button>
-                                    </div>
+                                    <div className="h-[1px] w-full bg-border" />
+                                    <button className="w-full py-2.5 px-4 text-danger font-semibold rounded-md text-sm transition-all text-left">
+                                        Deactivate account
+                                    </button>
                                 </div>
                             )}
                         </div>
