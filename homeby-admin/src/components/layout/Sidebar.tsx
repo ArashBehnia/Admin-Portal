@@ -105,7 +105,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     const currentPath = router.location.pathname;
 
     return (
-        <div className="xl:w-[300px] lg:w-[200px] h-screen bg-card border-r border-border flex flex-col">
+        <div className="xl:w-[300px] lg:w-[200px] h-screen bg-gray-100 border-r border-border flex flex-col">
             <div className="h-[64px] flex items-center justify-between px-5 border-b border-border/50 shrink-0">
                 <div className="font-bold text-lg text-text">HomeBy Admin</div>
                 {onClose && (
@@ -161,8 +161,8 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                 const itemClasses = `group flex items-center justify-between px-3 py-2 rounded-md transition-all text-base ${isSoon
                                         ? 'text-muted/50 cursor-not-allowed'
                                         : isActive
-                                            ? 'bg-page text-text font-medium'
-                                            : 'text-muted hover:text-text font-medium'
+                                            ? 'bg-white shadow-sm text-text font-medium border border-gray-200/60'
+                                            : 'text-muted hover:text-text font-medium hover:bg-gray-200/50'
                                     }`;
 
                                 // If it's a soon item, or no path is provided, render a div
