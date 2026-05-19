@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
@@ -20,6 +21,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
 import { Route as AgenciesIdRouteImport } from './routes/agencies/$id'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaffRoute = StaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
+  '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/agencies/': typeof AgenciesIndexRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
+  '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/agencies': typeof AgenciesIndexRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
+  '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/agencies/': typeof AgenciesIndexRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/login'
     | '/staff'
+    | '/users'
     | '/agencies/$id'
     | '/agencies/'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/login'
     | '/staff'
+    | '/users'
     | '/agencies/$id'
     | '/agencies'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/login'
     | '/staff'
+    | '/users'
     | '/agencies/$id'
     | '/agencies/'
   fileRoutesById: FileRoutesById
@@ -156,12 +168,20 @@ export interface RootRouteChildren {
   IntegrationsRoute: typeof IntegrationsRoute
   LoginRoute: typeof LoginRoute
   StaffRoute: typeof StaffRoute
+  UsersRoute: typeof UsersRoute
   AgenciesIdRoute: typeof AgenciesIdRoute
   AgenciesIndexRoute: typeof AgenciesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/staff': {
       id: '/staff'
       path: '/staff'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsRoute: IntegrationsRoute,
   LoginRoute: LoginRoute,
   StaffRoute: StaffRoute,
+  UsersRoute: UsersRoute,
   AgenciesIdRoute: AgenciesIdRoute,
   AgenciesIndexRoute: AgenciesIndexRoute,
 }
