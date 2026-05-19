@@ -18,7 +18,9 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VendorsIndexRouteImport } from './routes/vendors/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
+import { Route as VendorsIdRouteImport } from './routes/vendors/$id'
 import { Route as AgenciesIdRouteImport } from './routes/agencies/$id'
 
 const UsersRoute = UsersRouteImport.update({
@@ -66,9 +68,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorsIndexRoute = VendorsIndexRouteImport.update({
+  id: '/vendors/',
+  path: '/vendors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgenciesIndexRoute = AgenciesIndexRouteImport.update({
   id: '/agencies/',
   path: '/agencies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsIdRoute = VendorsIdRouteImport.update({
+  id: '/vendors/$id',
+  path: '/vendors/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgenciesIdRoute = AgenciesIdRouteImport.update({
@@ -88,7 +100,9 @@ export interface FileRoutesByFullPath {
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,7 +115,9 @@ export interface FileRoutesByTo {
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
   '/agencies': typeof AgenciesIndexRoute
+  '/vendors': typeof VendorsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,7 +131,9 @@ export interface FileRoutesById {
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,7 +148,9 @@ export interface FileRouteTypes {
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/vendors/$id'
     | '/agencies/'
+    | '/vendors/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -143,7 +163,9 @@ export interface FileRouteTypes {
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/vendors/$id'
     | '/agencies'
+    | '/vendors'
   id:
     | '__root__'
     | '/'
@@ -156,7 +178,9 @@ export interface FileRouteTypes {
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/vendors/$id'
     | '/agencies/'
+    | '/vendors/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,7 +194,9 @@ export interface RootRouteChildren {
   StaffRoute: typeof StaffRoute
   UsersRoute: typeof UsersRoute
   AgenciesIdRoute: typeof AgenciesIdRoute
+  VendorsIdRoute: typeof VendorsIdRoute
   AgenciesIndexRoute: typeof AgenciesIndexRoute
+  VendorsIndexRoute: typeof VendorsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -238,11 +264,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendors/': {
+      id: '/vendors/'
+      path: '/vendors'
+      fullPath: '/vendors/'
+      preLoaderRoute: typeof VendorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agencies/': {
       id: '/agencies/'
       path: '/agencies'
       fullPath: '/agencies/'
       preLoaderRoute: typeof AgenciesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/$id': {
+      id: '/vendors/$id'
+      path: '/vendors/$id'
+      fullPath: '/vendors/$id'
+      preLoaderRoute: typeof VendorsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agencies/$id': {
@@ -266,7 +306,9 @@ const rootRouteChildren: RootRouteChildren = {
   StaffRoute: StaffRoute,
   UsersRoute: UsersRoute,
   AgenciesIdRoute: AgenciesIdRoute,
+  VendorsIdRoute: VendorsIdRoute,
   AgenciesIndexRoute: AgenciesIndexRoute,
+  VendorsIndexRoute: VendorsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
