@@ -114,7 +114,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                     </button>
                 )}
             </div>
-            
+
             <nav className="flex-1 overflow-y-auto pt-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {sidebarConfig.map((group, index) => (
                     <div key={index} className="mb-6 last:mb-0 px-3">
@@ -132,14 +132,14 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                 const Icon = item.icon;
                                 const isSoon = item.soon;
                                 const isActive = currentPath === item.path;
-                                
+
                                 const innerContent = (
                                     <>
                                         <div className="flex items-center gap-3 overflow-hidden">
                                             <Icon size={18} className={`${isSoon ? "text-muted/40" : isActive ? "text-text" : "text-muted group-hover:text-text"} shrink-0`} />
                                             <span className="truncate">{item.title}</span>
                                         </div>
-                                        
+
                                         <div className="flex items-center gap-2 shrink-0">
                                             {isSoon && (
                                                 <span className="px-2 py-[2px] text-[10px] font-medium bg-muted/10 text-muted/75 rounded-full">
@@ -147,11 +147,10 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                                 </span>
                                             )}
                                             {item.badge && (
-                                                <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-medium rounded-full ${
-                                                    item.badgeColor === 'yellow' 
-                                                        ? 'bg-warning/10 text-warning' 
+                                                <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-medium rounded-full ${item.badgeColor === 'yellow'
+                                                        ? 'bg-warning/10 text-warning'
                                                         : 'bg-muted/10 text-muted'
-                                                }`}>
+                                                    }`}>
                                                     {item.badge}
                                                 </span>
                                             )}
@@ -159,19 +158,18 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                     </>
                                 );
 
-                                const itemClasses = `group flex items-center justify-between px-3 py-2 rounded-md transition-all text-base ${
-                                    isSoon 
-                                        ? 'text-muted/50 cursor-not-allowed' 
+                                const itemClasses = `group flex items-center justify-between px-3 py-2 rounded-md transition-all text-base ${isSoon
+                                        ? 'text-muted/50 cursor-not-allowed'
                                         : isActive
                                             ? 'bg-page text-text font-medium'
                                             : 'text-muted hover:text-text font-medium'
-                                }`;
+                                    }`;
 
                                 // If it's a soon item, or no path is provided, render a div
                                 if (isSoon || !item.path) {
                                     return (
-                                        <div 
-                                            key={itemIndex} 
+                                        <div
+                                            key={itemIndex}
                                             className={itemClasses}
                                         >
                                             {innerContent}
