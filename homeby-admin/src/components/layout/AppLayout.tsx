@@ -1,40 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
-import { useAuth } from '../../contexts/AuthContext';
+import { Outlet, useRouterState } from '@tanstack/react-router';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
+// AUTH IS DISABLED FOR DESIGN MODE — reconnect when the real API is ready.
 export const AppLayout = () => {
-    const { accessToken } = useAuth();
     const router = useRouterState();
-    const navigate = useNavigate();
     const isLogin = router.location.pathname === "/login";
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    useEffect(() => {
-        // If not authenticated and trying to access an authenticated route
-        if (!accessToken && !isLogin) {
-            navigate({ to: "/login", replace: true });
-        }
-        // If authenticated and trying to access login page
-        else if (accessToken && isLogin) {
-            navigate({ to: "/dashboard", replace: true });
-        }
-    }, [accessToken, isLogin, navigate]);
 
     useEffect(() => {
         // Close sidebar on route change on mobile
         setIsSidebarOpen(false);
     }, [router.location.pathname]);
-
-    // Render loading indicator during auth redirect to prevent flash
-    if (!accessToken && !isLogin) {
-        return (
-            <div className="min-h-screen bg-page flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
 
     if (isLogin) {
         return (
