@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -8,11 +8,8 @@ import {
     Plus, 
     X, 
     Loader2, 
-    Shield, 
-    Key, 
     Check,
     MoreHorizontal, 
-    Trash2, 
     AlertTriangle
 } from "lucide-react";
 
@@ -92,8 +89,10 @@ const RouteComponent = () => {
     const [showMfaConfirm, setShowMfaConfirm] = useState(false);
     const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
 
-    // Dropdown Action Popovers
-    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+    // Permissions popup state
+    const [isPermsModalOpen, setIsPermsModalOpen] = useState(false);
+    const [selectedRoleForPerms, setSelectedRoleForPerms] = useState<string>("Superadmin");
+
 
     // React Form states (controlled inputs)
     const [formFirstName, setFormFirstName] = useState("");
@@ -124,6 +123,33 @@ const RouteComponent = () => {
         }
     });
 
+    // TanStack Query for Roles definitions list
+    const { data: rolesList = [] } = useQuery<any[]>({
+        queryKey: ["rolesList"],
+        queryFn: async () => {
+            const response = await axios.get("/data/roles.json");
+            return response.data;
+        }
+    });
+
+    // TanStack Query for Role Permissions matrix table
+    const { data: rolePermissionsData = [] } = useQuery<any[]>({
+        queryKey: ["rolePermissionsData"],
+        queryFn: async () => {
+            const response = await axios.get("/data/role_permissions.json");
+            return response.data;
+        }
+    });
+
+    const [localPermissions, setLocalPermissions] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (rolePermissionsData && rolePermissionsData.length > 0 && localPermissions.length === 0) {
+            setLocalPermissions(JSON.parse(JSON.stringify(rolePermissionsData)));
+        }
+    }, [rolePermissionsData]);
+
+
     // Local state which serves as the interactive store for additions/edits/deletions
     const [localStaff, setLocalStaff] = useState<StaffMember[]>([]);
 
@@ -153,12 +179,6 @@ const RouteComponent = () => {
         return matchesQuery && matchesRole;
     });
 
-    // Close dropdowns
-    useEffect(() => {
-        const handleOutsideClick = () => setActiveDropdownId(null);
-        window.addEventListener("click", handleOutsideClick);
-        return () => window.removeEventListener("click", handleOutsideClick);
-    }, []);
 
     // Auto-hide Toast Notification tooltip after 4 seconds
     useEffect(() => {
@@ -582,55 +602,9 @@ const RouteComponent = () => {
                                                                     Edit
                                                                 </button>
                                                                 
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setActiveDropdownId(activeDropdownId === member.id ? null : member.id);
-                                                                    }}
-                                                                    className="p-1 hover:bg-page rounded text-muted hover:text-text transition-colors cursor-pointer"
-                                                                >
+                                                                <span className="p-1 text-muted select-none">
                                                                     <MoreHorizontal size={16} strokeWidth={2.5} />
-                                                                </button>
-
-                                                                {/* Custom dropdown popover */}
-                                                                {activeDropdownId === member.id && (
-                                                                    <div className="absolute right-0 top-7 bg-card border border-border rounded shadow-lg py-1.5 z-20 min-w-[160px] text-left text-xs animate-fade-in select-none">
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setActiveDropdownId(null);
-                                                                                setToast({ title: "Design Placeholder", message: "Toggle Active is a design-only placeholder.", type: "info", visible: true });
-                                                                            }}
-                                                                            className="w-full px-4 py-2 text-text hover:bg-page transition-colors text-left flex items-center gap-2"
-                                                                        >
-                                                                            <Shield size={14} className="text-muted" />
-                                                                            Toggle Active
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setActiveDropdownId(null);
-                                                                                setToast({ title: "Design Placeholder", message: "Toggle MFA is a design-only placeholder.", type: "info", visible: true });
-                                                                            }}
-                                                                            className="w-full px-4 py-2 text-text hover:bg-page transition-colors text-left flex items-center gap-2"
-                                                                        >
-                                                                            <Key size={14} className="text-muted" />
-                                                                            Toggle MFA
-                                                                        </button>
-                                                                        <div className="h-[1px] bg-border my-1" />
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setActiveDropdownId(null);
-                                                                                setToast({ title: "Operation Restricted", message: "Delete staff operation is restricted in this version.", type: "info", visible: true });
-                                                                            }}
-                                                                            className="w-full px-4 py-2 text-danger hover:bg-red-50 hover:text-red-700 transition-colors text-left flex items-center gap-2 font-bold"
-                                                                        >
-                                                                            <Trash2 size={14} />
-                                                                            Delete Staff
-                                                                        </button>
-                                                                    </div>
-                                                                )}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -653,50 +627,90 @@ const RouteComponent = () => {
 
             {/* TAB CONTENT: ROLES SECTION */}
             {activeTab === "Roles" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-1 animate-fade-in">
-                    {Object.values(ROLES_INFO).map((role) => {
-                        const count = localStaff.filter(s => s.role.toLowerCase() === role.name.toLowerCase()).length;
-                        return (
-                            <div 
-                                key={role.name} 
-                                className="bg-card border border-border rounded-lg shadow-sm p-6 flex flex-col justify-between gap-5 hover:border-accent/35 transition-colors"
-                            >
-                                <div className="flex flex-col gap-3">
-                                    {/* Role Header tag */}
-                                    <div className="flex items-center justify-between">
-                                        <span className={`inline-block px-3 py-1 border text-xs font-bold rounded ${role.badgeStyle}`}>
-                                            {role.name}
-                                        </span>
-                                        <span className="text-[12px] text-muted font-bold">
-                                            {count} {count === 1 ? "staff member" : "staff members"}
-                                        </span>
+                <div className="flex flex-col gap-6 mt-1 animate-fade-in select-none">
+                    
+                    {/* Header */}
+                    <div className="flex flex-col gap-1">
+                        <h2 className="font-bold text-[20px] text-text font-sans tracking-tight">
+                            Role definitions
+                        </h2>
+                        <p className="text-[13px] text-muted font-medium font-sans leading-relaxed">
+                            Roles control what each staff member can access. Permissions are defined in code and apply to all users with that role.
+                        </p>
+                    </div>
+
+                    {/* Roles list vertical stack */}
+                    <div className="flex flex-col gap-4">
+                        {rolesList.map((role: any) => {
+                            // Dynamically count active staff members matching role slug (case-insensitive)
+                            const count = localStaff.filter(
+                                (s) => s.role.toLowerCase() === role.slug.toLowerCase()
+                            ).length;
+
+                            return (
+                                <div
+                                    key={role.id}
+                                    className="bg-card border border-border rounded-lg shadow-sm p-6 flex flex-col gap-4 hover:border-accent/25 transition-all"
+                                >
+                                    {/* Top Header Row */}
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-3">
+                                            <span className={`px-2.5 py-0.5 border text-xs font-bold rounded font-sans shadow-sm ${role.pillClass}`}>
+                                                {role.name}
+                                            </span>
+                                            <span className="text-[13px] text-muted font-bold font-sans">
+                                                • {count} {count === 1 ? "staff member" : "staff members"}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedRoleForPerms(role.name);
+                                                setIsPermsModalOpen(true);
+                                            }}
+                                            className="hidden md:flex text-xs font-bold text-accent hover:text-accent/80 transition-colors items-center gap-0.5 cursor-pointer font-sans"
+                                        >
+                                            View all permissions →
+                                        </button>
                                     </div>
 
                                     {/* Description */}
-                                    <p className="text-[13px] text-muted leading-relaxed mt-1">
+                                    <p className="text-[13px] text-muted font-medium leading-relaxed font-sans max-w-4xl">
                                         {role.description}
                                     </p>
-                                </div>
 
-                                {/* Permissions subset list */}
-                                <div className="flex flex-col gap-2 pt-2 border-t border-border/70">
-                                    <h4 className="text-[11px] uppercase font-bold tracking-wider text-muted">
-                                        Authorized Scope
-                                    </h4>
-                                    <div className="flex flex-wrap gap-1.5 mt-1">
-                                        {role.permissions.map((perm) => (
-                                            <span 
-                                                key={perm} 
-                                                className="bg-page border border-border text-[11px] px-2 py-0.5 rounded text-muted font-semibold"
-                                            >
-                                                {perm}
-                                            </span>
+                                    {/* Checklist grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 mt-1">
+                                        {role.features.map((feat: string, idx: number) => (
+                                            <div key={idx} className="flex items-center gap-2 text-[13px] text-text font-sans font-medium">
+                                                {/* Bold green checkmark */}
+                                                <Check size={14} className="text-green-600 shrink-0" strokeWidth={3} />
+                                                <span>{feat}</span>
+                                            </div>
                                         ))}
                                     </div>
+
+                                    {/* Mobile View all permissions link button at bottom */}
+                                    <div className="block md:hidden mt-2 pt-3 border-t border-border/60">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedRoleForPerms(role.name);
+                                                setIsPermsModalOpen(true);
+                                            }}
+                                            className="text-xs font-bold text-accent hover:text-accent/80 transition-colors flex items-center gap-0.5 cursor-pointer font-sans"
+                                        >
+                                            View all permissions →
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
+
+                    {/* Footer text */}
+                    <div className="text-[13px] text-muted font-semibold font-sans mt-2 py-1 select-none">
+                        Need a new role or custom permissions? Role definitions are managed in the codebase. Speak to your backend engineer to add or modify roles.
+                    </div>
                 </div>
             )}
 
@@ -1314,6 +1328,124 @@ const RouteComponent = () => {
                     </div>
                 </div>
             )}
+
+            {/* READ-ONLY ROLE PERMISSIONS MATRIX POPUP */}
+            {isPermsModalOpen && (() => {
+                const isSuperadminActive = selectedRoleForPerms.toLowerCase() === "superadmin";
+                const isAdminActive = selectedRoleForPerms.toLowerCase() === "admin";
+                const isSupportActive = selectedRoleForPerms.toLowerCase() === "support";
+
+                return (
+                    <div 
+                        className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4 select-none animate-fade-in cursor-pointer"
+                        onClick={() => setIsPermsModalOpen(false)}
+                    >
+                        <div 
+                            className="bg-card w-full max-w-2xl rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] cursor-default"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="px-6 py-5 flex justify-between items-start bg-card">
+                                <div className="flex flex-col gap-0.5">
+                                    <h3 className="font-bold text-[18px] text-text font-sans tracking-tight">
+                                        Permissions — {selectedRoleForPerms}
+                                    </h3>
+                                    <p className="text-[13px] text-muted font-medium font-sans">
+                                        Defined by role. Cannot be customised per user.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setIsPermsModalOpen(false)}
+                                    className="text-muted hover:text-text p-1 rounded hover:bg-page transition-colors cursor-pointer"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Permissions Matrix Table Scrollable area */}
+                            <div className="flex-1 overflow-y-auto max-h-[520px] scrollbar-thin pl-6 pr-6 pb-6 pt-2">
+                                <div className="border border-border/80 rounded overflow-hidden shadow-sm overflow-x-auto md:overflow-x-visible scrollbar-thin">
+                                    <table className="w-full min-w-[580px] md:min-w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr className="bg-card border-b border-border/80 uppercase text-[10px] tracking-wider select-none text-muted/70">
+                                                <th className="px-4 py-3 font-semibold text-left">Permission</th>
+                                                <th className={`px-4 py-3 text-center transition-colors ${
+                                                    isSuperadminActive ? "font-bold text-text bg-page/30" : "font-medium"
+                                                }`}>
+                                                    Superadmin
+                                                </th>
+                                                <th className={`px-4 py-3 text-center transition-colors ${
+                                                    isAdminActive ? "font-bold text-text bg-page/30" : "font-medium"
+                                                }`}>
+                                                    Admin
+                                                </th>
+                                                <th className={`px-4 py-3 text-center transition-colors ${
+                                                    isSupportActive ? "font-bold text-text bg-page/30" : "font-medium"
+                                                }`}>
+                                                    Support
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/60">
+                                            {localPermissions.map((category: any) => {
+                                                return (
+                                                    <Fragment key={category.category}>
+                                                        {/* Category Header Row (styled exactly like image: OPERATIONS, MODERATION, etc.) */}
+                                                        <tr className="bg-page/40 font-bold text-[10px] text-muted select-none">
+                                                            <td colSpan={4} className="px-4 py-2.5 uppercase tracking-wider text-slate-400/90 font-bold bg-[#F8FAFC]">
+                                                                {category.category}
+                                                            </td>
+                                                        </tr>
+                                                        {category.permissions.map((perm: any) => {
+                                                            return (
+                                                                <tr key={perm.id} className="hover:bg-page/10 transition-colors">
+                                                                    <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">
+                                                                        {perm.name}
+                                                                    </td>
+                                                                    
+                                                                    {/* Superadmin column */}
+                                                                    <td className={`px-4 py-3 text-center ${isSuperadminActive ? "bg-page/10" : ""}`}>
+                                                                        {perm.superadmin === "✓" ? (
+                                                                            <Check size={15} className="text-green-600 inline-block" strokeWidth={3} />
+                                                                        ) : (
+                                                                            <span className="text-muted/40 font-semibold">—</span>
+                                                                        )}
+                                                                    </td>
+
+                                                                    {/* Admin column */}
+                                                                    <td className={`px-4 py-3 text-center ${isAdminActive ? "bg-page/10" : ""}`}>
+                                                                        {perm.admin === "✓" ? (
+                                                                            <Check size={15} className="text-green-600 inline-block" strokeWidth={3} />
+                                                                        ) : (
+                                                                            <span className="text-muted/40 font-semibold">—</span>
+                                                                        )}
+                                                                    </td>
+
+                                                                    {/* Support column */}
+                                                                    <td className={`px-4 py-3 text-center ${isSupportActive ? "bg-page/10" : ""}`}>
+                                                                        {perm.support === "✓" ? (
+                                                                            <Check size={15} className="text-green-600 inline-block" strokeWidth={3} />
+                                                                        ) : perm.support === "read" ? (
+                                                                            <span className="text-muted font-bold text-[12px]">read</span>
+                                                                        ) : (
+                                                                            <span className="text-muted/40 font-semibold">—</span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </Fragment>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* SLEEK GLASSMORPHIC TOAST TOOLTIP (BOTTOM-RIGHT) */}
             {toast.visible && (

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "superadmin",
+    "name": "Superadmin",
+    "slug": "Superadmin",
+    "pillClass": "bg-purple-50 text-purple-700 border-purple-250",
+    "description": "Full access to all admin functions including staff management, audit log, and system configuration. Reserved for founders and lead engineers.",
+    "features": [
+      "All admin sections",
+      "Manage staff & roles",
+      "View audit log",
+      "Change auth settings",
+      "Manage feature flags",
+      "Issue refunds"
+    ]
+  },
+  {
+    "id": "admin",
+    "name": "Admin",
+    "slug": "Admin",
+    "pillClass": "bg-blue-50 text-blue-700 border-blue-250",
+    "description": "Full operational access for day-to-day platform management. Cannot manage other staff or view audit log.",
+    "features": [
+      "Manage agencies & agents",
+      "Approve applications",
+      "Monitor integrations",
+      "Review moderation",
+      "Billing visibility (read)",
+      "Email templates"
+    ]
+  },
+  {
+    "id": "support",
+    "name": "Support",
+    "slug": "Support",
+    "pillClass": "bg-teal-50 text-teal-700 border-teal-250",
+    "description": "Read access across the platform with limited write access for user and agency support tasks.",
+    "features": [
+      "View all sections (read-only)",
+      "Suspend/restore user accounts",
+      "Reset passwords",
+      "Add internal notes",
+      "Respond to moderation flags"
+    ]
+  },
+  {
+    "id": "reviewer",
+    "name": "Reviewer",
+    "slug": "Reviewer",
+    "pillClass": "bg-orange-50 text-orange-700 border-orange-250",
+    "description": "Access to moderation queues only. For staff dedicated to content moderation.",
+    "features": [
+      "Review Moderation queue",
+      "Listing Moderation queue",
+      "Listing Corrections queue",
+      "Approve/reject/flag content"
+    ]
+  },
+  {
+    "id": "content-editor",
+    "name": "Content editor",
+    "slug": "Content editor",
+    "pillClass": "bg-slate-100 text-slate-700 border-slate-300",
+    "description": "Access to content management only. For marketing and content team members.",
+    "features": [
+      "Insights CMS (full access)",
+      "Email Templates (full access)",
+      "No access to operational data"
+    ]
+  }
+]
