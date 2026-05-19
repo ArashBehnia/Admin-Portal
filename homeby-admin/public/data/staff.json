@@ -1,0 +1,62 @@
+[
+    {
+        "id": "1",
+        "name": "Arash Behnia",
+        "email": "arash@arkaisolutions.com.au",
+        "role": "Superadmin",
+        "status": "Active",
+        "mfa": "Enabled",
+        "lastLogin": "Today 9:14am",
+        "added": "1 Dec 2024"
+    },
+    {
+        "id": "2",
+        "name": "Hirad Baradaran",
+        "email": "hirad@arkaisolutions.com.au",
+        "role": "Superadmin",
+        "status": "Active",
+        "mfa": "Enabled",
+        "lastLogin": "Today 10:32am",
+        "added": "1 Dec 2024"
+    },
+    {
+        "id": "3",
+        "name": "Sarah Chen",
+        "email": "sarah.chen@homeby.com.au",
+        "role": "Admin",
+        "status": "Active",
+        "mfa": "Enabled",
+        "lastLogin": "Yesterday",
+        "added": "15 Jan 2026"
+    },
+    {
+        "id": "4",
+        "name": "Mominur Rahman",
+        "email": "mominur@arkaisolutions.com.au",
+        "role": "Admin",
+        "status": "Active",
+        "mfa": "Enabled",
+        "lastLogin": "2 days ago",
+        "added": "1 Feb 2026"
+    },
+    {
+        "id": "5",
+        "name": "Soheil Mohseni",
+        "email": "soheil@arkaisolutions.com.au",
+        "role": "Support",
+        "status": "Active",
+        "mfa": "Enabled",
+        "lastLogin": "3 days ago",
+        "added": "1 Mar 2026"
+    },
+    {
+        "id": "6",
+        "name": "Atiye Afrasiabi",
+        "email": "atiye@arkaisolutions.com.au",
+        "role": "Content editor",
+        "status": "Active",
+        "mfa": "Not set up",
+        "lastLogin": "1 week ago",
+        "added": "15 Mar 2026"
+    }
+]
