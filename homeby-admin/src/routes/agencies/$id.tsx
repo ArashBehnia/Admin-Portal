@@ -88,13 +88,13 @@ const RouteComponent = () => {
                 </div>
             </div>
 
-            {/* Tab Contents */}
+            {/* Overview Content */}
             {activeTab === "Overview" && (
-                <div className="flex flex-col lg:flex-row gap-5">
-                    {/* Left Column */}
-                    <div className="flex-1 flex flex-col gap-5">
+                <div className="flex flex-col gap-5">
+                    {/* Top Row: Onboarding + Activity Timeline */}
+                    <div className="flex flex-col lg:flex-row gap-5 items-stretch">
                         {/* Onboarding status */}
-                        <div className="bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-6">
+                        <div className="flex-1 bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-6">
                             <h2 className="text-[14px] font-bold text-gray-900">Onboarding status</h2>
                             
                             <div className="flex flex-col gap-1">
@@ -138,85 +138,85 @@ const RouteComponent = () => {
                             </button>
                         </div>
 
-                        {/* Listing distribution */}
-                        <div className="bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-4">
-                            <div className="flex flex-col">
-                                <h2 className="text-[14px] font-bold text-gray-900">Listing distribution</h2>
-                                <p className="text-[11px] text-gray-500">Portals this agency publishes listings to</p>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                                {[
-                                    { name: "HomeBy", icon: "H", color: "text-[#2B5CE6] bg-blue-50", status: "Connected", listings: "247 published", active: true },
-                                    { name: "Realestate.com", icon: "R", color: "text-red-600 bg-red-50", status: "Connected", listings: "247 published", active: true },
-                                    { name: "Domain", icon: "D", color: "text-green-600 bg-green-50", status: "Connected", listings: "247 published", active: true },
-                                    { name: "View", icon: "V", color: "text-purple-600 bg-purple-50", status: "Connected", listings: "247 published", active: true },
-                                    { name: "Homely", icon: "H", color: "text-gray-500 bg-gray-100", status: "Not connected", listings: "0 published", active: false },
-                                ].map(portal => (
-                                    <div key={portal.name} className="border border-gray-200 rounded p-3 flex flex-col gap-2.5">
-                                        <div className="flex items-center gap-2">
-                                            <div className={cn("w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold", portal.color)}>
-                                                {portal.icon}
+                        {/* Right Column: Activity Timeline */}
+                        <div className="w-full lg:w-[320px] bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col min-h-[300px]">
+                            <h2 className="text-[14px] font-bold text-gray-900 mb-4 shrink-0">Activity timeline</h2>
+                            <div className="flex-1 overflow-y-auto pr-2 relative sidebar-scrollbar max-h-[220px]">
+                                <div className="absolute left-1.5 top-2 bottom-2 w-px bg-gray-200 z-0" />
+                                <div className="flex flex-col gap-5 relative z-10">
+                                    {[
+                                        { title: "Subscription upgraded to Founding Partner", date: "10 Jan 2026", color: "bg-[#2B5CE6]" },
+                                        { title: "Feed recovered — syncing resumed", date: "8 Jan 2026", color: "bg-green-500" },
+                                        { title: "Feed warning — stale >24h", date: "7 Jan 2026", color: "bg-orange-400" },
+                                        { title: "First sync completed — 47 listings imported", date: "20 Dec 2024", color: "bg-green-500" },
+                                        { title: "CRM connected — Box+Dice REAXML", date: "18 Dec 2024", color: "bg-green-500" },
+                                        { title: "Welcome email sent with temporary credentials", date: "15 Dec 2024", color: "bg-[#2B5CE6]" },
+                                        { title: "Application approved by Arash", date: "15 Dec 2024", color: "bg-green-500" },
+                                        { title: "Agency application received", date: "10 Dec 2024", color: "bg-green-500" },
+                                    ].map((event, i) => (
+                                        <div key={i} className="flex gap-3">
+                                            <div className="mt-1 relative">
+                                                <div className="w-3 h-3 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center">
+                                                    <div className={cn("w-1.5 h-1.5 rounded-full", event.color)} />
+                                                </div>
                                             </div>
-                                            <span className="text-[12px] font-bold text-gray-900">{portal.name}</span>
-                                        </div>
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-1.5">
-                                                <div className={cn("w-1 h-1 rounded-full", portal.active ? "bg-green-500" : "bg-gray-300")} />
-                                                <span className="text-[11px] text-gray-900 font-medium">{portal.status}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-[12px] font-medium text-gray-900 leading-snug">{event.title}</span>
+                                                <span className="text-[11px] text-gray-500">{event.date}</span>
                                             </div>
-                                            <span className="text-[11px] text-gray-500 pl-2.5">{portal.listings}</span>
                                         </div>
-                                        {!portal.active && (
-                                            <button className="text-[#2B5CE6] text-[11px] font-medium hover:underline self-start mt-1">Set up</button>
-                                        )}
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-
-                        {/* Internal notes */}
-                        <div className="bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-2">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-[14px] font-bold text-gray-900">Internal notes</h2>
-                                <button onClick={() => setActiveTab("Notes")} className="text-[#2B5CE6] text-[11px] font-medium hover:underline">Edit notes →</button>
-                            </div>
-                            <p className="text-[12px] text-gray-600 leading-relaxed">
-                                Founding partner — onboarded Dec 2024. Primary contact: James Mitchell (james@raywhitebondi.com.au, +61 412 xxx xxx). CRM: Box+Dice, REAXML feed configured by Hirad on 15 Dec 2024.
-                            </p>
                         </div>
                     </div>
 
-                    {/* Right Column: Activity Timeline */}
-                    <div className="w-full lg:w-[320px] bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col h-[500px]">
-                        <h2 className="text-[14px] font-bold text-gray-900 mb-4 shrink-0">Activity timeline</h2>
-                        <div className="flex-1 overflow-y-auto pr-2 relative sidebar-scrollbar">
-                            <div className="absolute left-1.5 top-2 bottom-2 w-px bg-gray-200 z-0" />
-                            <div className="flex flex-col gap-5 relative z-10">
-                                {[
-                                    { title: "Subscription upgraded to Founding Partner", date: "10 Jan 2026", color: "bg-[#2B5CE6]" },
-                                    { title: "Feed recovered — syncing resumed", date: "8 Jan 2026", color: "bg-green-500" },
-                                    { title: "Feed warning — stale >24h", date: "7 Jan 2026", color: "bg-orange-400" },
-                                    { title: "First sync completed — 47 listings imported", date: "20 Dec 2024", color: "bg-green-500" },
-                                    { title: "CRM connected — Box+Dice REAXML", date: "18 Dec 2024", color: "bg-green-500" },
-                                    { title: "Welcome email sent with temporary credentials", date: "15 Dec 2024", color: "bg-[#2B5CE6]" },
-                                    { title: "Application approved by Arash", date: "15 Dec 2024", color: "bg-green-500" },
-                                    { title: "Agency application received", date: "10 Dec 2024", color: "bg-green-500" },
-                                ].map((event, i) => (
-                                    <div key={i} className="flex gap-3">
-                                        <div className="mt-1 relative">
-                                            <div className="w-3 h-3 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center">
-                                                <div className={cn("w-1.5 h-1.5 rounded-full", event.color)} />
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="text-[12px] font-medium text-gray-900 leading-snug">{event.title}</span>
-                                            <span className="text-[11px] text-gray-500">{event.date}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* Listing distribution */}
+                    <div className="bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-4">
+                        <div className="flex flex-col">
+                            <h2 className="text-[14px] font-bold text-gray-900">Listing distribution</h2>
+                            <p className="text-[11px] text-gray-500">Portals this agency publishes listings to</p>
                         </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            {[
+                                { name: "HomeBy", icon: "H", color: "text-[#2B5CE6] bg-blue-50", status: "Connected", listings: "247 published", active: true },
+                                { name: "Realestate.com", icon: "R", color: "text-red-600 bg-red-50", status: "Connected", listings: "247 published", active: true },
+                                { name: "Domain", icon: "D", color: "text-green-600 bg-green-50", status: "Connected", listings: "247 published", active: true },
+                                { name: "View", icon: "V", color: "text-purple-600 bg-purple-50", status: "Connected", listings: "247 published", active: true },
+                                { name: "Homely", icon: "H", color: "text-gray-500 bg-gray-100", status: "Not connected", listings: "0 published", active: false },
+                            ].map(portal => (
+                                <div key={portal.name} className="border border-gray-200 rounded p-3 flex flex-col gap-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn("w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold", portal.color)}>
+                                            {portal.icon}
+                                        </div>
+                                        <span className="text-[12px] font-bold text-gray-900">{portal.name}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className={cn("w-1 h-1 rounded-full", portal.active ? "bg-green-500" : "bg-gray-300")} />
+                                            <span className="text-[11px] text-gray-900 font-medium">{portal.status}</span>
+                                        </div>
+                                        <span className="text-[11px] text-gray-500 pl-2.5">{portal.listings}</span>
+                                    </div>
+                                    {!portal.active && (
+                                        <button className="text-[#2B5CE6] text-[11px] font-medium hover:underline self-start mt-1">Set up</button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Internal notes */}
+                    <div className="bg-white border border-gray-200 rounded shadow-sm p-5 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[14px] font-bold text-gray-900">Internal notes</h2>
+                            <button onClick={() => setActiveTab("Notes")} className="text-[#2B5CE6] text-[11px] font-medium hover:underline">Edit notes →</button>
+                        </div>
+                        <p className="text-[12px] text-gray-600 leading-relaxed">
+                            Founding partner — onboarded Dec 2024. Primary contact: James Mitchell (james@raywhitebondi.com.au, +61 412 xxx xxx). CRM: Box+Dice, REAXML feed configured by Hirad on 15 Dec 2024.
+                        </p>
                     </div>
                 </div>
             )}
@@ -463,18 +463,18 @@ const RouteComponent = () => {
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-[13px] whitespace-nowrap">
+                        <div className="overflow-x-auto scrollbar-none">
+                            <table className="w-full text-left text-[13px] table-auto">
                                 <thead>
                                     <tr className="border-b border-gray-200 text-gray-500 bg-white">
-                                        <th className="font-medium py-3 px-5">Name</th>
-                                        <th className="font-medium py-3 px-5">Role</th>
-                                        <th className="font-medium py-3 px-5">Email</th>
-                                        <th className="font-medium py-3 px-5">Phone</th>
-                                        <th className="font-medium py-3 px-5">Licence</th>
-                                        <th className="font-medium py-3 px-5">Last login</th>
-                                        <th className="font-medium py-3 px-5">Status</th>
-                                        <th className="font-medium py-3 px-5 text-right">Actions</th>
+                                        <th className="font-medium py-3 pl-4 pr-3">Name</th>
+                                        <th className="font-medium py-3 px-3">Role</th>
+                                        <th className="font-medium py-3 px-3">Email</th>
+                                        <th className="font-medium py-3 px-3">Phone</th>
+                                        <th className="font-medium py-3 px-3">Licence</th>
+                                        <th className="font-medium py-3 px-3">Last login</th>
+                                        <th className="font-medium py-3 px-3">Status</th>
+                                        <th className="font-medium py-3 pl-3 pr-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -489,15 +489,15 @@ const RouteComponent = () => {
                                         { name: "Priya Sharma", role: "Agent", email: "priya@raywhitebondi.com.au", phone: "+61 489 xxx xxx", licence: "LIC-NSW-36201", lastLogin: "Today 11:32am", status: "Active" },
                                     ].map((agent, i) => (
                                         <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                                            <td className="py-3 px-5 font-medium">
+                                            <td className="py-3 pl-4 pr-3 font-medium whitespace-nowrap">
                                                 <span className="text-[#2B5CE6] hover:underline cursor-pointer">{agent.name}</span>
                                             </td>
-                                            <td className="py-3 px-5 text-gray-900">{agent.role}</td>
-                                            <td className="py-3 px-5 text-gray-500">{agent.email}</td>
-                                            <td className="py-3 px-5 text-gray-500">{agent.phone}</td>
-                                            <td className="py-3 px-5 text-gray-500">{agent.licence}</td>
-                                            <td className="py-3 px-5 text-gray-500">{agent.lastLogin}</td>
-                                            <td className="py-3 px-5">
+                                            <td className="py-3 px-3 text-gray-900 whitespace-nowrap">{agent.role}</td>
+                                            <td className="py-3 px-3 text-gray-500 truncate max-w-[180px] lg:max-w-none" title={agent.email}>{agent.email}</td>
+                                            <td className="py-3 px-3 text-gray-500 whitespace-nowrap">{agent.phone}</td>
+                                            <td className="py-3 px-3 text-gray-500 whitespace-nowrap">{agent.licence}</td>
+                                            <td className="py-3 px-3 text-gray-500 whitespace-nowrap">{agent.lastLogin}</td>
+                                            <td className="py-3 px-3 whitespace-nowrap">
                                                 <div className="flex items-center gap-1.5">
                                                     <div className={cn(
                                                         "w-1.5 h-1.5 rounded-full",
@@ -513,7 +513,7 @@ const RouteComponent = () => {
                                                     )}>{agent.status}</span>
                                                 </div>
                                             </td>
-                                            <td className="py-3 px-5 text-right">
+                                            <td className="py-3 pl-3 pr-4 text-right whitespace-nowrap">
                                                 <button className="text-[#2B5CE6] font-medium hover:underline">Edit</button>
                                             </td>
                                         </tr>
