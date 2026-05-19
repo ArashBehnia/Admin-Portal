@@ -19,8 +19,10 @@ import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorsIndexRouteImport } from './routes/vendors/index'
+import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
 import { Route as VendorsIdRouteImport } from './routes/vendors/$id'
+import { Route as EmailTemplatesTemplateNameRouteImport } from './routes/email-templates/$templateName'
 import { Route as AgenciesIdRouteImport } from './routes/agencies/$id'
 
 const UsersRoute = UsersRouteImport.update({
@@ -73,6 +75,11 @@ const VendorsIndexRoute = VendorsIndexRouteImport.update({
   path: '/vendors/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailTemplatesIndexRoute = EmailTemplatesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmailTemplatesRoute,
+} as any)
 const AgenciesIndexRoute = AgenciesIndexRouteImport.update({
   id: '/agencies/',
   path: '/agencies/',
@@ -83,6 +90,12 @@ const VendorsIdRoute = VendorsIdRouteImport.update({
   path: '/vendors/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailTemplatesTemplateNameRoute =
+  EmailTemplatesTemplateNameRouteImport.update({
+    id: '/$templateName',
+    path: '/$templateName',
+    getParentRoute: () => EmailTemplatesRoute,
+  } as any)
 const AgenciesIdRoute = AgenciesIdRouteImport.update({
   id: '/agencies/$id',
   path: '/agencies/$id',
@@ -94,14 +107,16 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
-  '/email-templates': typeof EmailTemplatesRoute
+  '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
+  '/email-templates/': typeof EmailTemplatesIndexRoute
   '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,14 +124,15 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
-  '/email-templates': typeof EmailTemplatesRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies': typeof AgenciesIndexRoute
+  '/email-templates': typeof EmailTemplatesIndexRoute
   '/vendors': typeof VendorsIndexRoute
 }
 export interface FileRoutesById {
@@ -125,14 +141,16 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/applications': typeof ApplicationsRoute
   '/dashboard': typeof DashboardRoute
-  '/email-templates': typeof EmailTemplatesRoute
+  '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
+  '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
+  '/email-templates/': typeof EmailTemplatesIndexRoute
   '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRouteTypes {
@@ -148,8 +166,10 @@ export interface FileRouteTypes {
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/email-templates/$templateName'
     | '/vendors/$id'
     | '/agencies/'
+    | '/email-templates/'
     | '/vendors/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -157,14 +177,15 @@ export interface FileRouteTypes {
     | '/agents'
     | '/applications'
     | '/dashboard'
-    | '/email-templates'
     | '/integrations'
     | '/login'
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/email-templates/$templateName'
     | '/vendors/$id'
     | '/agencies'
+    | '/email-templates'
     | '/vendors'
   id:
     | '__root__'
@@ -178,8 +199,10 @@ export interface FileRouteTypes {
     | '/staff'
     | '/users'
     | '/agencies/$id'
+    | '/email-templates/$templateName'
     | '/vendors/$id'
     | '/agencies/'
+    | '/email-templates/'
     | '/vendors/'
   fileRoutesById: FileRoutesById
 }
@@ -188,7 +211,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   ApplicationsRoute: typeof ApplicationsRoute
   DashboardRoute: typeof DashboardRoute
-  EmailTemplatesRoute: typeof EmailTemplatesRoute
+  EmailTemplatesRoute: typeof EmailTemplatesRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRoute
   LoginRoute: typeof LoginRoute
   StaffRoute: typeof StaffRoute
@@ -271,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email-templates/': {
+      id: '/email-templates/'
+      path: '/'
+      fullPath: '/email-templates/'
+      preLoaderRoute: typeof EmailTemplatesIndexRouteImport
+      parentRoute: typeof EmailTemplatesRoute
+    }
     '/agencies/': {
       id: '/agencies/'
       path: '/agencies'
@@ -285,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email-templates/$templateName': {
+      id: '/email-templates/$templateName'
+      path: '/$templateName'
+      fullPath: '/email-templates/$templateName'
+      preLoaderRoute: typeof EmailTemplatesTemplateNameRouteImport
+      parentRoute: typeof EmailTemplatesRoute
+    }
     '/agencies/$id': {
       id: '/agencies/$id'
       path: '/agencies/$id'
@@ -295,12 +332,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface EmailTemplatesRouteChildren {
+  EmailTemplatesTemplateNameRoute: typeof EmailTemplatesTemplateNameRoute
+  EmailTemplatesIndexRoute: typeof EmailTemplatesIndexRoute
+}
+
+const EmailTemplatesRouteChildren: EmailTemplatesRouteChildren = {
+  EmailTemplatesTemplateNameRoute: EmailTemplatesTemplateNameRoute,
+  EmailTemplatesIndexRoute: EmailTemplatesIndexRoute,
+}
+
+const EmailTemplatesRouteWithChildren = EmailTemplatesRoute._addFileChildren(
+  EmailTemplatesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
   ApplicationsRoute: ApplicationsRoute,
   DashboardRoute: DashboardRoute,
-  EmailTemplatesRoute: EmailTemplatesRoute,
+  EmailTemplatesRoute: EmailTemplatesRouteWithChildren,
   IntegrationsRoute: IntegrationsRoute,
   LoginRoute: LoginRoute,
   StaffRoute: StaffRoute,

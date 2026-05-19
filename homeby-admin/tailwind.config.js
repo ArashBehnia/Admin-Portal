@@ -28,7 +28,7 @@ export default {
                 sidebar: "300px",
             },
             maxWidth: {
-                content: "1400px",
+                content: "1620px",
             },
             transitionDuration: {
                 DEFAULT: "150ms",
