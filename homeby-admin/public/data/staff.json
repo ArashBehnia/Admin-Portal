@@ -7,7 +7,14 @@
         "status": "Active",
         "mfa": "Enabled",
         "lastLogin": "Today 9:14am",
-        "added": "1 Dec 2024"
+        "added": "1 Dec 2024",
+        "mobile": "+61 412 558 921",
+        "activity": [
+            "Logged in — Today 9:14am",
+            "Reset password — Atiye Afrasiabi — 3 days ago 9:15am",
+            "Created vendor — BuildSafe Inspections — 28 Apr 2026",
+            "Updated email template — agency-approved — 24 Apr 2026"
+        ]
     },
     {
         "id": "2",
@@ -17,7 +24,12 @@
         "status": "Active",
         "mfa": "Enabled",
         "lastLogin": "Today 10:32am",
-        "added": "1 Dec 2024"
+        "added": "1 Dec 2024",
+        "mobile": "+61 422 111 222",
+        "activity": [
+            "Logged in — Today 10:32am",
+            "Approved agency — First Home Buyers Melbourne — 25 Apr 2026"
+        ]
     },
     {
         "id": "3",
@@ -27,7 +39,12 @@
         "status": "Active",
         "mfa": "Enabled",
         "lastLogin": "Yesterday",
-        "added": "15 Jan 2026"
+        "added": "15 Jan 2026",
+        "mobile": "+61 433 222 333",
+        "activity": [
+            "Approved agency application — James Wilson — Today 9:47am",
+            "Updated notes — Ray White Bondi — Today 9:32am"
+        ]
     },
     {
         "id": "4",
@@ -37,7 +54,12 @@
         "status": "Active",
         "mfa": "Enabled",
         "lastLogin": "2 days ago",
-        "added": "1 Feb 2026"
+        "added": "1 Feb 2026",
+        "mobile": "+61 444 333 444",
+        "activity": [
+            "Approved review — David Kowalski — Yesterday 4:12pm",
+            "Changed subscription tier — Belle Property → Premier — Yesterday 2:08pm"
+        ]
     },
     {
         "id": "5",
@@ -47,7 +69,11 @@
         "status": "Active",
         "mfa": "Enabled",
         "lastLogin": "3 days ago",
-        "added": "1 Mar 2026"
+        "added": "1 Mar 2026",
+        "mobile": "+61 455 444 555",
+        "activity": [
+            "Flagged review for legal — Robert Kim review — 2 days ago 11:33am"
+        ]
     },
     {
         "id": "6",
@@ -57,6 +83,11 @@
         "status": "Active",
         "mfa": "Not set up",
         "lastLogin": "1 week ago",
-        "added": "15 Mar 2026"
+        "added": "15 Mar 2026",
+        "mobile": "+61 466 555 666",
+        "activity": [
+            "Logged in — 1 week ago",
+            "Updated FAQ article — 1 week ago"
+        ]
     }
 ]

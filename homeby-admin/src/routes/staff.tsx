@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -9,12 +10,10 @@ import {
     Loader2, 
     Shield, 
     Key, 
+    Check,
     MoreHorizontal, 
     Trash2, 
-    User, 
-    Mail, 
-    AlertTriangle,
-    ShieldAlert
+    AlertTriangle
 } from "lucide-react";
 
 // Define TS Interfaces for Data-Driven Architecture
@@ -27,6 +26,8 @@ interface StaffMember {
     mfa: "Enabled" | "Not set up";
     lastLogin: string;
     added: string;
+    mobile?: string;
+    activity?: string[];
 }
 
 interface RoleInfo {
@@ -87,16 +88,32 @@ const RouteComponent = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
 
+    // Confirmation Popup Modal states
+    const [showMfaConfirm, setShowMfaConfirm] = useState(false);
+    const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
+
     // Dropdown Action Popovers
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
     // React Form states (controlled inputs)
-    const [formName, setFormName] = useState("");
+    const [formFirstName, setFormFirstName] = useState("");
+    const [formLastName, setFormLastName] = useState("");
+    const [formMobile, setFormMobile] = useState("");
+    const [sendWelcome, setSendWelcome] = useState(false);
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState("Admin");
     const [formStatus, setFormStatus] = useState<"Active" | "Inactive">("Active");
     const [formMfa, setFormMfa] = useState<"Enabled" | "Not set up">("Not set up");
     const [formError, setFormError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Toast Message State
+    const [toast, setToast] = useState<{
+        title: string;
+        message: string;
+        type: "success" | "info" | "error";
+        visible: boolean;
+    }>({ title: "Success", message: "", type: "success", visible: false });
 
     // TanStack Query for Loading local JSON Database
     const { data: serverStaff = [], isLoading, isError } = useQuery<StaffMember[]>({
@@ -143,13 +160,33 @@ const RouteComponent = () => {
         return () => window.removeEventListener("click", handleOutsideClick);
     }, []);
 
+    // Auto-hide Toast Notification tooltip after 4 seconds
+    useEffect(() => {
+        if (toast.visible) {
+            const timer = setTimeout(() => {
+                setToast(prev => ({ ...prev, visible: false }));
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast.visible]);
+
     // Create / Add Staff Operation
     const handleAddStaff = (e: React.FormEvent) => {
         e.preventDefault();
         setFormError("");
 
-        if (!formName.trim() || !formEmail.trim()) {
-            setFormError("Please enter both name and email.");
+        if (!formFirstName.trim()) {
+            setFormError("First name is required.");
+            return;
+        }
+
+        if (!formLastName.trim()) {
+            setFormError("Last name is required.");
+            return;
+        }
+
+        if (!formEmail.trim()) {
+            setFormError("Email address is required.");
             return;
         }
 
@@ -165,51 +202,86 @@ const RouteComponent = () => {
             return;
         }
 
-        const newStaff: StaffMember = {
-            id: String(Date.now()),
-            name: formName,
-            email: formEmail,
-            role: formRole,
-            status: formStatus,
-            mfa: formMfa,
-            lastLogin: "Never logged in",
-            added: new Date().toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric"
-            })
-        };
+        // Prevent double clicking using a submitting state
+        setIsSubmitting(true);
 
-        setLocalStaff([newStaff, ...localStaff]);
-        setIsAddModalOpen(false);
-        resetForm();
+        // Simulate network loading for visual excellence (1000ms)
+        setTimeout(() => {
+            const fullName = `${formFirstName.trim()} ${formLastName.trim()}`;
+            const newStaff: StaffMember = {
+                id: String(Date.now()),
+                name: fullName,
+                email: formEmail,
+                role: formRole,
+                status: "Active",
+                mfa: "Not set up",
+                lastLogin: "Never logged in",
+                added: new Date().toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                })
+            };
+
+            setLocalStaff([newStaff, ...localStaff]);
+            setIsAddModalOpen(false);
+            setIsSubmitting(false);
+            resetForm();
+
+            // Display toast tooltip message in the bottom-right corner
+            setToast({
+                title: "Staff Member Added",
+                message: `${fullName} has been added successfully as ${formRole}.`,
+                type: "success",
+                visible: true
+            });
+        }, 1000);
     };
 
-    // Open Edit Modal with current values
+    // Drawer Tab state for detailed staff view
+    const [activeDrawerTab, setActiveDrawerTab] = useState<"Profile" | "Permissions" | "Activity">("Profile");
+
+    // Open Right-Side Detail Drawer with current values
     const openEditModal = (staff: StaffMember) => {
         setSelectedStaff(staff);
-        setFormName(staff.name);
-        setFormEmail(staff.email);
-        setFormRole(staff.role);
-        setFormStatus(staff.status);
-        setFormMfa(staff.mfa);
+        
+        // Split full name dynamically into first and last name
+        const nameParts = (staff.name || "").trim().split(/\s+/);
+        const first = nameParts[0] || "";
+        const last = nameParts.slice(1).join(" ") || "";
+        
+        setFormFirstName(first);
+        setFormLastName(last);
+        setFormEmail(staff.email || "");
+        setFormMobile(staff.mobile || "");
+        setFormRole(staff.role || "Admin");
+        setFormStatus(staff.status || "Active");
+        setFormMfa(staff.mfa || "Not set up");
         setFormError("");
-        setIsEditModalOpen(true);
+        setActiveDrawerTab("Profile"); // Reset to profile tab
+        setIsEditModalOpen(true); // Open the drawer
     };
 
-    // Save Edit Operation
+    // Save Edit / Profile update in drawer
     const handleEditStaff = (e: React.FormEvent) => {
         e.preventDefault();
         setFormError("");
 
-        if (!formName.trim() || !formEmail.trim()) {
-            setFormError("Please enter both name and email.");
+        if (!formFirstName.trim()) {
+            setFormError("First name is required.");
+            return;
+        }
+
+        if (!formLastName.trim()) {
+            setFormError("Last name is required.");
             return;
         }
 
         if (!selectedStaff) return;
 
-        // Check for duplicate emails excluding self
+        const fullName = `${formFirstName.trim()} ${formLastName.trim()}`;
+
+        // Prevent duplicate emails
         if (localStaff.some(s => s.email.toLowerCase() === formEmail.toLowerCase() && s.id !== selectedStaff.id)) {
             setFormError("A staff member with this email already exists.");
             return;
@@ -219,8 +291,9 @@ const RouteComponent = () => {
             if (s.id === selectedStaff.id) {
                 return {
                     ...s,
-                    name: formName,
+                    name: fullName,
                     email: formEmail,
+                    mobile: formMobile,
                     role: formRole,
                     status: formStatus,
                     mfa: formMfa
@@ -232,51 +305,28 @@ const RouteComponent = () => {
         setLocalStaff(updatedList);
         setIsEditModalOpen(false);
         resetForm();
-    };
 
-    // Delete Staff Operation
-    const handleDeleteStaff = (id: string) => {
-        if (confirm("Are you sure you want to remove this staff member from internal administration?")) {
-            setLocalStaff(localStaff.filter(s => s.id !== id));
-        }
-    };
-
-    // Toggle MFA Status utility
-    const toggleMfaStatus = (staff: StaffMember) => {
-        const updatedList = localStaff.map((s) => {
-            if (s.id === staff.id) {
-                return {
-                    ...s,
-                    mfa: s.mfa === "Enabled" ? ("Not set up" as const) : ("Enabled" as const)
-                };
-            }
-            return s;
+        // Show Toast notification in bottom right
+        setToast({
+            title: "Profile Updated",
+            message: `${fullName}'s profile has been successfully updated.`,
+            type: "success",
+            visible: true
         });
-        setLocalStaff(updatedList);
-    };
-
-    // Toggle Active Status
-    const toggleActiveStatus = (staff: StaffMember) => {
-        const updatedList = localStaff.map((s) => {
-            if (s.id === staff.id) {
-                return {
-                    ...s,
-                    status: s.status === "Active" ? ("Inactive" as const) : ("Active" as const)
-                };
-            }
-            return s;
-        });
-        setLocalStaff(updatedList);
     };
 
     const resetForm = () => {
-        setFormName("");
+        setFormFirstName("");
+        setFormLastName("");
+        setFormMobile("");
+        setSendWelcome(false);
         setFormEmail("");
         setFormRole("Admin");
         setFormStatus("Active");
         setFormMfa("Not set up");
         setFormError("");
         setSelectedStaff(null);
+        setIsSubmitting(false);
     };
 
     return (
@@ -544,16 +594,24 @@ const RouteComponent = () => {
 
                                                                 {/* Custom dropdown popover */}
                                                                 {activeDropdownId === member.id && (
-                                                                    <div className="absolute right-0 top-7 bg-card border border-border rounded shadow-lg py-1.5 z-20 min-w-[160px] text-left text-xs animate-fade-in">
+                                                                    <div className="absolute right-0 top-7 bg-card border border-border rounded shadow-lg py-1.5 z-20 min-w-[160px] text-left text-xs animate-fade-in select-none">
                                                                         <button
-                                                                            onClick={() => toggleActiveStatus(member)}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setActiveDropdownId(null);
+                                                                                setToast({ title: "Design Placeholder", message: "Toggle Active is a design-only placeholder.", type: "info", visible: true });
+                                                                            }}
                                                                             className="w-full px-4 py-2 text-text hover:bg-page transition-colors text-left flex items-center gap-2"
                                                                         >
                                                                             <Shield size={14} className="text-muted" />
                                                                             Toggle Active
                                                                         </button>
                                                                         <button
-                                                                            onClick={() => toggleMfaStatus(member)}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setActiveDropdownId(null);
+                                                                                setToast({ title: "Design Placeholder", message: "Toggle MFA is a design-only placeholder.", type: "info", visible: true });
+                                                                            }}
                                                                             className="w-full px-4 py-2 text-text hover:bg-page transition-colors text-left flex items-center gap-2"
                                                                         >
                                                                             <Key size={14} className="text-muted" />
@@ -561,7 +619,11 @@ const RouteComponent = () => {
                                                                         </button>
                                                                         <div className="h-[1px] bg-border my-1" />
                                                                         <button
-                                                                            onClick={() => handleDeleteStaff(member.id)}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setActiveDropdownId(null);
+                                                                                setToast({ title: "Operation Restricted", message: "Delete staff operation is restricted in this version.", type: "info", visible: true });
+                                                                            }}
                                                                             className="w-full px-4 py-2 text-danger hover:bg-red-50 hover:text-red-700 transition-colors text-left flex items-center gap-2 font-bold"
                                                                         >
                                                                             <Trash2 size={14} />
@@ -640,16 +702,15 @@ const RouteComponent = () => {
 
             {/* MODAL: ADD STAFF */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[3px] z-[999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4">
                     <div 
-                        className="bg-card w-full max-w-md rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up"
+                        className="bg-card w-full max-w-[480px] rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-page/40">
-                            <h3 className="font-bold text-[16px] text-text flex items-center gap-2">
-                                <ShieldAlert size={18} className="text-accent" />
-                                Add Staff Member
+                        <div className="px-6 py-5 flex justify-between items-center bg-card">
+                            <h3 className="font-bold text-lg text-text font-sans tracking-tight">
+                                Add staff member
                             </h3>
                             <button
                                 onClick={() => setIsAddModalOpen(false)}
@@ -660,7 +721,7 @@ const RouteComponent = () => {
                         </div>
 
                         {/* Form Body */}
-                        <form onSubmit={handleAddStaff} className="p-6 flex flex-col gap-4 text-xs">
+                        <form onSubmit={handleAddStaff} className="px-6 pb-6 flex flex-col gap-4 text-xs">
                             {formError && (
                                 <div className="bg-red-50 border border-red-200 text-danger p-3 rounded-md flex items-start gap-2 text-xs font-semibold leading-normal">
                                     <AlertTriangle size={14} className="shrink-0 mt-0.5" />
@@ -668,105 +729,125 @@ const RouteComponent = () => {
                                 </div>
                             )}
 
-                            {/* Name Input */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    Full Name
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+                            {/* First Name & Last Name (2 Column) */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[13px] text-muted font-medium font-sans">
+                                        First name <span className="text-accent">*</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        placeholder="e.g. Arash Behnia"
-                                        value={formName}
-                                        onChange={(e) => setFormName(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
+                                        value={formFirstName}
+                                        onChange={(e) => setFormFirstName(e.target.value)}
+                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
                                         required
                                     />
                                 </div>
-                            </div>
-
-                            {/* Email Input */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[13px] text-muted font-medium font-sans">
+                                        Last name <span className="text-accent">*</span>
+                                    </label>
                                     <input
-                                        type="email"
-                                        placeholder="e.g. arash@arkaisolutions.com.au"
-                                        value={formEmail}
-                                        onChange={(e) => setFormEmail(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
+                                        type="text"
+                                        value={formLastName}
+                                        onChange={(e) => setFormLastName(e.target.value)}
+                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            {/* Role Dropdown Selector */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    System Role
+                            {/* Email Address */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[13px] text-muted font-medium font-sans">
+                                    Email address <span className="text-accent">*</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    value={formEmail}
+                                    placeholder=""
+                                    onChange={(e) => setFormEmail(e.target.value)}
+                                    className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
+                                    required
+                                />
+                            </div>
+
+                            {/* Mobile Number */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[13px] text-muted font-medium font-sans">
+                                    Mobile number
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="+61 4XX XXX XXX"
+                                    value={formMobile}
+                                    onChange={(e) => setFormMobile(e.target.value)}
+                                    className="w-full px-3 py-2 border border-border bg-card text-text rounded placeholder-muted/80 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
+                                />
+                            </div>
+
+                            {/* Role Select Dropdown (Admin, Support, Reviewer, Content editor) */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[13px] text-muted font-medium font-sans">
+                                    Role <span className="text-accent">*</span>
                                 </label>
                                 <select
                                     value={formRole}
                                     onChange={(e) => setFormRole(e.target.value)}
-                                    className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
+                                    className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
                                 >
-                                    {Object.keys(ROLES_INFO).map((roleName) => (
-                                        <option key={roleName} value={roleName}>
-                                            {roleName}
-                                        </option>
-                                    ))}
+                                    <option value="Admin">Admin</option>
+                                    <option value="Support">Support</option>
+                                    <option value="Reviewer">Reviewer</option>
+                                    <option value="Content editor">Content editor</option>
                                 </select>
+                                <p className="text-[12px] text-muted leading-tight mt-1.5 font-sans">
+                                    Superadmin role can only be assigned by existing superadmin after account creation.
+                                </p>
                             </div>
 
-                            {/* Status & MFA Controls row */}
-                            <div className="grid grid-cols-2 gap-4 mt-1">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="font-bold text-muted uppercase tracking-wide">
-                                        Account Status
-                                    </label>
-                                    <select
-                                        value={formStatus}
-                                        onChange={(e) => setFormStatus(e.target.value as any)}
-                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                    >
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="font-bold text-muted uppercase tracking-wide">
-                                        MFA Status
-                                    </label>
-                                    <select
-                                        value={formMfa}
-                                        onChange={(e) => setFormMfa(e.target.value as any)}
-                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                    >
-                                        <option value="Not set up">Not set up</option>
-                                        <option value="Enabled">Enabled</option>
-                                    </select>
-                                </div>
+                            {/* Send Welcome Email Checkbox */}
+                            <div className="flex items-start gap-3 mt-1.5 select-none">
+                                <input
+                                    id="sendWelcomeEmail"
+                                    type="checkbox"
+                                    checked={sendWelcome}
+                                    onChange={(e) => setSendWelcome(e.target.checked)}
+                                    className="mt-1 h-4 w-4 rounded border-border text-accent focus:ring-accent transition-colors cursor-pointer"
+                                />
+                                <label htmlFor="sendWelcomeEmail" className="flex flex-col gap-0.5 cursor-pointer">
+                                    <span className="text-sm font-semibold text-text font-sans">
+                                        Send welcome email
+                                    </span>
+                                    <span className="text-[12px] text-muted font-medium font-sans">
+                                        Send login instructions to new staff member.
+                                    </span>
+                                </label>
                             </div>
 
                             {/* Modal Footer buttons */}
-                            <div className="flex justify-end gap-2.5 pt-4 border-t border-border mt-4">
+                            <div className="flex justify-end gap-3 pt-4 mt-2">
                                 <button
                                     type="button"
+                                    disabled={isSubmitting}
                                     onClick={() => setIsAddModalOpen(false)}
-                                    className="px-4 py-2 border border-border text-muted hover:text-text rounded-md hover:bg-page transition-colors cursor-pointer font-bold"
+                                    className="px-4 py-2 border border-border text-muted hover:text-text rounded bg-white hover:bg-page font-bold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-md transition-colors cursor-pointer font-bold"
+                                    disabled={isSubmitting}
+                                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-75 disabled:cursor-not-allowed min-w-[100px]"
                                 >
-                                    Add Member
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 size={14} className="animate-spin" />
+                                            Adding...
+                                        </>
+                                    ) : (
+                                        "Add staff"
+                                    )}
                                 </button>
                             </div>
                         </form>
@@ -774,137 +855,489 @@ const RouteComponent = () => {
                 </div>
             )}
 
-            {/* MODAL: EDIT STAFF */}
+            {/* RIGHT SIDE DRAWER: STAFF DETAIL */}
             {isEditModalOpen && selectedStaff && (
-                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[3px] z-[999] flex items-center justify-center p-4">
+                <div 
+                    className="fixed inset-0 bg-[#0F1115]/40 backdrop-blur-[2px] z-[999] flex justify-end"
+                    onClick={() => setIsEditModalOpen(false)}
+                >
                     <div 
-                        className="bg-card w-full max-w-md rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up"
+                        className="bg-card w-full max-w-[480px] h-full border-l border-border shadow-2xl overflow-hidden flex flex-col animate-slide-left"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Header */}
-                        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-page/40">
-                            <h3 className="font-bold text-[16px] text-text flex items-center gap-2">
-                                <ShieldAlert size={18} className="text-accent" />
-                                Edit Staff Member
-                            </h3>
+                        {/* Header Details */}
+                        <div className="p-6 border-b border-border flex justify-between items-start">
+                            <div className="flex items-center gap-4">
+                                {/* Initials avatar */}
+                                <div className="h-12 w-12 rounded-lg bg-purple-50 text-purple-700 font-bold text-lg flex items-center justify-center select-none shrink-0 border border-purple-200">
+                                    {(selectedStaff.name || "").trim().split(/\s+/).map(n => n[0]).join("").toUpperCase()}
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <h3 className="font-bold text-lg text-text tracking-tight font-sans">
+                                        {selectedStaff.name}
+                                    </h3>
+                                    <span className="text-[13px] text-muted font-medium font-sans">
+                                        {selectedStaff.email}
+                                    </span>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="inline-block px-2.5 py-0.5 border text-xs font-semibold rounded bg-purple-50 text-purple-700 border-purple-200">
+                                            {selectedStaff.role}
+                                        </span>
+                                        <span className={`inline-block px-2.5 py-0.5 border text-xs font-semibold rounded ${
+                                            selectedStaff.status === "Active"
+                                                ? "bg-green-50 text-green-700 border-green-200"
+                                                : "bg-red-50 text-red-700 border-red-200"
+                                        }`}>
+                                            {selectedStaff.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <button
                                 onClick={() => setIsEditModalOpen(false)}
-                                className="text-muted hover:text-text p-1 rounded hover:bg-page transition-colors cursor-pointer"
+                                className="text-muted hover:text-text p-1.5 rounded hover:bg-page transition-colors cursor-pointer"
                             >
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
-                        {/* Form Body */}
-                        <form onSubmit={handleEditStaff} className="p-6 flex flex-col gap-4 text-xs">
-                            {formError && (
-                                <div className="bg-red-50 border border-red-200 text-danger p-3 rounded-md flex items-start gap-2 text-xs font-semibold leading-normal">
-                                    <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-                                    <span>{formError}</span>
-                                </div>
-                            )}
-
-                            {/* Name Input */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    Full Name
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
-                                    <input
-                                        type="text"
-                                        value={formName}
-                                        onChange={(e) => setFormName(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Email Input */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
-                                    <input
-                                        type="email"
-                                        value={formEmail}
-                                        onChange={(e) => setFormEmail(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Role Dropdown Selector */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="font-bold text-muted uppercase tracking-wide">
-                                    System Role
-                                </label>
-                                <select
-                                    value={formRole}
-                                    onChange={(e) => setFormRole(e.target.value)}
-                                    className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                >
-                                    {Object.keys(ROLES_INFO).map((roleName) => (
-                                        <option key={roleName} value={roleName}>
-                                            {roleName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Status & MFA Controls row */}
-                            <div className="grid grid-cols-2 gap-4 mt-1">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="font-bold text-muted uppercase tracking-wide">
-                                        Account Status
-                                    </label>
-                                    <select
-                                        value={formStatus}
-                                        onChange={(e) => setFormStatus(e.target.value as any)}
-                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                    >
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="font-bold text-muted uppercase tracking-wide">
-                                        MFA Status
-                                    </label>
-                                    <select
-                                        value={formMfa}
-                                        onChange={(e) => setFormMfa(e.target.value as any)}
-                                        className="w-full px-3 py-2 border border-border bg-card text-text rounded-md focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs font-medium"
-                                    >
-                                        <option value="Not set up">Not set up</option>
-                                        <option value="Enabled">Enabled</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Modal Footer buttons */}
-                            <div className="flex justify-end gap-2.5 pt-4 border-t border-border mt-4">
+                        {/* Navigation Tab Bar */}
+                        <div className="flex gap-6 border-b border-border px-6 mt-1 bg-page/10">
+                            {(["Profile", "Permissions", "Activity"] as const).map((tab) => (
                                 <button
-                                    type="button"
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2 border border-border text-muted hover:text-text rounded-md hover:bg-page transition-colors cursor-pointer font-bold"
+                                    key={tab}
+                                    onClick={() => setActiveDrawerTab(tab)}
+                                    className={`pb-3 pt-2 text-sm font-semibold border-b-2 transition-all relative ${
+                                        activeDrawerTab === tab 
+                                            ? "border-accent text-accent" 
+                                            : "border-transparent text-muted hover:text-text"
+                                    }`}
                                 >
-                                    Cancel
+                                    {tab}
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-md transition-colors cursor-pointer font-bold"
-                                >
-                                    Save Changes
-                                </button>
+                            ))}
+                        </div>
+
+                        {/* TAB 1: PROFILE CONTENT */}
+                        {activeDrawerTab === "Profile" && (
+                            <form onSubmit={handleEditStaff} className="flex-1 flex flex-col justify-between overflow-hidden">
+                                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 text-xs">
+                                    {formError && (
+                                        <div className="bg-red-50 border border-red-200 text-danger p-3 rounded flex items-start gap-2 text-xs font-semibold">
+                                            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                                            <span>{formError}</span>
+                                        </div>
+                                    )}
+
+                                    {/* First Name & Last Name (2 Column) */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[13px] text-muted font-medium font-sans">
+                                                First name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formFirstName}
+                                                onChange={(e) => setFormFirstName(e.target.value)}
+                                                className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors font-sans"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[13px] text-muted font-medium font-sans">
+                                                Last name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formLastName}
+                                                onChange={(e) => setFormLastName(e.target.value)}
+                                                className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors font-sans"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Email Input (Disabled/Readonly) */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[13px] text-muted font-medium font-sans">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={formEmail}
+                                            disabled
+                                            className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded text-sm font-medium cursor-not-allowed font-sans"
+                                        />
+                                    </div>
+
+                                    {/* Mobile Number */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[13px] text-muted font-medium font-sans">
+                                            Mobile number
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formMobile}
+                                            onChange={(e) => setFormMobile(e.target.value)}
+                                            placeholder="+61 4XX XXX XXX"
+                                            className="w-full px-3 py-2 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors font-sans"
+                                        />
+                                    </div>
+
+                                    {/* Role Dropdown */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[13px] text-muted font-medium font-sans">
+                                            Role
+                                        </label>
+                                        <select
+                                            value={formRole}
+                                            onChange={(e) => setFormRole(e.target.value)}
+                                            className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors font-sans"
+                                        >
+                                            <option value="Superadmin">Superadmin</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="Support">Support</option>
+                                            <option value="Reviewer">Reviewer</option>
+                                            <option value="Content editor">Content editor</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Status Switch Toggle */}
+                                    <div className="flex flex-col gap-1.5 mt-1 select-none">
+                                        <span className="text-[13px] text-muted font-medium font-sans">
+                                            Status
+                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormStatus(formStatus === "Active" ? "Inactive" : "Active")}
+                                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                    formStatus === "Active" ? "bg-green-600" : "bg-slate-350"
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                        formStatus === "Active" ? "translate-x-5" : "translate-x-0"
+                                                    }`}
+                                                />
+                                            </button>
+                                            <span className={`inline-block px-2.5 py-0.5 border text-xs font-semibold rounded ${
+                                                formStatus === "Active"
+                                                    ? "bg-green-50 text-green-700 border-green-200"
+                                                    : "bg-red-50 text-red-700 border-red-200"
+                                            }`}>
+                                                {formStatus}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="h-[1px] bg-border/50 my-2" />
+
+                                    {/* Multi-factor Authentication Section */}
+                                    <div className="flex flex-col gap-2">
+                                        <h4 className="font-bold text-[14px] text-text font-sans">
+                                            Multi-factor authentication
+                                        </h4>
+                                        <div className="flex items-center gap-2 text-[13px] text-muted">
+                                            <span>Status:</span>
+                                            <span className={`inline-block px-2 py-0.5 border text-xs font-semibold rounded ${
+                                                formMfa === "Enabled"
+                                                    ? "bg-green-50 text-green-700 border-green-200 font-sans"
+                                                    : "bg-orange-50 text-orange-600 border-orange-200 font-sans font-bold"
+                                            }`}>
+                                                {formMfa}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-2.5 mt-1 select-none">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowMfaConfirm(true);
+                                                }}
+                                                className="px-3 py-1.5 border border-border bg-white text-muted hover:text-text rounded text-xs font-bold hover:bg-page transition-colors cursor-pointer font-sans"
+                                            >
+                                                Reset MFA
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowRevokeConfirm(true);
+                                                }}
+                                                className="px-3 py-1.5 border border-border bg-white text-muted hover:text-text rounded text-xs font-bold hover:bg-page transition-colors cursor-pointer font-sans"
+                                            >
+                                                Revoke all sessions
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="h-[1px] bg-border/50 my-1" />
+
+                                    <p className="text-[12px] text-muted leading-tight mt-1 font-sans">
+                                        Changes to superadmin accounts require re-authentication.
+                                    </p>
+                                </div>
+
+                                {/* Save Button Footer */}
+                                <div className="px-6 py-4 border-t border-border flex justify-end bg-page/20">
+                                    <button
+                                        type="submit"
+                                        className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded font-bold text-sm transition-colors cursor-pointer font-sans shadow-sm"
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        {/* TAB 2: PERMISSIONS CONTENT */}
+                        {activeDrawerTab === "Permissions" && (
+                            <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+                                <div className="flex flex-col gap-0.5">
+                                    <h4 className="font-bold text-[15px] text-text font-sans">
+                                        Access permissions
+                                    </h4>
+                                    <p className="text-[12px] text-muted font-medium font-sans leading-relaxed">
+                                        Permissions are defined by role and cannot be customised per user in this version.
+                                    </p>
+                                </div>
+
+                                <div className="border border-border rounded overflow-hidden shadow-sm">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
+                                                <th className="px-3 py-2.5">Permission</th>
+                                                <th className="px-2 py-2.5 text-center">Superadmin</th>
+                                                <th className="px-2 py-2.5 text-center">Admin</th>
+                                                <th className="px-2 py-2.5 text-center">Support</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/60 font-sans">
+                                            {/* Category: Operations */}
+                                            <tr className="bg-page/40 font-bold text-[11px] text-accent select-none">
+                                                <td colSpan={4} className="px-3 py-1.5 uppercase tracking-wide">Operations</td>
+                                            </tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">View agencies</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Edit agencies</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">View agents</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Approve applications</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">View integrations</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Retry feed sync</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">View vendors</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Edit vendors</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+
+                                            {/* Category: Moderation */}
+                                            <tr className="bg-page/40 font-bold text-[11px] text-accent select-none">
+                                                <td colSpan={4} className="px-3 py-1.5 uppercase tracking-wide">Moderation</td>
+                                            </tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Review moderation</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Approve reviews</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Flag for legal</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+
+                                            {/* Category: Commercial */}
+                                            <tr className="bg-page/40 font-bold text-[11px] text-accent select-none">
+                                                <td colSpan={4} className="px-3 py-1.5 uppercase tracking-wide">Commercial</td>
+                                            </tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">View billing</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-text font-bold">read</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Issue refunds</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Lead distribution</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+
+                                            {/* Category: Content */}
+                                            <tr className="bg-page/40 font-bold text-[11px] text-accent select-none">
+                                                <td colSpan={4} className="px-3 py-1.5 uppercase tracking-wide">Content</td>
+                                            </tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Insights CMS</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Email templates</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+
+                                            {/* Category: System */}
+                                            <tr className="bg-page/40 font-bold text-[11px] text-accent select-none">
+                                                <td colSpan={4} className="px-3 py-1.5 uppercase tracking-wide">System</td>
+                                            </tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Staff & Roles</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Audit Log</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Auth Settings</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Feature Flags</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                            <tr className="hover:bg-page/20"><td className="px-3 py-2 text-muted font-medium">Blocked IPs</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-green-600 font-bold">✓</td><td className="px-2 py-2 text-center text-muted">—</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <p className="text-[12px] text-muted leading-tight font-medium font-sans bg-page/35 border border-border/80 rounded p-2 select-none">
+                                    Role permissions are managed in code. Contact your developer to modify role definitions.
+                                </p>
                             </div>
-                        </form>
+                        )}
+
+                        {/* TAB 3: ACTIVITY CONTENT */}
+                        {activeDrawerTab === "Activity" && (
+                            <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+                                <h4 className="font-bold text-[16px] text-text font-sans">
+                                    Recent activity
+                                </h4>
+                                <div className="flex flex-col gap-4 relative border-l border-border/80 pl-4 ml-1.5 mt-2">
+                                    {(selectedStaff.activity && selectedStaff.activity.length > 0 ? selectedStaff.activity : [
+                                        "Approved agency application — James Wilson — Today 9:47am",
+                                        "Updated notes — Ray White Bondi — Today 9:32am",
+                                        "Approved review — David Kowalski — Yesterday 4:12pm",
+                                        "Changed subscription tier — Belle Property → Premier — Yesterday 2:08pm",
+                                        "Logged in — Today 9:14am",
+                                        "Flagged review for legal — Robert Kim review — 2 days ago 11:33am",
+                                        "Reset password — Atiye Afrasiabi — 3 days ago 9:15am",
+                                        "Created vendor — BuildSafe Inspections — 28 Apr 2026",
+                                        "Approved agency — First Home Buyers Melbourne — 25 Apr 2026",
+                                        "Updated email template — agency-approved — 24 Apr 2026"
+                                    ]).map((act, index) => {
+                                        const parts = act.split(" — ");
+                                        const actionName = parts[0] || "";
+                                        const entityName = parts[1] || "";
+                                        const timeLabel = parts[2] || "";
+
+                                        return (
+                                            <div key={index} className="flex flex-col gap-0.5 relative text-[13px]">
+                                                {/* Timeline dot */}
+                                                <span className="absolute -left-[21px] top-1.5 h-2 w-2 bg-accent border border-card rounded-full shadow-sm" />
+                                                <div className="font-sans text-text leading-normal">
+                                                    <span className="font-bold text-text">{actionName}</span>
+                                                    {entityName && (
+                                                        <>
+                                                            <span className="text-muted/70 mx-1.5">—</span>
+                                                            <span className="font-semibold text-muted">{entityName}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                {timeLabel && (
+                                                    <span className="text-[11px] text-muted/65 font-bold tracking-tight">
+                                                        {timeLabel}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
+                </div>
+            )}
+
+            {/* MFA RESET CONFIRMATION POPUP */}
+            {showMfaConfirm && selectedStaff && (
+                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[9999] flex items-center justify-center p-4 select-none animate-fade-in">
+                    <div 
+                        className="bg-card w-full max-w-[380px] rounded-lg border border-border shadow-2xl overflow-hidden p-6 flex flex-col gap-4 animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col gap-1.5">
+                            <h3 className="font-bold text-[16px] text-text font-sans leading-snug">
+                                Reset MFA for {selectedStaff.name}?
+                            </h3>
+                            <p className="text-[13px] text-muted font-medium font-sans leading-relaxed">
+                                They will need to re-enroll on next login.
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowMfaConfirm(false)}
+                                className="px-4 py-2 border border-border rounded text-muted hover:text-text hover:bg-page transition-colors text-xs font-bold cursor-pointer font-sans"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setFormMfa("Not set up");
+                                    // Update local state item immediately as well
+                                    const updatedList = localStaff.map(s => {
+                                        if (s.id === selectedStaff.id) {
+                                            return { ...s, mfa: "Not set up" as const };
+                                        }
+                                        return s;
+                                    });
+                                    setLocalStaff(updatedList);
+                                    
+                                    setShowMfaConfirm(false);
+                                    setToast({
+                                        title: "MFA Reset Success",
+                                        message: `Multi-factor authentication for ${selectedStaff.name} has been reset.`,
+                                        type: "success",
+                                        visible: true
+                                    });
+                                }}
+                                className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded text-xs font-bold transition-colors cursor-pointer font-sans shadow-sm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* REVOKE ACTIVE SESSIONS CONFIRMATION POPUP */}
+            {showRevokeConfirm && selectedStaff && (
+                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[9999] flex items-center justify-center p-4 select-none animate-fade-in">
+                    <div 
+                        className="bg-card w-full max-w-[380px] rounded-lg border border-border shadow-2xl overflow-hidden p-6 flex flex-col gap-4 animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col gap-1.5">
+                            <h3 className="font-bold text-[16px] text-text font-sans leading-snug">
+                                Sign out all active sessions for {selectedStaff.name}?
+                            </h3>
+                            <p className="text-[13px] text-muted font-medium font-sans leading-relaxed">
+                                All devices will be signed out immediately.
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowRevokeConfirm(false)}
+                                className="px-4 py-2 border border-border rounded text-muted hover:text-text hover:bg-page transition-colors text-xs font-bold cursor-pointer font-sans"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowRevokeConfirm(false);
+                                    setToast({
+                                        title: "Sessions Revoked",
+                                        message: `All active sessions for ${selectedStaff.name} have been successfully revoked.`,
+                                        type: "success",
+                                        visible: true
+                                    });
+                                }}
+                                className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded text-xs font-bold transition-colors cursor-pointer font-sans shadow-sm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* SLEEK GLASSMORPHIC TOAST TOOLTIP (BOTTOM-RIGHT) */}
+            {toast.visible && (
+                <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-white/95 backdrop-blur-md border border-border rounded-lg shadow-xl px-4 py-3.5 max-w-sm animate-slide-left select-none">
+                    {/* Circle checkmark in green */}
+                    <div className="bg-green-100 text-green-700 p-1.5 rounded-full shrink-0">
+                        <Check size={15} strokeWidth={3} />
+                    </div>
+                    {/* Message content */}
+                    <div className="flex-1 min-w-0 pr-1">
+                        <h4 className="font-bold text-[13px] text-text font-sans">
+                            {toast.title}
+                        </h4>
+                        <p className="text-[12px] text-muted mt-0.5 font-medium leading-tight font-sans truncate">
+                            {toast.message}
+                        </p>
+                    </div>
+                    {/* Close button */}
+                    <button
+                        onClick={() => setToast(prev => ({ ...prev, visible: false }))}
+                        className="text-muted/80 hover:text-text p-0.5 rounded hover:bg-page transition-colors cursor-pointer"
+                    >
+                        <X size={14} strokeWidth={2.5} />
+                    </button>
                 </div>
             )}
         </div>
