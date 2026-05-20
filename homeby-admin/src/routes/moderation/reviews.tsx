@@ -3,14 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Toast } from "../../components/Toast";
-import {
-    Search,
-    Loader2,
-    Star,
-    AlertTriangle,
-    X,
-    Check,
-} from "lucide-react";
+import { Search, Loader2, Star, AlertTriangle, X, Check } from "lucide-react";
 
 type ReviewStatus = "Pending" | "Approved" | "Rejected" | "Flagged for legal";
 
@@ -45,22 +38,24 @@ type Review = {
 
 const ReviewModerationComponent = () => {
     const queryClient = useQueryClient();
-    
+
     // Filters State
     const [activeTab, setActiveTab] = useState<ReviewStatus | "All">("Pending");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedRating, setSelectedRating] = useState<number | null>(null);
-    
+
     // Modal State
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
-    const [drawerTab, setDrawerTab] = useState<"Review" | "Risk signals" | "History">("Review");
-    
+    const [drawerTab, setDrawerTab] = useState<
+        "Review" | "Risk signals" | "History"
+    >("Review");
+
     // Action Confirmation Modal State
     const [actionModal, setActionModal] = useState<{
         type: "Approve" | "Reject";
         review: Review;
     } | null>(null);
-    
+
     // Toast State
     const [toast, setToast] = useState<{
         title: string;
@@ -68,10 +63,13 @@ const ReviewModerationComponent = () => {
         type: "success" | "info" | "error";
         visible: boolean;
     }>({ title: "Success", message: "", type: "success", visible: false });
-    
+
     const showToast = (title: string, message: string) => {
         setToast({ title, message, type: "success", visible: true });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+        setTimeout(
+            () => setToast((prev) => ({ ...prev, visible: false })),
+            4000,
+        );
     };
 
     // Fetch Reviews from Axios + Tanstack Query
@@ -88,21 +86,18 @@ const ReviewModerationComponent = () => {
     });
 
     // Handle review status updates in local cache
-    const updateReviewStatus = (
-        id: string,
-        newStatus: ReviewStatus
-    ) => {
+    const updateReviewStatus = (id: string, newStatus: ReviewStatus) => {
         queryClient.setQueryData<Review[]>(["reviews"], (oldData) => {
             if (!oldData) return [];
             return oldData.map((rev) =>
-                rev.id === id ? { ...rev, status: newStatus } : rev
+                rev.id === id ? { ...rev, status: newStatus } : rev,
             );
         });
-        
+
         // If the modal is currently open and inspecting this review, update its modal state
         if (selectedReview && selectedReview.id === id) {
             setSelectedReview((prev) =>
-                prev ? { ...prev, status: newStatus } : null
+                prev ? { ...prev, status: newStatus } : null,
             );
         }
     };
@@ -115,7 +110,9 @@ const ReviewModerationComponent = () => {
     // Rejected count: matches the 8 rejected metric base
     const rejectedCount = reviews.filter((r) => r.status === "Rejected").length;
     // Flagged count: matches the 2 flagged metric base
-    const flaggedCount = reviews.filter((r) => r.status === "Flagged for legal").length;
+    const flaggedCount = reviews.filter(
+        (r) => r.status === "Flagged for legal",
+    ).length;
 
     // Filtered Reviews computation
     const filteredReviews = useMemo(() => {
@@ -143,7 +140,11 @@ const ReviewModerationComponent = () => {
     }, [reviews, activeTab, selectedRating, searchQuery]);
 
     // Star renderer helper
-    const renderStars = (rating: number, size = 16, onClick?: (r: number) => void) => {
+    const renderStars = (
+        rating: number,
+        size = 16,
+        onClick?: (r: number) => void,
+    ) => {
         return (
             <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -179,25 +180,30 @@ const ReviewModerationComponent = () => {
     };
 
     return (
-        <div className="max-w-screen mx-auto space-y-6 pb-12">
+        <div className="max-w-screen mx-auto pb-12">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-text">Review Moderation</h1>
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-text">
+                    Review Moderation
+                </h1>
                 <p className="text-sm text-muted mt-1">
-                    Approve, reject or flag agent reviews before they appear publicly. Nothing publishes without admin approval.
+                    Approve, reject or flag agent reviews before they appear
+                    publicly. Nothing publishes without admin approval.
                 </p>
             </div>
 
             {/* Warning Alert banner */}
-            <div className="bg-warning/10 border border-warning/20 rounded p-3.5 flex items-center gap-2.5">
+            <div className="bg-warning/10 border border-warning/20 rounded p-3.5 flex items-center gap-2.5 mb-6">
                 <AlertTriangle className="text-warning shrink-0" size={16} />
                 <p className="text-xs text-warning leading-relaxed font-medium">
-                    Reviews about real estate agents carry defamation risk under Australian law. All reviews require manual approval before publishing. When in doubt, flag for legal review.
+                    Reviews about real estate agents carry defamation risk under
+                    Australian law. All reviews require manual approval before
+                    publishing. When in doubt, flag for legal review.
                 </p>
             </div>
 
             {/* KPI Metrics row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 {/* Pending review */}
                 <div className="bg-card border border-border rounded shadow-sm p-5 flex flex-col justify-between">
                     <div className="flex items-center gap-1.5 text-[13px] text-muted font-medium">
@@ -244,16 +250,21 @@ const ReviewModerationComponent = () => {
             </div>
 
             {/* Tabs & Filters */}
-            <div className="space-y-4">
+            <div className="space-y-4 mb-6">
                 {/* Tabs */}
                 <div className="flex border-b border-border overflow-x-auto overflow-y-hidden whitespace-nowrap gap-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {([
-                        { id: "Pending", label: "Pending" },
-                        { id: "Approved", label: "Approved" },
-                        { id: "Rejected", label: "Rejected" },
-                        { id: "Flagged for legal", label: "Flagged for legal" },
-                        { id: "All", label: "All" },
-                    ] as const).map((tab) => (
+                    {(
+                        [
+                            { id: "Pending", label: "Pending" },
+                            { id: "Approved", label: "Approved" },
+                            { id: "Rejected", label: "Rejected" },
+                            {
+                                id: "Flagged for legal",
+                                label: "Flagged for legal",
+                            },
+                            { id: "All", label: "All" },
+                        ] as const
+                    ).map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => {
@@ -268,7 +279,10 @@ const ReviewModerationComponent = () => {
                         >
                             {tab.id === "Pending" ? (
                                 <>
-                                    Pending <span className="text-[#D97706] ml-1 font-bold">{pendingCount}</span>
+                                    Pending{" "}
+                                    <span className="text-[#D97706] ml-1 font-bold">
+                                        {pendingCount}
+                                    </span>
                                 </>
                             ) : (
                                 tab.label
@@ -281,7 +295,10 @@ const ReviewModerationComponent = () => {
                 <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                     {/* Search */}
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
+                        <Search
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                            size={16}
+                        />
                         <input
                             type="text"
                             value={searchQuery}
@@ -354,22 +371,43 @@ const ReviewModerationComponent = () => {
             <div className="bg-card border border-border rounded shadow-sm overflow-hidden">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-3">
-                        <Loader2 className="animate-spin text-accent" size={32} />
-                        <span className="text-sm text-muted">Loading reviews...</span>
+                        <Loader2
+                            className="animate-spin text-accent"
+                            size={32}
+                        />
+                        <span className="text-sm text-muted">
+                            Loading reviews...
+                        </span>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-border bg-card text-[13px] text-muted font-medium">
-                                    <th className="px-6 py-3 font-medium">Reviewer</th>
-                                    <th className="px-6 py-3 font-medium">Agent reviewed</th>
-                                    <th className="px-6 py-3 font-medium">Rating</th>
-                                    <th className="px-6 py-3 font-medium">Comment</th>
-                                    <th className="px-6 py-3 font-medium">Submitted</th>
-                                    <th className="px-6 py-3 font-medium text-center">Risk</th>
-                                    <th className="px-6 py-3 font-medium">Status</th>
-                                    <th className="px-6 py-3 font-medium text-right">Actions</th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Reviewer
+                                    </th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Agent reviewed
+                                    </th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Rating
+                                    </th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Comment
+                                    </th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Submitted
+                                    </th>
+                                    <th className="px-6 py-3 font-medium text-center">
+                                        Risk
+                                    </th>
+                                    <th className="px-6 py-3 font-medium">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 font-medium text-right">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/60">
@@ -380,9 +418,12 @@ const ReviewModerationComponent = () => {
                                             className="hover:bg-page/20 transition-colors text-sm text-text"
                                         >
                                             {/* Reviewer */}
-                                            <td className={`px-6 py-4 border-l-[3px] transition-all ${rev.hasRisk ? "border-l-[#D97706]" : "border-l-transparent"}`}>
+                                            <td
+                                                className={`px-6 py-4 border-l-[3px] transition-all ${rev.hasRisk ? "border-l-[#D97706]" : "border-l-transparent"}`}
+                                            >
                                                 <div className="font-semibold text-text">
-                                                    {rev.reviewerName || "Anonymous"}
+                                                    {rev.reviewerName ||
+                                                        "Anonymous"}
                                                 </div>
                                                 {rev.reviewerEmail && (
                                                     <div className="text-xs text-muted font-medium mt-0.5">
@@ -421,15 +462,22 @@ const ReviewModerationComponent = () => {
                                             {/* Risk */}
                                             <td className="px-6 py-4 text-center">
                                                 {rev.hasRisk ? (
-                                                    <div className="inline-flex items-center justify-center text-[#D97706]" title={rev.riskReason}>
-                                                        <AlertTriangle size={16} />
+                                                    <div
+                                                        className="inline-flex items-center justify-center text-[#D97706]"
+                                                        title={rev.riskReason}
+                                                    >
+                                                        <AlertTriangle
+                                                            size={16}
+                                                        />
                                                     </div>
                                                 ) : null}
                                             </td>
 
                                             {/* Status Badge */}
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2.5 py-0.5 rounded text-xs font-semibold inline-block ${getStatusStyles(rev.status)}`}>
+                                                <span
+                                                    className={`px-2.5 py-0.5 rounded text-xs font-semibold inline-block ${getStatusStyles(rev.status)}`}
+                                                >
                                                     {rev.status}
                                                 </span>
                                             </td>
@@ -437,7 +485,9 @@ const ReviewModerationComponent = () => {
                                             {/* Actions */}
                                             <td className="px-6 py-4 text-right whitespace-nowrap">
                                                 <button
-                                                    onClick={() => setSelectedReview(rev)}
+                                                    onClick={() =>
+                                                        setSelectedReview(rev)
+                                                    }
                                                     className="text-accent hover:underline text-sm font-semibold transition-colors font-sans"
                                                 >
                                                     Review
@@ -451,7 +501,8 @@ const ReviewModerationComponent = () => {
                                             colSpan={8}
                                             className="px-6 py-16 text-center text-sm text-muted font-medium"
                                         >
-                                            No reviews found matching the filters.
+                                            No reviews found matching the
+                                            filters.
                                         </td>
                                     </tr>
                                 )}
@@ -465,14 +516,14 @@ const ReviewModerationComponent = () => {
             {selectedReview && (
                 <>
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity"
                         onClick={() => {
                             setSelectedReview(null);
                             setDrawerTab("Review");
                         }}
                     />
-                    
+
                     {/* Drawer */}
                     <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card shadow-2xl flex flex-col z-[100] overflow-hidden border-l border-border transition-transform">
                         {/* Drawer Header */}
@@ -488,15 +539,22 @@ const ReviewModerationComponent = () => {
                             </button>
 
                             <div>
-                                <h2 className="text-xl font-bold text-text">{selectedReview.reviewerName || "Anonymous User"}</h2>
+                                <h2 className="text-xl font-bold text-text">
+                                    {selectedReview.reviewerName ||
+                                        "Anonymous User"}
+                                </h2>
                                 <p className="text-[13px] text-muted mt-0.5">
-                                    {selectedReview.reviewerEmail || "No email"} &middot; Submitted {selectedReview.submittedAt}
+                                    {selectedReview.reviewerEmail || "No email"}{" "}
+                                    &middot; Submitted{" "}
+                                    {selectedReview.submittedAt}
                                 </p>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 {renderStars(selectedReview.rating, 18)}
-                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusStyles(selectedReview.status)}`}>
+                                <span
+                                    className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusStyles(selectedReview.status)}`}
+                                >
                                     {selectedReview.status}
                                 </span>
                             </div>
@@ -504,7 +562,9 @@ const ReviewModerationComponent = () => {
 
                         {/* Drawer Tabs */}
                         <div className="flex px-6 border-b border-border gap-6 shrink-0">
-                            {(["Review", "Risk signals", "History"] as const).map(tab => (
+                            {(
+                                ["Review", "Risk signals", "History"] as const
+                            ).map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setDrawerTab(tab)}
@@ -525,7 +585,9 @@ const ReviewModerationComponent = () => {
                                 <div className="p-6 space-y-8">
                                     {/* FULL REVIEW */}
                                     <div className="space-y-3">
-                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Full Review</h3>
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+                                            Full Review
+                                        </h3>
                                         <div className="bg-page/50 rounded-lg p-4 font-medium text-text text-[14px] leading-relaxed whitespace-pre-wrap">
                                             {selectedReview.comment}
                                         </div>
@@ -533,58 +595,132 @@ const ReviewModerationComponent = () => {
 
                                     {/* REVIEW DETAILS */}
                                     <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Review Details</h3>
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+                                            Review Details
+                                        </h3>
                                         <div className="grid grid-cols-[140px_1fr] gap-y-3 text-[14px]">
-                                            <span className="text-muted">Reviewer</span>
-                                            <span className="text-text">{selectedReview.reviewerName || "Anonymous"}</span>
+                                            <span className="text-muted">
+                                                Reviewer
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.reviewerName ||
+                                                    "Anonymous"}
+                                            </span>
 
-                                            <span className="text-muted">Email</span>
-                                            <span className="text-text">{selectedReview.reviewerEmail || "—"}</span>
+                                            <span className="text-muted">
+                                                Email
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.reviewerEmail ||
+                                                    "—"}
+                                            </span>
 
-                                            <span className="text-muted">Account created</span>
-                                            <span className="text-text">{selectedReview.accountCreated || "—"}</span>
+                                            <span className="text-muted">
+                                                Account created
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.accountCreated ||
+                                                    "—"}
+                                            </span>
 
-                                            <span className="text-muted">Reviews submitted</span>
-                                            <span className="text-text">{selectedReview.reviewsSubmitted ?? "—"}</span>
+                                            <span className="text-muted">
+                                                Reviews submitted
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.reviewsSubmitted ??
+                                                    "—"}
+                                            </span>
 
-                                            <span className="text-muted">Agent reviewed</span>
-                                            <span className="text-text">{selectedReview.agentName}</span>
+                                            <span className="text-muted">
+                                                Agent reviewed
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agentName}
+                                            </span>
 
-                                            <span className="text-muted">Agency</span>
-                                            <span className="text-text">{selectedReview.agencyName}</span>
+                                            <span className="text-muted">
+                                                Agency
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agencyName}
+                                            </span>
 
-                                            <span className="text-muted">Property</span>
-                                            <span className="text-text">{selectedReview.property || "—"}</span>
+                                            <span className="text-muted">
+                                                Property
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.property || "—"}
+                                            </span>
 
-                                            <span className="text-muted">Rating</span>
-                                            <span className="text-text flex items-center h-[20px]">{renderStars(selectedReview.rating, 14)}</span>
+                                            <span className="text-muted">
+                                                Rating
+                                            </span>
+                                            <span className="text-text flex items-center h-[20px]">
+                                                {renderStars(
+                                                    selectedReview.rating,
+                                                    14,
+                                                )}
+                                            </span>
 
-                                            <span className="text-muted">Submitted from IP</span>
-                                            <span className="text-text">{selectedReview.ip || "—"}</span>
+                                            <span className="text-muted">
+                                                Submitted from IP
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.ip || "—"}
+                                            </span>
 
-                                            <span className="text-muted">Device</span>
-                                            <span className="text-text">{selectedReview.device || "—"}</span>
+                                            <span className="text-muted">
+                                                Device
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.device || "—"}
+                                            </span>
                                         </div>
                                     </div>
 
                                     {/* AGENT INFO */}
                                     <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Agent Info</h3>
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+                                            Agent Info
+                                        </h3>
                                         <div className="grid grid-cols-[140px_1fr] gap-y-3 text-[14px]">
-                                            <span className="text-muted">Agent name</span>
-                                            <span className="text-text">{selectedReview.agentName}</span>
+                                            <span className="text-muted">
+                                                Agent name
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agentName}
+                                            </span>
 
-                                            <span className="text-muted">Agency</span>
-                                            <span className="text-text">{selectedReview.agencyName}</span>
+                                            <span className="text-muted">
+                                                Agency
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agencyName}
+                                            </span>
 
-                                            <span className="text-muted">Approved reviews</span>
-                                            <span className="text-text">{selectedReview.agentApprovedReviews ?? "—"}</span>
+                                            <span className="text-muted">
+                                                Approved reviews
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agentApprovedReviews ??
+                                                    "—"}
+                                            </span>
 
-                                            <span className="text-muted">Average rating</span>
-                                            <span className="text-text">{selectedReview.agentAverageRating ?? "—"}</span>
+                                            <span className="text-muted">
+                                                Average rating
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.agentAverageRating ??
+                                                    "—"}
+                                            </span>
 
-                                            <span className="text-muted">Previous from reviewer</span>
-                                            <span className="text-text">{selectedReview.previousFromReviewer || "—"}</span>
+                                            <span className="text-muted">
+                                                Previous from reviewer
+                                            </span>
+                                            <span className="text-text">
+                                                {selectedReview.previousFromReviewer ||
+                                                    "—"}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -592,39 +728,67 @@ const ReviewModerationComponent = () => {
 
                             {drawerTab === "Risk signals" && (
                                 <div className="p-6 space-y-6">
-                                    <h3 className="text-[15px] font-bold text-text">Automated risk assessment</h3>
-                                    
+                                    <h3 className="text-[15px] font-bold text-text">
+                                        Automated risk assessment
+                                    </h3>
+
                                     <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
-                                        {selectedReview.riskSignals?.map((signal, idx) => (
-                                            <div key={idx} className="p-4 flex items-start gap-3 bg-card">
-                                                {signal.isSafe ? (
-                                                    <div className="text-success mt-0.5 shrink-0 border border-success rounded-full p-0.5"><Check size={12} strokeWidth={3} /></div>
-                                                ) : (
-                                                    <div className="text-danger mt-0.5 shrink-0"><AlertTriangle size={16} /></div>
-                                                )}
-                                                <div>
-                                                    <p className="text-[14px] font-semibold text-text">{signal.title}</p>
-                                                    <p className="text-[13px] text-muted mt-0.5">{signal.description}</p>
+                                        {selectedReview.riskSignals?.map(
+                                            (signal, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="p-4 flex items-start gap-3 bg-card"
+                                                >
+                                                    {signal.isSafe ? (
+                                                        <div className="text-success mt-0.5 shrink-0 border border-success rounded-full p-0.5">
+                                                            <Check
+                                                                size={12}
+                                                                strokeWidth={3}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-danger mt-0.5 shrink-0">
+                                                            <AlertTriangle
+                                                                size={16}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="text-[14px] font-semibold text-text">
+                                                            {signal.title}
+                                                        </p>
+                                                        <p className="text-[13px] text-muted mt-0.5">
+                                                            {signal.description}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                         {!selectedReview.riskSignals && (
-                                            <div className="p-4 text-[14px] text-muted text-center">No risk signals data available.</div>
+                                            <div className="p-4 text-[14px] text-muted text-center">
+                                                No risk signals data available.
+                                            </div>
                                         )}
                                     </div>
 
                                     {selectedReview.hasRisk ? (
                                         <div className="bg-rose-50/50 border border-rose-200 rounded-lg p-4">
-                                            <h4 className="text-[14px] font-bold text-danger">High risk</h4>
+                                            <h4 className="text-[14px] font-bold text-danger">
+                                                High risk
+                                            </h4>
                                             <p className="text-[14px] text-rose-800 leading-relaxed font-medium mt-1">
                                                 {selectedReview.riskReason}
                                             </p>
                                         </div>
                                     ) : (
                                         <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-                                            <h4 className="text-[14px] font-bold text-success">Low risk</h4>
+                                            <h4 className="text-[14px] font-bold text-success">
+                                                Low risk
+                                            </h4>
                                             <p className="text-[14px] text-success/90 leading-relaxed font-medium mt-1">
-                                                No automated concerns detected. Human review recommended before approving all reviews.
+                                                No automated concerns detected.
+                                                Human review recommended before
+                                                approving all reviews.
                                             </p>
                                         </div>
                                     )}
@@ -641,25 +805,41 @@ const ReviewModerationComponent = () => {
                         {/* Drawer Footer Actions */}
                         <div className="p-6 border-t border-border bg-card shrink-0 space-y-3">
                             <button
-                                onClick={() => setActionModal({ type: "Approve", review: selectedReview })}
+                                onClick={() =>
+                                    setActionModal({
+                                        type: "Approve",
+                                        review: selectedReview,
+                                    })
+                                }
                                 className="w-full py-2.5 bg-success text-card rounded text-[15px] font-bold hover:bg-success/90 transition-colors"
                             >
                                 Approve & publish
                             </button>
-                            
+
                             <button
-                                onClick={() => setActionModal({ type: "Reject", review: selectedReview })}
+                                onClick={() =>
+                                    setActionModal({
+                                        type: "Reject",
+                                        review: selectedReview,
+                                    })
+                                }
                                 className="w-full py-2.5 bg-card border border-border text-text rounded text-[15px] font-bold hover:bg-page transition-colors"
                             >
                                 Reject review
                             </button>
-                            
+
                             <button
                                 onClick={() => {
-                                    updateReviewStatus(selectedReview.id, "Flagged for legal");
+                                    updateReviewStatus(
+                                        selectedReview.id,
+                                        "Flagged for legal",
+                                    );
                                     setSelectedReview(null);
                                     setDrawerTab("Review");
-                                    showToast("Flagged for legal", "Review has been flagged for legal review.");
+                                    showToast(
+                                        "Flagged for legal",
+                                        "Review has been flagged for legal review.",
+                                    );
                                 }}
                                 className="w-full py-2.5 text-danger rounded text-[15px] font-normal hover:bg-rose-50/50 transition-colors"
                             >
@@ -677,9 +857,15 @@ const ReviewModerationComponent = () => {
                         {actionModal.type === "Approve" ? (
                             <>
                                 <div className="p-6 space-y-3">
-                                    <h3 className="text-[17px] font-bold text-text">Publish this review?</h3>
+                                    <h3 className="text-[17px] font-bold text-text">
+                                        Publish this review?
+                                    </h3>
                                     <p className="text-[14px] text-muted">
-                                        It will appear publicly on <span className="font-semibold text-text">{actionModal.review.agentName}</span>'s profile.
+                                        It will appear publicly on{" "}
+                                        <span className="font-semibold text-text">
+                                            {actionModal.review.agentName}
+                                        </span>
+                                        's profile.
                                     </p>
                                 </div>
                                 <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
@@ -691,11 +877,17 @@ const ReviewModerationComponent = () => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            updateReviewStatus(actionModal.review.id, "Approved");
+                                            updateReviewStatus(
+                                                actionModal.review.id,
+                                                "Approved",
+                                            );
                                             setActionModal(null);
                                             setSelectedReview(null);
                                             setDrawerTab("Review");
-                                            showToast("Review Approved", "Review published successfully.");
+                                            showToast(
+                                                "Review Approved",
+                                                "Review published successfully.",
+                                            );
                                         }}
                                         className="px-4 py-2 bg-success text-card rounded text-[14px] font-bold hover:bg-success/90 transition-colors"
                                     >
@@ -706,37 +898,59 @@ const ReviewModerationComponent = () => {
                         ) : (
                             <>
                                 <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                                    <h3 className="text-[17px] font-bold text-text">Reject review</h3>
-                                    <button onClick={() => setActionModal(null)} className="text-muted hover:text-text">
+                                    <h3 className="text-[17px] font-bold text-text">
+                                        Reject review
+                                    </h3>
+                                    <button
+                                        onClick={() => setActionModal(null)}
+                                        className="text-muted hover:text-text"
+                                    >
                                         <X size={20} />
                                     </button>
                                 </div>
                                 <div className="p-6 space-y-4">
                                     <p className="text-[14px] text-muted">
-                                        Rejecting review by {actionModal.review.reviewerName || "Anonymous"} for {actionModal.review.agentName}.
+                                        Rejecting review by{" "}
+                                        {actionModal.review.reviewerName ||
+                                            "Anonymous"}{" "}
+                                        for {actionModal.review.agentName}.
                                     </p>
-                                    
+
                                     <div className="space-y-1.5">
-                                        <label className="text-[14px] text-muted font-medium">Reason</label>
+                                        <label className="text-[14px] text-muted font-medium">
+                                            Reason
+                                        </label>
                                         <select className="w-full border border-border bg-card rounded px-3 py-2 text-[14px] text-text focus:outline-none focus:border-accent">
                                             <option>Spam or fake review</option>
-                                            <option>Inappropriate language</option>
-                                            <option>Conflict of interest</option>
+                                            <option>
+                                                Inappropriate language
+                                            </option>
+                                            <option>
+                                                Conflict of interest
+                                            </option>
                                             <option>Defamation risk</option>
                                         </select>
                                     </div>
-                                    
+
                                     <div className="space-y-1.5">
-                                        <label className="text-[14px] text-muted font-medium">Notes (optional)</label>
-                                        <textarea 
-                                            rows={3} 
+                                        <label className="text-[14px] text-muted font-medium">
+                                            Notes (optional)
+                                        </label>
+                                        <textarea
+                                            rows={3}
                                             className="w-full border border-border bg-card rounded px-3 py-2 text-[14px] text-text focus:outline-none focus:border-accent resize-none"
                                         ></textarea>
                                     </div>
-                                    
+
                                     <label className="flex items-center gap-2 cursor-pointer mt-4">
-                                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-border accent-accent" />
-                                        <span className="text-[14px] text-text">Send rejection notice to reviewer</span>
+                                        <input
+                                            type="checkbox"
+                                            defaultChecked
+                                            className="w-4 h-4 rounded border-border accent-accent"
+                                        />
+                                        <span className="text-[14px] text-text">
+                                            Send rejection notice to reviewer
+                                        </span>
                                     </label>
                                 </div>
                                 <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
@@ -748,11 +962,17 @@ const ReviewModerationComponent = () => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            updateReviewStatus(actionModal.review.id, "Rejected");
+                                            updateReviewStatus(
+                                                actionModal.review.id,
+                                                "Rejected",
+                                            );
                                             setActionModal(null);
                                             setSelectedReview(null);
                                             setDrawerTab("Review");
-                                            showToast("Review Rejected", "Review has been rejected.");
+                                            showToast(
+                                                "Review Rejected",
+                                                "Review has been rejected.",
+                                            );
                                         }}
                                         className="px-4 py-2 bg-danger text-card rounded text-[14px] font-bold hover:bg-rose-600 transition-colors"
                                     >
@@ -771,7 +991,9 @@ const ReviewModerationComponent = () => {
                 title={toast.title}
                 message={toast.message}
                 type={toast.type}
-                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+                onClose={() =>
+                    setToast((prev) => ({ ...prev, visible: false }))
+                }
             />
         </div>
     );
