@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import {
     LayoutDashboard,
     Plug,
@@ -63,7 +65,7 @@ const sidebarConfig: SidebarGroupType[] = [
     {
         label: 'MODERATION',
         items: [
-            { title: 'Review Moderation', icon: MessageSquare, path: '/review-moderation', badge: 12, badgeColor: 'gray' },
+            { title: 'Review Moderation', icon: MessageSquare, path: '/moderation/reviews', badge: 12, badgeColor: 'gray' },
             { title: 'Listing Moderation', icon: Flag, soon: true, badge: 3, badgeColor: 'gray' },
             { title: 'Listing Corrections', icon: FileEdit, soon: true, badge: 7, badgeColor: 'gray' },
         ],
@@ -104,6 +106,15 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     const router = useRouterState();
     const currentPath = router.location.pathname;
 
+    const { data: reviews = [] } = useQuery<any[]>({
+        queryKey: ["reviews"],
+        queryFn: async () => {
+            const response = await axios.get("/data/reviews.json");
+            return response.data;
+        },
+    });
+    const pendingReviewsCount = reviews.filter((r: any) => r.status === 'Pending').length;
+
     return (
         <div className="xl:w-[300px] lg:w-[200px] h-screen bg-card border-r border-border flex flex-col">
             <div className="h-[64px] flex items-center justify-between px-5 border-b border-border/50 shrink-0">
@@ -132,6 +143,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                 const Icon = item.icon;
                                 const isSoon = item.soon;
                                 const isActive = currentPath === item.path;
+                                const displayBadge = item.path === '/moderation/reviews' ? pendingReviewsCount : item.badge;
 
                                 const innerContent = (
                                     <>
@@ -146,12 +158,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                                                     Soon
                                                 </span>
                                             )}
-                                            {item.badge && (
+                                            {displayBadge !== undefined && displayBadge !== null && (typeof displayBadge === 'number' ? displayBadge > 0 : displayBadge !== '') && (
                                                 <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-medium rounded-full ${item.badgeColor === 'yellow'
                                                         ? 'bg-warning/10 text-warning'
                                                         : 'bg-muted/10 text-muted'
                                                     }`}>
-                                                    {item.badge}
+                                                    {displayBadge}
                                                 </span>
                                             )}
                                         </div>

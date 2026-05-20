@@ -118,9 +118,7 @@
         "joined": "01 Aug 2025",
         "lastLogin": "Never",
         "status": "Pending",
-        "activities": [
-            { "event": "Account created", "time": "01 Aug 2025" }
-        ]
+        "activities": [{ "event": "Account created", "time": "01 Aug 2025" }]
     },
     {
         "id": "8",

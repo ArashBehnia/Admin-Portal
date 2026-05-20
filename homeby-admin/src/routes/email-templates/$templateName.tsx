@@ -8,7 +8,7 @@ import {
     ArrowLeft,
     Monitor,
     Smartphone,
-    Loader2
+    Loader2,
 } from "lucide-react";
 
 // Types for Template Editor
@@ -35,20 +35,28 @@ const RouteComponent = () => {
     });
 
     const currentTemplate = useMemo(() => {
-        return templates.find((t) => t.name === templateName) || {
-            name: templateName,
-            category: "Auth",
-            status: "Active"
-        };
+        return (
+            templates.find((t) => t.name === templateName) || {
+                name: templateName,
+                category: "Auth",
+                status: "Active",
+            }
+        );
     }, [templates, templateName]);
 
     // Nav & Active states
-    const [activeTab, setActiveTab] = useState<"Email" | "SMS" | "Push">("Email");
+    const [activeTab, setActiveTab] = useState<"Email" | "SMS" | "Push">(
+        "Email",
+    );
     const [isActiveStatus, setIsActiveStatus] = useState(true);
-    const [previewMode, setPreviewMode] = useState<"Desktop" | "Mobile">("Desktop");
+    const [previewMode, setPreviewMode] = useState<"Desktop" | "Mobile">(
+        "Desktop",
+    );
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-    const [testEmailAddress, setTestEmailAddress] = useState("james@raywhitebondi.com.au");
+    const [testEmailAddress, setTestEmailAddress] = useState(
+        "james@raywhitebondi.com.au",
+    );
 
     // Core Form Fields
     const [fromName, setFromName] = useState("HomeBy Team");
@@ -111,7 +119,7 @@ The HomeBy Team`);
     useEffect(() => {
         if (toast.visible) {
             const timer = setTimeout(() => {
-                setToast(prev => ({ ...prev, visible: false }));
+                setToast((prev) => ({ ...prev, visible: false }));
             }, 4000);
             return () => clearTimeout(timer);
         }
@@ -125,8 +133,7 @@ The HomeBy Team`);
             date: "1 May 2026",
             changes: "Added temp password expiry notice",
             subject: "Welcome to HomeBy — Your agency account is ready",
-            body:
-                `Hi {{contact_name}},
+            body: `Hi {{contact_name}},
 
 Welcome to HomeBy! Your agency account for {{agency_name}} has been approved and is ready to use.
 
@@ -146,7 +153,7 @@ If you need help getting started, contact us at {{support_email}}.
 
 Welcome aboard,
 The HomeBy Team`,
-            isActive: true
+            isActive: true,
         },
         {
             version: "v2",
@@ -154,8 +161,7 @@ The HomeBy Team`,
             date: "15 Mar 2026",
             changes: "Updated login URL",
             subject: "Welcome to HomeBy! Account Approved",
-            body:
-                `Hi {{contact_name}},
+            body: `Hi {{contact_name}},
 
 Your agency account for {{agency_name}} is now approved.
 
@@ -164,7 +170,7 @@ Password: {{temp_password}}
 
 Regards,
 HomeBy Team`,
-            isActive: false
+            isActive: false,
         },
         {
             version: "v1",
@@ -172,16 +178,15 @@ HomeBy Team`,
             date: "1 Jan 2026",
             changes: "Initial template",
             subject: "HomeBy Agent Account Setup",
-            body:
-                `Hi {{contact_name}},
+            body: `Hi {{contact_name}},
 
 This is the initial setup email for your agency {{agency_name}}.
 Your password is {{temp_password}}.
 
 Thanks,
 HomeBy`,
-            isActive: false
-        }
+            isActive: false,
+        },
     ]);
 
     // Available variables list to inject
@@ -191,7 +196,7 @@ HomeBy`,
         "{{temp_password}}",
         "{{login_url}}",
         "{{support_email}}",
-        "{{expiry_hours}}"
+        "{{expiry_hours}}",
     ];
 
     // Click to insert variable at caret cursor position
@@ -201,18 +206,24 @@ HomeBy`,
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const currentVal = textarea.value;
-            const updatedVal = currentVal.substring(0, start) + token + currentVal.substring(end);
+            const updatedVal =
+                currentVal.substring(0, start) +
+                token +
+                currentVal.substring(end);
 
             setBodyText(updatedVal);
 
             // Re-focus and set caret after insertion
             setTimeout(() => {
                 textarea.focus();
-                textarea.setSelectionRange(start + token.length, start + token.length);
+                textarea.setSelectionRange(
+                    start + token.length,
+                    start + token.length,
+                );
             }, 0);
         } else {
             // Fallback if textarea is not loaded/selected
-            setBodyText(prev => prev + " " + token);
+            setBodyText((prev) => prev + " " + token);
         }
     };
 
@@ -240,9 +251,9 @@ HomeBy`,
         setBodyText(verItem.body);
 
         // Update current version state in log list
-        const updatedHistory = versionHistory.map(v => ({
+        const updatedHistory = versionHistory.map((v) => ({
             ...v,
-            isActive: v.version === verItem.version
+            isActive: v.version === verItem.version,
         }));
         setVersionHistory(updatedHistory);
 
@@ -250,7 +261,7 @@ HomeBy`,
             title: "Version Restored",
             message: `Successfully loaded content configurations from ${verItem.version}.`,
             type: "success",
-            visible: true
+            visible: true,
         });
     };
 
@@ -263,7 +274,7 @@ HomeBy`,
                 title: "Template Saved",
                 message: `${templateName} configuration has been successfully updated.`,
                 type: "success",
-                visible: true
+                visible: true,
             });
         }, 1200);
     };
@@ -278,18 +289,20 @@ HomeBy`,
                 title: "Test Email Sent",
                 message: `Test ${templateName} email dispatched to ${emailAddress}.`,
                 type: "success",
-                visible: true
+                visible: true,
             });
         }, 1000);
     };
 
     return (
         <div className="max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">
-
             {/* Breadcrumb Header Row */}
             <div className="flex flex-col gap-1.5 mb-6">
                 <div className="flex items-center gap-1.5 text-xs text-muted font-semibold tracking-wide uppercase select-none">
-                    <Link to="/email-templates" className="hover:text-text flex items-center gap-1 transition-colors">
+                    <Link
+                        to="/email-templates"
+                        className="hover:text-text flex items-center gap-1 transition-colors"
+                    >
                         <ArrowLeft size={12} strokeWidth={3} />
                         Email Templates
                     </Link>
@@ -311,15 +324,28 @@ HomeBy`,
                             </span>
                             <button
                                 type="button"
-                                onClick={() => setIsActiveStatus(!isActiveStatus)}
-                                className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer flex items-center ${isActiveStatus ? "bg-success" : "bg-border"
-                                    }`}
+                                onClick={() =>
+                                    setIsActiveStatus(!isActiveStatus)
+                                }
+                                className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer flex items-center ${
+                                    isActiveStatus ? "bg-success" : "bg-border"
+                                }`}
                             >
-                                <span className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${isActiveStatus ? "translate-x-5" : "translate-x-0"
-                                    }`} />
+                                <span
+                                    className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
+                                        isActiveStatus
+                                            ? "translate-x-5"
+                                            : "translate-x-0"
+                                    }`}
+                                />
                             </button>
-                            <span className={`text-xs font-bold font-sans ${isActiveStatus ? "text-success" : "text-muted"
-                                }`}>
+                            <span
+                                className={`text-xs font-bold font-sans ${
+                                    isActiveStatus
+                                        ? "text-success"
+                                        : "text-muted"
+                                }`}
+                            >
                                 {isActiveStatus ? "Active" : "Inactive"}
                             </span>
                         </div>
@@ -345,8 +371,11 @@ HomeBy`,
             <div className="flex border-b border-border mb-6">
                 <button
                     onClick={() => setActiveTab("Email")}
-                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${activeTab === "Email" ? "text-accent" : "text-muted hover:text-text"
-                        }`}
+                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${
+                        activeTab === "Email"
+                            ? "text-accent"
+                            : "text-muted hover:text-text"
+                    }`}
                 >
                     Email
                     {activeTab === "Email" && (
@@ -355,8 +384,11 @@ HomeBy`,
                 </button>
                 <button
                     onClick={() => setActiveTab("SMS")}
-                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${activeTab === "SMS" ? "text-accent" : "text-muted hover:text-text"
-                        }`}
+                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${
+                        activeTab === "SMS"
+                            ? "text-accent"
+                            : "text-muted hover:text-text"
+                    }`}
                 >
                     SMS
                     {activeTab === "SMS" && (
@@ -365,8 +397,11 @@ HomeBy`,
                 </button>
                 <button
                     onClick={() => setActiveTab("Push")}
-                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${activeTab === "Push" ? "text-accent" : "text-muted hover:text-text"
-                        }`}
+                    className={`flex items-center px-5 py-3 text-xs font-bold tracking-wide transition-all relative cursor-pointer ${
+                        activeTab === "Push"
+                            ? "text-accent"
+                            : "text-muted hover:text-text"
+                    }`}
                 >
                     Push Notification
                     {activeTab === "Push" && (
@@ -377,10 +412,8 @@ HomeBy`,
 
             {/* Split Screen Panel Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
                 {/* LEFT COLUMN: EDITOR FORM FIELDS (7/12) */}
                 <div className="lg:col-span-7 flex flex-col gap-5">
-
                     {/* Meta Fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Template name */}
@@ -402,15 +435,19 @@ HomeBy`,
                                 Category
                             </label>
                             <div>
-                                <span className={`inline-block px-3 py-2 border font-bold rounded text-xs font-sans ${
-                                    currentTemplate.category === "Auth"
-                                        ? "bg-blue-50 border-blue-100 text-blue-700"
-                                        : currentTemplate.category === "Account"
-                                        ? "bg-emerald-50 border-emerald-100 text-emerald-700"
-                                        : currentTemplate.category === "Agency"
-                                        ? "bg-purple-50 border-purple-100 text-purple-700"
-                                        : "bg-slate-50 border-slate-200 text-slate-700"
-                                }`}>
+                                <span
+                                    className={`inline-block px-3 py-2 border font-bold rounded text-xs font-sans ${
+                                        currentTemplate.category === "Auth"
+                                            ? "bg-blue-50 border-blue-100 text-blue-700"
+                                            : currentTemplate.category ===
+                                                "Account"
+                                              ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                                              : currentTemplate.category ===
+                                                  "Agency"
+                                                ? "bg-purple-50 border-purple-100 text-purple-700"
+                                                : "bg-slate-50 border-slate-200 text-slate-700"
+                                    }`}
+                                >
                                     {currentTemplate.category}
                                 </span>
                             </div>
@@ -457,7 +494,11 @@ HomeBy`,
                             type="text"
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
-                            placeholder={activeTab === "Email" ? "Email Subject Line" : "Title text"}
+                            placeholder={
+                                activeTab === "Email"
+                                    ? "Email Subject Line"
+                                    : "Title text"
+                            }
                             className="px-3 py-2 border border-border bg-white text-text rounded text-xs font-medium focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-colors font-sans w-full"
                         />
                     </div>
@@ -537,31 +578,31 @@ HomeBy`,
                             <button
                                 type="button"
                                 onClick={() => setSmsProvider("Twilio")}
-                                className={`px-4 py-2 rounded text-xs font-bold font-sans transition-colors cursor-pointer shadow-sm border ${smsProvider === "Twilio"
-                                    ? "bg-text text-white border-text"
-                                    : "bg-white border-border text-muted hover:text-text hover:bg-page"
-                                    }`}
+                                className={`px-4 py-2 rounded text-xs font-bold font-sans transition-colors cursor-pointer shadow-sm border ${
+                                    smsProvider === "Twilio"
+                                        ? "bg-text text-white border-text"
+                                        : "bg-white border-border text-muted hover:text-text hover:bg-page"
+                                }`}
                             >
                                 Twilio
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setSmsProvider("GAMA")}
-                                className={`px-4 py-2 rounded text-xs font-bold font-sans transition-colors cursor-pointer shadow-sm border ${smsProvider === "GAMA"
-                                    ? "bg-text text-white border-text"
-                                    : "bg-white border-border text-muted hover:text-text hover:bg-page"
-                                    }`}
+                                className={`px-4 py-2 rounded text-xs font-bold font-sans transition-colors cursor-pointer shadow-sm border ${
+                                    smsProvider === "GAMA"
+                                        ? "bg-text text-white border-text"
+                                        : "bg-white border-border text-muted hover:text-text hover:bg-page"
+                                }`}
                             >
                                 GAMA
                             </button>
                         </div>
                     </div>
-
                 </div>
 
                 {/* RIGHT COLUMN: LIVE REAL-TIME PREVIEW PANEL (5/12) */}
                 <div className="lg:col-span-5 flex flex-col gap-4">
-
                     {/* Preview Panel Header Controls */}
                     <div className="flex flex-wrap justify-between items-center gap-3 select-none">
                         <h3 className="font-bold text-[14px] text-text font-sans">
@@ -574,10 +615,11 @@ HomeBy`,
                                 <button
                                     type="button"
                                     onClick={() => setPreviewMode("Desktop")}
-                                    className={`px-3 py-1.5 rounded-sm text-xs font-bold font-sans flex items-center gap-1 cursor-pointer transition-colors ${previewMode === "Desktop"
-                                        ? "bg-text text-white"
-                                        : "text-muted hover:text-text bg-transparent"
-                                        }`}
+                                    className={`px-3 py-1.5 rounded-sm text-xs font-bold font-sans flex items-center gap-1 cursor-pointer transition-colors ${
+                                        previewMode === "Desktop"
+                                            ? "bg-text text-white"
+                                            : "text-muted hover:text-text bg-transparent"
+                                    }`}
                                 >
                                     <Monitor size={12} />
                                     Desktop
@@ -585,10 +627,11 @@ HomeBy`,
                                 <button
                                     type="button"
                                     onClick={() => setPreviewMode("Mobile")}
-                                    className={`px-3 py-1.5 rounded-sm text-xs font-bold font-sans flex items-center gap-1 cursor-pointer transition-colors ${previewMode === "Mobile"
-                                        ? "bg-text text-white"
-                                        : "text-muted hover:text-text bg-transparent"
-                                        }`}
+                                    className={`px-3 py-1.5 rounded-sm text-xs font-bold font-sans flex items-center gap-1 cursor-pointer transition-colors ${
+                                        previewMode === "Mobile"
+                                            ? "bg-text text-white"
+                                            : "text-muted hover:text-text bg-transparent"
+                                    }`}
                                 >
                                     <Smartphone size={12} />
                                     Mobile
@@ -608,21 +651,35 @@ HomeBy`,
 
                     {/* PREVIEW CONTAINER */}
                     <div className="w-full rounded-lg p-5 flex justify-center items-start min-h-[460px]">
-
-                        <div className={`bg-white w-full rounded border border-slate-200 shadow-md p-6 flex flex-col font-sans transition-all duration-300 text-xs ${previewMode === "Mobile" ? "max-w-[340px]" : "max-w-full"
-                            }`}>
+                        <div
+                            className={`bg-white w-full rounded border border-slate-200 shadow-md p-6 flex flex-col font-sans transition-all duration-300 text-xs ${
+                                previewMode === "Mobile"
+                                    ? "max-w-[340px]"
+                                    : "max-w-full"
+                            }`}
+                        >
                             <div className="flex flex-col gap-1 text-[13px] text-muted pb-4 border-b border-slate-100 font-sans">
                                 <div>
-                                    <span className="font-bold text-slate-800">From:</span> {fromName} &lt;{fromEmail}&gt;
+                                    <span className="font-bold text-slate-800">
+                                        From:
+                                    </span>{" "}
+                                    {fromName} &lt;{fromEmail}&gt;
                                 </div>
                                 <div>
-                                    <span className="font-bold text-slate-800">To:</span> james@raywhitebondi.com.au
+                                    <span className="font-bold text-slate-800">
+                                        To:
+                                    </span>{" "}
+                                    james@raywhitebondi.com.au
                                 </div>
                                 <div className="mt-0.5">
                                     <span className="font-bold text-slate-800">
-                                        {activeTab === "Email" ? "Subject:" : "Title:"}
+                                        {activeTab === "Email"
+                                            ? "Subject:"
+                                            : "Title:"}
                                     </span>{" "}
-                                    <span className="font-semibold text-text">{subject}</span>
+                                    <span className="font-semibold text-text">
+                                        {subject}
+                                    </span>
                                 </div>
                             </div>
 
@@ -631,16 +688,12 @@ HomeBy`,
                                 {compileTemplate(bodyText)}
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
             {/* VERSION HISTORY PANEL */}
             <div className="mt-12 bg-card border border-border rounded-lg shadow-sm overflow-hidden select-none">
-
                 {/* Panel Header */}
                 <div
                     onClick={() => setIsHistoryOpen(!isHistoryOpen)}
@@ -664,15 +717,20 @@ HomeBy`,
                                     <th className="px-6 py-3">Modified by</th>
                                     <th className="px-6 py-3">Date</th>
                                     <th className="px-6 py-3">Changes</th>
-                                    <th className="px-6 py-3 text-right">Restore</th>
+                                    <th className="px-6 py-3 text-right">
+                                        Restore
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/60">
                                 {versionHistory.map((item) => (
                                     <tr
                                         key={item.version}
-                                        className={`hover:bg-page/20 transition-colors text-text ${item.isActive ? "bg-page/40 font-semibold" : ""
-                                            }`}
+                                        className={`hover:bg-page/20 transition-colors text-text ${
+                                            item.isActive
+                                                ? "bg-page/40 font-semibold"
+                                                : ""
+                                        }`}
                                     >
                                         <td className="px-6 py-3.5 font-bold">
                                             {item.version}
@@ -688,11 +746,17 @@ HomeBy`,
                                         </td>
                                         <td className="px-6 py-3.5 text-right font-bold font-sans">
                                             {item.isActive ? (
-                                                <span className="text-muted/50 cursor-default">Current</span>
+                                                <span className="text-muted/50 cursor-default">
+                                                    Current
+                                                </span>
                                             ) : (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleRestoreVersion(item)}
+                                                    onClick={() =>
+                                                        handleRestoreVersion(
+                                                            item,
+                                                        )
+                                                    }
                                                     className="text-accent hover:text-accent/80 hover:underline cursor-pointer"
                                                 >
                                                     Restore
@@ -711,14 +775,13 @@ HomeBy`,
             {isTestEmailModalOpen && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 select-none">
                     {/* Backdrop shadow overlay */}
-                    <div 
+                    <div
                         onClick={() => setIsTestEmailModalOpen(false)}
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                     />
 
                     {/* High-Fidelity Dialog Box */}
                     <div className="relative bg-white border border-border rounded-xl shadow-2xl w-full max-w-[400px] p-6 overflow-hidden animate-fade-in font-sans">
-
                         {/* Header */}
                         <div className="flex justify-between items-center pb-3 border-b border-border">
                             <h3 className="text-sm font-bold text-text uppercase tracking-wider">
@@ -741,7 +804,9 @@ HomeBy`,
                                 <input
                                     type="email"
                                     value={testEmailAddress}
-                                    onChange={(e) => setTestEmailAddress(e.target.value)}
+                                    onChange={(e) =>
+                                        setTestEmailAddress(e.target.value)
+                                    }
                                     placeholder="Enter your email address"
                                     className="px-3 py-2.5 border border-border bg-white text-text rounded text-xs font-semibold focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-colors font-sans w-full"
                                 />
@@ -764,11 +829,16 @@ HomeBy`,
                             <button
                                 type="button"
                                 onClick={() => handleSendTest(testEmailAddress)}
-                                disabled={isSendingTest || !testEmailAddress.trim()}
+                                disabled={
+                                    isSendingTest || !testEmailAddress.trim()
+                                }
                                 className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center gap-1.5 font-sans min-w-[100px] justify-center"
                             >
                                 {isSendingTest ? (
-                                    <Loader2 size={13} className="animate-spin" />
+                                    <Loader2
+                                        size={13}
+                                        className="animate-spin"
+                                    />
                                 ) : (
                                     "Send test"
                                 )}
@@ -795,18 +865,19 @@ HomeBy`,
                     </div>
 
                     <button
-                        onClick={() => setToast(prev => ({ ...prev, visible: false }))}
+                        onClick={() =>
+                            setToast((prev) => ({ ...prev, visible: false }))
+                        }
                         className="text-muted/80 hover:text-text p-0.5 rounded hover:bg-page transition-colors cursor-pointer"
                     >
                         <X size={14} strokeWidth={2.5} />
                     </button>
                 </div>
             )}
-
         </div>
     );
 };
 
 export const Route = createFileRoute("/email-templates/$templateName")({
-    component: RouteComponent
+    component: RouteComponent,
 });

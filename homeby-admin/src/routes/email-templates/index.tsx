@@ -16,10 +16,15 @@ type Template = {
 
 const RouteComponent = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<string>("All categories");
+    const [selectedCategory, setSelectedCategory] =
+        useState<string>("All categories");
 
     // Fetch Email Templates data using Axios & TanStack Query
-    const { data: templates = [], isLoading, isError } = useQuery<Template[]>({
+    const {
+        data: templates = [],
+        isLoading,
+        isError,
+    } = useQuery<Template[]>({
         queryKey: ["emailTemplatesData"],
         queryFn: async () => {
             const response = await axios.get("/data/email_templates.json");
@@ -35,7 +40,9 @@ const RouteComponent = () => {
     // Filter templates based on Search Query and Category
     const filteredTemplates = useMemo(() => {
         return templates.filter((t) => {
-            const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesSearch = t.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
             const matchesCategory =
                 selectedCategory === "All categories" ||
                 t.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -44,7 +51,15 @@ const RouteComponent = () => {
     }, [templates, searchQuery, selectedCategory]);
 
     // Distinct categories for dropdown list
-    const categories = ["All categories", "Auth", "Account", "Agency", "Reviews", "Billing", "System"];
+    const categories = [
+        "All categories",
+        "Auth",
+        "Account",
+        "Agency",
+        "Reviews",
+        "Billing",
+        "System",
+    ];
 
     // Render style helper for Category pill
     const getCategoryStyles = (category: string) => {
@@ -70,9 +85,12 @@ const RouteComponent = () => {
         <div className="max-w-content mx-auto">
             {/* Header */}
             <div className="my-6">
-                <h1 className="text-2xl font-bold text-text">Email Templates</h1>
+                <h1 className="text-2xl font-bold text-text">
+                    Email Templates
+                </h1>
                 <p className="text-sm text-muted mt-1">
-                    Manage all transactional email, SMS and push notification templates. Changes take effect immediately without a deploy.
+                    Manage all transactional email, SMS and push notification
+                    templates. Changes take effect immediately without a deploy.
                 </p>
             </div>
 
@@ -80,8 +98,12 @@ const RouteComponent = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 {/* Total Templates Card */}
                 <div className="bg-card border border-border rounded-lg p-5 shadow-sm space-y-1">
-                    <p className="text-xs text-muted font-medium">Total templates</p>
-                    <p className="text-3xl font-bold text-text">{isLoading ? "..." : totalCount}</p>
+                    <p className="text-xs text-muted font-medium">
+                        Total templates
+                    </p>
+                    <p className="text-3xl font-bold text-text">
+                        {isLoading ? "..." : totalCount}
+                    </p>
                 </div>
 
                 {/* Active Templates Card */}
@@ -90,7 +112,9 @@ const RouteComponent = () => {
                         <span className="w-2 h-2 rounded-full bg-success inline-block" />
                         Active
                     </p>
-                    <p className="text-3xl font-bold text-text">{isLoading ? "..." : activeCount}</p>
+                    <p className="text-3xl font-bold text-text">
+                        {isLoading ? "..." : activeCount}
+                    </p>
                 </div>
 
                 {/* Draft Templates Card */}
@@ -99,7 +123,9 @@ const RouteComponent = () => {
                         <span className="w-2 h-2 rounded-full bg-warning inline-block" />
                         Draft (not yet active)
                     </p>
-                    <p className="text-3xl font-bold text-text">{isLoading ? "..." : draftCount}</p>
+                    <p className="text-3xl font-bold text-text">
+                        {isLoading ? "..." : draftCount}
+                    </p>
                 </div>
             </div>
 
@@ -134,7 +160,8 @@ const RouteComponent = () => {
             {/* Error Message */}
             {isError && (
                 <div className="bg-red-50 border border-red-200 text-danger rounded-lg p-4 text-sm text-center mb-6">
-                    Failed to fetch email templates. Please refresh and try again.
+                    Failed to fetch email templates. Please refresh and try
+                    again.
                 </div>
             )}
 
@@ -143,7 +170,9 @@ const RouteComponent = () => {
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
                         <Loader2 className="h-8 w-8 text-accent animate-spin" />
-                        <span className="text-sm text-muted">Loading templates...</span>
+                        <span className="text-sm text-muted">
+                            Loading templates...
+                        </span>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -151,12 +180,22 @@ const RouteComponent = () => {
                             <thead>
                                 <tr className="border-b border-border/80 bg-page/50 text-[11px] text-muted font-bold tracking-wider uppercase">
                                     <th className="px-6 py-4">Template name</th>
-                                    <th className="px-6 py-4 hidden sm:table-cell">Category</th>
-                                    <th className="px-6 py-4 hidden md:table-cell">Channel</th>
-                                    <th className="px-6 py-4 hidden lg:table-cell">Last modified</th>
-                                    <th className="px-6 py-4 hidden lg:table-cell">Modified by</th>
+                                    <th className="px-6 py-4 hidden sm:table-cell">
+                                        Category
+                                    </th>
+                                    <th className="px-6 py-4 hidden md:table-cell">
+                                        Channel
+                                    </th>
+                                    <th className="px-6 py-4 hidden lg:table-cell">
+                                        Last modified
+                                    </th>
+                                    <th className="px-6 py-4 hidden lg:table-cell">
+                                        Modified by
+                                    </th>
                                     <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
+                                    <th className="px-6 py-4 text-right">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/60">
@@ -173,7 +212,9 @@ const RouteComponent = () => {
 
                                             {/* Category Tag */}
                                             <td className="px-6 py-4 hidden sm:table-cell">
-                                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getCategoryStyles(template.category)}`}>
+                                                <span
+                                                    className={`px-2 py-0.5 rounded text-xs font-semibold ${getCategoryStyles(template.category)}`}
+                                                >
                                                     {template.category}
                                                 </span>
                                             </td>
@@ -181,17 +222,21 @@ const RouteComponent = () => {
                                             {/* Channel Tag(s) */}
                                             <td className="px-6 py-4 hidden md:table-cell">
                                                 <div className="flex items-center gap-1.5">
-                                                    {template.channels.map((chan) => (
-                                                        <span
-                                                            key={chan}
-                                                            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${chan === "Email"
-                                                                    ? "bg-accent/10 text-accent"
-                                                                    : "bg-success/15 text-success"
+                                                    {template.channels.map(
+                                                        (chan) => (
+                                                            <span
+                                                                key={chan}
+                                                                className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                                                                    chan ===
+                                                                    "Email"
+                                                                        ? "bg-accent/10 text-accent"
+                                                                        : "bg-success/15 text-success"
                                                                 }`}
-                                                        >
-                                                            {chan}
-                                                        </span>
-                                                    ))}
+                                                            >
+                                                                {chan}
+                                                            </span>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </td>
 
@@ -208,10 +253,12 @@ const RouteComponent = () => {
                                             {/* Status Badge */}
                                             <td className="px-6 py-4">
                                                 <span
-                                                    className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded ${template.status === "Active"
+                                                    className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded ${
+                                                        template.status ===
+                                                        "Active"
                                                             ? "bg-success/10 text-success"
                                                             : "bg-warning/10 text-warning"
-                                                        }`}
+                                                    }`}
                                                 >
                                                     {template.status}
                                                 </span>
@@ -220,7 +267,10 @@ const RouteComponent = () => {
                                             <td className="px-6 py-4 text-right select-none">
                                                 <Link
                                                     to="/email-templates/$templateName"
-                                                    params={{ templateName: template.name }}
+                                                    params={{
+                                                        templateName:
+                                                            template.name,
+                                                    }}
                                                     className="text-accent hover:underline text-sm font-semibold transition-colors font-sans"
                                                 >
                                                     Edit
@@ -230,8 +280,12 @@ const RouteComponent = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-muted">
-                                            No templates match your search criteria.
+                                        <td
+                                            colSpan={7}
+                                            className="px-6 py-12 text-center text-sm text-muted"
+                                        >
+                                            No templates match your search
+                                            criteria.
                                         </td>
                                     </tr>
                                 )}

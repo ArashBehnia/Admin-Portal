@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as StaffRouteImport } from './routes/staff'
+import { Route as ModerationRouteImport } from './routes/moderation'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
@@ -22,6 +23,7 @@ import { Route as VendorsIndexRouteImport } from './routes/vendors/index'
 import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
 import { Route as VendorsIdRouteImport } from './routes/vendors/$id'
+import { Route as ModerationReviewsRouteImport } from './routes/moderation/reviews'
 import { Route as EmailTemplatesTemplateNameRouteImport } from './routes/email-templates/$templateName'
 import { Route as AgenciesIdRouteImport } from './routes/agencies/$id'
 
@@ -33,6 +35,11 @@ const UsersRoute = UsersRouteImport.update({
 const StaffRoute = StaffRouteImport.update({
   id: '/staff',
   path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModerationRoute = ModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -90,6 +97,11 @@ const VendorsIdRoute = VendorsIdRouteImport.update({
   path: '/vendors/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModerationReviewsRoute = ModerationReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => ModerationRoute,
+} as any)
 const EmailTemplatesTemplateNameRoute =
   EmailTemplatesTemplateNameRouteImport.update({
     id: '/$templateName',
@@ -110,10 +122,12 @@ export interface FileRoutesByFullPath {
   '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRouteWithChildren
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
+  '/moderation/reviews': typeof ModerationReviewsRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
@@ -126,10 +140,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRouteWithChildren
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
+  '/moderation/reviews': typeof ModerationReviewsRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies': typeof AgenciesIndexRoute
   '/email-templates': typeof EmailTemplatesIndexRoute
@@ -144,10 +160,12 @@ export interface FileRoutesById {
   '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRouteWithChildren
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
   '/email-templates/$templateName': typeof EmailTemplatesTemplateNameRoute
+  '/moderation/reviews': typeof ModerationReviewsRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
@@ -163,10 +181,12 @@ export interface FileRouteTypes {
     | '/email-templates'
     | '/integrations'
     | '/login'
+    | '/moderation'
     | '/staff'
     | '/users'
     | '/agencies/$id'
     | '/email-templates/$templateName'
+    | '/moderation/reviews'
     | '/vendors/$id'
     | '/agencies/'
     | '/email-templates/'
@@ -179,10 +199,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/integrations'
     | '/login'
+    | '/moderation'
     | '/staff'
     | '/users'
     | '/agencies/$id'
     | '/email-templates/$templateName'
+    | '/moderation/reviews'
     | '/vendors/$id'
     | '/agencies'
     | '/email-templates'
@@ -196,10 +218,12 @@ export interface FileRouteTypes {
     | '/email-templates'
     | '/integrations'
     | '/login'
+    | '/moderation'
     | '/staff'
     | '/users'
     | '/agencies/$id'
     | '/email-templates/$templateName'
+    | '/moderation/reviews'
     | '/vendors/$id'
     | '/agencies/'
     | '/email-templates/'
@@ -214,6 +238,7 @@ export interface RootRouteChildren {
   EmailTemplatesRoute: typeof EmailTemplatesRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRoute
   LoginRoute: typeof LoginRoute
+  ModerationRoute: typeof ModerationRouteWithChildren
   StaffRoute: typeof StaffRoute
   UsersRoute: typeof UsersRoute
   AgenciesIdRoute: typeof AgenciesIdRoute
@@ -236,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/staff'
       fullPath: '/staff'
       preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moderation': {
+      id: '/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof ModerationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -315,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/moderation/reviews': {
+      id: '/moderation/reviews'
+      path: '/reviews'
+      fullPath: '/moderation/reviews'
+      preLoaderRoute: typeof ModerationReviewsRouteImport
+      parentRoute: typeof ModerationRoute
+    }
     '/email-templates/$templateName': {
       id: '/email-templates/$templateName'
       path: '/$templateName'
@@ -346,6 +385,18 @@ const EmailTemplatesRouteWithChildren = EmailTemplatesRoute._addFileChildren(
   EmailTemplatesRouteChildren,
 )
 
+interface ModerationRouteChildren {
+  ModerationReviewsRoute: typeof ModerationReviewsRoute
+}
+
+const ModerationRouteChildren: ModerationRouteChildren = {
+  ModerationReviewsRoute: ModerationReviewsRoute,
+}
+
+const ModerationRouteWithChildren = ModerationRoute._addFileChildren(
+  ModerationRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
@@ -354,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailTemplatesRoute: EmailTemplatesRouteWithChildren,
   IntegrationsRoute: IntegrationsRoute,
   LoginRoute: LoginRoute,
+  ModerationRoute: ModerationRouteWithChildren,
   StaffRoute: StaffRoute,
   UsersRoute: UsersRoute,
   AgenciesIdRoute: AgenciesIdRoute,
