@@ -20,6 +20,7 @@ import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorsIndexRouteImport } from './routes/vendors/index'
+import { Route as ModerationIndexRouteImport } from './routes/moderation/index'
 import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates/index'
 import { Route as AgenciesIndexRouteImport } from './routes/agencies/index'
 import { Route as VendorsIdRouteImport } from './routes/vendors/$id'
@@ -82,6 +83,11 @@ const VendorsIndexRoute = VendorsIndexRouteImport.update({
   path: '/vendors/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModerationIndexRoute = ModerationIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ModerationRoute,
+} as any)
 const EmailTemplatesIndexRoute = EmailTemplatesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
+  '/moderation/': typeof ModerationIndexRoute
   '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -140,7 +147,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/integrations': typeof IntegrationsRoute
   '/login': typeof LoginRoute
-  '/moderation': typeof ModerationRouteWithChildren
   '/staff': typeof StaffRoute
   '/users': typeof UsersRoute
   '/agencies/$id': typeof AgenciesIdRoute
@@ -149,6 +155,7 @@ export interface FileRoutesByTo {
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies': typeof AgenciesIndexRoute
   '/email-templates': typeof EmailTemplatesIndexRoute
+  '/moderation': typeof ModerationIndexRoute
   '/vendors': typeof VendorsIndexRoute
 }
 export interface FileRoutesById {
@@ -169,6 +176,7 @@ export interface FileRoutesById {
   '/vendors/$id': typeof VendorsIdRoute
   '/agencies/': typeof AgenciesIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
+  '/moderation/': typeof ModerationIndexRoute
   '/vendors/': typeof VendorsIndexRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +198,7 @@ export interface FileRouteTypes {
     | '/vendors/$id'
     | '/agencies/'
     | '/email-templates/'
+    | '/moderation/'
     | '/vendors/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -199,7 +208,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/integrations'
     | '/login'
-    | '/moderation'
     | '/staff'
     | '/users'
     | '/agencies/$id'
@@ -208,6 +216,7 @@ export interface FileRouteTypes {
     | '/vendors/$id'
     | '/agencies'
     | '/email-templates'
+    | '/moderation'
     | '/vendors'
   id:
     | '__root__'
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/vendors/$id'
     | '/agencies/'
     | '/email-templates/'
+    | '/moderation/'
     | '/vendors/'
   fileRoutesById: FileRoutesById
 }
@@ -326,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/moderation/': {
+      id: '/moderation/'
+      path: '/'
+      fullPath: '/moderation/'
+      preLoaderRoute: typeof ModerationIndexRouteImport
+      parentRoute: typeof ModerationRoute
+    }
     '/email-templates/': {
       id: '/email-templates/'
       path: '/'
@@ -387,10 +404,12 @@ const EmailTemplatesRouteWithChildren = EmailTemplatesRoute._addFileChildren(
 
 interface ModerationRouteChildren {
   ModerationReviewsRoute: typeof ModerationReviewsRoute
+  ModerationIndexRoute: typeof ModerationIndexRoute
 }
 
 const ModerationRouteChildren: ModerationRouteChildren = {
   ModerationReviewsRoute: ModerationReviewsRoute,
+  ModerationIndexRoute: ModerationIndexRoute,
 }
 
 const ModerationRouteWithChildren = ModerationRoute._addFileChildren(
