@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { Toast } from "../../components/Toast";
 import {
     Search,
     Loader2,
@@ -9,25 +10,36 @@ import {
     AlertTriangle,
     X,
     Check,
-    Ban,
-    Flag,
-    ShieldAlert,
-    MessageSquare,
 } from "lucide-react";
 
 type ReviewStatus = "Pending" | "Approved" | "Rejected" | "Flagged for legal";
+
+type RiskSignal = {
+    title: string;
+    description: string;
+    isSafe: boolean;
+};
 
 type Review = {
     id: string;
     reviewerName: string;
     reviewerEmail: string;
+    accountCreated?: string;
+    reviewsSubmitted?: number;
     agentName: string;
     agencyName: string;
+    property?: string;
     rating: number;
     comment: string;
     submittedAt: string;
+    ip?: string;
+    device?: string;
+    agentApprovedReviews?: number;
+    agentAverageRating?: number;
+    previousFromReviewer?: string;
     hasRisk: boolean;
     riskReason: string;
+    riskSignals?: RiskSignal[];
     status: ReviewStatus;
 };
 
@@ -41,6 +53,26 @@ const ReviewModerationComponent = () => {
     
     // Modal State
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+    const [drawerTab, setDrawerTab] = useState<"Review" | "Risk signals" | "History">("Review");
+    
+    // Action Confirmation Modal State
+    const [actionModal, setActionModal] = useState<{
+        type: "Approve" | "Reject";
+        review: Review;
+    } | null>(null);
+    
+    // Toast State
+    const [toast, setToast] = useState<{
+        title: string;
+        message: string;
+        type: "success" | "info" | "error";
+        visible: boolean;
+    }>({ title: "Success", message: "", type: "success", visible: false });
+    
+    const showToast = (title: string, message: string) => {
+        setToast({ title, message, type: "success", visible: true });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+    };
 
     // Fetch Reviews from Axios + Tanstack Query
     const {
@@ -178,7 +210,7 @@ const ReviewModerationComponent = () => {
                 </div>
 
                 {/* Approved this month */}
-                <div className="bg-card border border-borderrounded shadow-sm p-5 flex flex-col justify-between">
+                <div className="bg-card border border-border rounded shadow-sm p-5 flex flex-col justify-between">
                     <div className="flex items-center gap-1.5 text-[13px] text-muted font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-success" />
                         <span>Approved this month</span>
@@ -429,146 +461,318 @@ const ReviewModerationComponent = () => {
                 )}
             </div>
 
-            {/* Detail Drawer / Modal */}
+            {/* Detail Drawer */}
             {selectedReview && (
-                <div className="fixed inset-0 bg-text/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-                    <div className="bg-card border border-border rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                        {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <MessageSquare className="text-accent" size={18} />
-                                <h2 className="text-base font-bold text-text">Review Moderation Details</h2>
-                            </div>
+                <>
+                    {/* Backdrop */}
+                    <div 
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity"
+                        onClick={() => {
+                            setSelectedReview(null);
+                            setDrawerTab("Review");
+                        }}
+                    />
+                    
+                    {/* Drawer */}
+                    <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card shadow-2xl flex flex-col z-[100] overflow-hidden border-l border-border transition-transform">
+                        {/* Drawer Header */}
+                        <div className="px-6 py-5 flex flex-col gap-3 relative shrink-0">
                             <button
-                                onClick={() => setSelectedReview(null)}
-                                className="text-muted hover:text-text transition-colors p-1"
+                                onClick={() => {
+                                    setSelectedReview(null);
+                                    setDrawerTab("Review");
+                                }}
+                                className="absolute top-4 right-4 text-muted hover:text-text transition-colors p-1"
                             >
                                 <X size={18} />
                             </button>
-                        </div>
 
-                        {/* Modal Content */}
-                        <div className="p-6 space-y-6 overflow-y-auto flex-1 text-sm">
-                            {/* Summary Columns */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-1">
-                                    <span className="text-xs font-bold text-muted uppercase tracking-wider">Reviewer</span>
-                                    <p className="font-bold text-text text-base">
-                                        {selectedReview.reviewerName || "Anonymous User"}
-                                    </p>
-                                    <p className="text-xs text-muted font-medium">
-                                        {selectedReview.reviewerEmail || "No email provided (Anonymous submission)"}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <span className="text-xs font-bold text-muted uppercase tracking-wider">Target Agent</span>
-                                    <p className="font-bold text-text text-base">
-                                        {selectedReview.agentName}
-                                    </p>
-                                    <p className="text-xs text-muted font-medium">
-                                        {selectedReview.agencyName}
-                                    </p>
-                                </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-text">{selectedReview.reviewerName || "Anonymous User"}</h2>
+                                <p className="text-[13px] text-muted mt-0.5">
+                                    {selectedReview.reviewerEmail || "No email"} &middot; Submitted {selectedReview.submittedAt}
+                                </p>
                             </div>
 
-                            {/* Rating and date row */}
-                            <div className="grid grid-cols-2 gap-6 border-t border-border pt-4">
-                                <div className="space-y-1">
-                                    <span className="text-xs font-bold text-muted uppercase tracking-wider">Rating</span>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        {renderStars(selectedReview.rating, 18)}
-                                        <span className="text-xs font-bold text-text">({selectedReview.rating} out of 5)</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <span className="text-xs font-bold text-muted uppercase tracking-wider">Submitted</span>
-                                    <p className="font-bold text-text/80 mt-0.5">
-                                        {selectedReview.submittedAt}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Full Comment */}
-                            <div className="border-t border-border pt-4 space-y-2">
-                                <span className="text-xs font-bold text-muted uppercase tracking-wider">Review Content</span>
-                                <div className="bg-page/50 border border-border/80 rounded-lg p-4 font-medium text-text text-sm leading-relaxed whitespace-pre-wrap">
-                                    "{selectedReview.comment}"
-                                </div>
-                            </div>
-
-                            {/* Defamation Risk Alert */}
-                            {selectedReview.hasRisk && (
-                                <div className="bg-rose-50/50 border border-rose-200 rounded-lg p-4 flex gap-3">
-                                    <ShieldAlert className="text-rose-500 shrink-0 mt-0.5" size={18} />
-                                    <div className="space-y-1">
-                                        <h4 className="text-xs font-bold text-danger uppercase tracking-wider">Flagged Risk Alert</h4>
-                                        <p className="text-xs text-rose-800 leading-relaxed font-medium">
-                                            {selectedReview.riskReason}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Current Moderation Status Banner */}
-                            <div className="flex items-center gap-3 border-t border-border pt-4">
-                                <span className="text-xs font-bold text-muted uppercase tracking-wider">Current status:</span>
-                                <span className={`px-2.5 py-0.5 rounded text-xs font-bold inline-block ${getStatusStyles(selectedReview.status)}`}>
+                            <div className="flex items-center gap-3">
+                                {renderStars(selectedReview.rating, 18)}
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusStyles(selectedReview.status)}`}>
                                     {selectedReview.status}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Modal Footer / Actions */}
-                        <div className="px-6 py-4 border-t border-border bg-page/30 flex flex-wrap gap-2 justify-between items-center shrink-0">
-                            <div>
+                        {/* Drawer Tabs */}
+                        <div className="flex px-6 border-b border-border gap-6 shrink-0">
+                            {(["Review", "Risk signals", "History"] as const).map(tab => (
                                 <button
-                                    onClick={() => setSelectedReview(null)}
-                                    className="px-4 py-2 border border-border rounded-md text-xs font-bold text-muted hover:text-text hover:bg-page transition-colors"
+                                    key={tab}
+                                    onClick={() => setDrawerTab(tab)}
+                                    className={`pb-3 text-sm font-semibold border-b-2 transition-colors -mb-[1px] ${
+                                        drawerTab === tab
+                                            ? "border-text text-text"
+                                            : "border-transparent text-muted hover:text-text"
+                                    }`}
                                 >
-                                    Cancel
+                                    {tab}
                                 </button>
-                            </div>
+                            ))}
+                        </div>
 
-                            <div className="flex gap-2">
-                                {/* Flag button */}
-                                {selectedReview.status !== "Flagged for legal" && (
+                        {/* Drawer Content */}
+                        <div className="flex-1 overflow-y-auto">
+                            {drawerTab === "Review" && (
+                                <div className="p-6 space-y-8">
+                                    {/* FULL REVIEW */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Full Review</h3>
+                                        <div className="bg-page/50 rounded-lg p-4 font-medium text-text text-[14px] leading-relaxed whitespace-pre-wrap">
+                                            {selectedReview.comment}
+                                        </div>
+                                    </div>
+
+                                    {/* REVIEW DETAILS */}
+                                    <div className="space-y-4">
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Review Details</h3>
+                                        <div className="grid grid-cols-[140px_1fr] gap-y-3 text-[14px]">
+                                            <span className="text-muted">Reviewer</span>
+                                            <span className="text-text">{selectedReview.reviewerName || "Anonymous"}</span>
+
+                                            <span className="text-muted">Email</span>
+                                            <span className="text-text">{selectedReview.reviewerEmail || "—"}</span>
+
+                                            <span className="text-muted">Account created</span>
+                                            <span className="text-text">{selectedReview.accountCreated || "—"}</span>
+
+                                            <span className="text-muted">Reviews submitted</span>
+                                            <span className="text-text">{selectedReview.reviewsSubmitted ?? "—"}</span>
+
+                                            <span className="text-muted">Agent reviewed</span>
+                                            <span className="text-text">{selectedReview.agentName}</span>
+
+                                            <span className="text-muted">Agency</span>
+                                            <span className="text-text">{selectedReview.agencyName}</span>
+
+                                            <span className="text-muted">Property</span>
+                                            <span className="text-text">{selectedReview.property || "—"}</span>
+
+                                            <span className="text-muted">Rating</span>
+                                            <span className="text-text flex items-center h-[20px]">{renderStars(selectedReview.rating, 14)}</span>
+
+                                            <span className="text-muted">Submitted from IP</span>
+                                            <span className="text-text">{selectedReview.ip || "—"}</span>
+
+                                            <span className="text-muted">Device</span>
+                                            <span className="text-text">{selectedReview.device || "—"}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* AGENT INFO */}
+                                    <div className="space-y-4">
+                                        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Agent Info</h3>
+                                        <div className="grid grid-cols-[140px_1fr] gap-y-3 text-[14px]">
+                                            <span className="text-muted">Agent name</span>
+                                            <span className="text-text">{selectedReview.agentName}</span>
+
+                                            <span className="text-muted">Agency</span>
+                                            <span className="text-text">{selectedReview.agencyName}</span>
+
+                                            <span className="text-muted">Approved reviews</span>
+                                            <span className="text-text">{selectedReview.agentApprovedReviews ?? "—"}</span>
+
+                                            <span className="text-muted">Average rating</span>
+                                            <span className="text-text">{selectedReview.agentAverageRating ?? "—"}</span>
+
+                                            <span className="text-muted">Previous from reviewer</span>
+                                            <span className="text-text">{selectedReview.previousFromReviewer || "—"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {drawerTab === "Risk signals" && (
+                                <div className="p-6 space-y-6">
+                                    <h3 className="text-[15px] font-bold text-text">Automated risk assessment</h3>
+                                    
+                                    <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
+                                        {selectedReview.riskSignals?.map((signal, idx) => (
+                                            <div key={idx} className="p-4 flex items-start gap-3 bg-card">
+                                                {signal.isSafe ? (
+                                                    <div className="text-success mt-0.5 shrink-0 border border-success rounded-full p-0.5"><Check size={12} strokeWidth={3} /></div>
+                                                ) : (
+                                                    <div className="text-danger mt-0.5 shrink-0"><AlertTriangle size={16} /></div>
+                                                )}
+                                                <div>
+                                                    <p className="text-[14px] font-semibold text-text">{signal.title}</p>
+                                                    <p className="text-[13px] text-muted mt-0.5">{signal.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {!selectedReview.riskSignals && (
+                                            <div className="p-4 text-[14px] text-muted text-center">No risk signals data available.</div>
+                                        )}
+                                    </div>
+
+                                    {selectedReview.hasRisk ? (
+                                        <div className="bg-rose-50/50 border border-rose-200 rounded-lg p-4">
+                                            <h4 className="text-[14px] font-bold text-danger">High risk</h4>
+                                            <p className="text-[14px] text-rose-800 leading-relaxed font-medium mt-1">
+                                                {selectedReview.riskReason}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+                                            <h4 className="text-[14px] font-bold text-success">Low risk</h4>
+                                            <p className="text-[14px] text-success/90 leading-relaxed font-medium mt-1">
+                                                No automated concerns detected. Human review recommended before approving all reviews.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {drawerTab === "History" && (
+                                <div className="p-6 text-center text-muted text-[14px]">
+                                    History logs not available yet.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Drawer Footer Actions */}
+                        <div className="p-6 border-t border-border bg-card shrink-0 space-y-3">
+                            <button
+                                onClick={() => setActionModal({ type: "Approve", review: selectedReview })}
+                                className="w-full py-2.5 bg-success text-card rounded text-[15px] font-bold hover:bg-success/90 transition-colors"
+                            >
+                                Approve & publish
+                            </button>
+                            
+                            <button
+                                onClick={() => setActionModal({ type: "Reject", review: selectedReview })}
+                                className="w-full py-2.5 bg-card border border-border text-text rounded text-[15px] font-bold hover:bg-page transition-colors"
+                            >
+                                Reject review
+                            </button>
+                            
+                            <button
+                                onClick={() => {
+                                    updateReviewStatus(selectedReview.id, "Flagged for legal");
+                                    setSelectedReview(null);
+                                    setDrawerTab("Review");
+                                    showToast("Flagged for legal", "Review has been flagged for legal review.");
+                                }}
+                                className="w-full py-2.5 text-danger rounded text-[15px] font-normal hover:bg-rose-50/50 transition-colors"
+                            >
+                                Flag for legal review
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Action Confirmation Modal */}
+            {actionModal && (
+                <div className="fixed inset-0 bg-text/50 z-[200] flex items-center justify-center p-4">
+                    <div className="bg-card border border-border rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+                        {actionModal.type === "Approve" ? (
+                            <>
+                                <div className="p-6 space-y-3">
+                                    <h3 className="text-[17px] font-bold text-text">Publish this review?</h3>
+                                    <p className="text-[14px] text-muted">
+                                        It will appear publicly on <span className="font-semibold text-text">{actionModal.review.agentName}</span>'s profile.
+                                    </p>
+                                </div>
+                                <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
                                     <button
-                                        onClick={() => updateReviewStatus(selectedReview.id, "Flagged for legal")}
-                                        className="px-3.5 py-2 bg-orange-50 border border-orange-200 text-orange-600 rounded-md text-xs font-bold hover:bg-orange-100 transition-colors flex items-center gap-1.5"
+                                        onClick={() => setActionModal(null)}
+                                        className="px-4 py-2 border border-border rounded text-[14px] font-semibold text-text bg-card hover:bg-page transition-colors"
                                     >
-                                        <Flag size={14} />
-                                        Flag for Legal
+                                        Cancel
                                     </button>
-                                )}
-
-                                {/* Reject button */}
-                                {selectedReview.status !== "Rejected" && (
                                     <button
-                                        onClick={() => updateReviewStatus(selectedReview.id, "Rejected")}
-                                        className="px-3.5 py-2 bg-rose-50 border border-rose-200 text-danger rounded-md text-xs font-bold hover:bg-rose-100 transition-colors flex items-center gap-1.5"
+                                        onClick={() => {
+                                            updateReviewStatus(actionModal.review.id, "Approved");
+                                            setActionModal(null);
+                                            setSelectedReview(null);
+                                            setDrawerTab("Review");
+                                            showToast("Review Approved", "Review published successfully.");
+                                        }}
+                                        className="px-4 py-2 bg-success text-card rounded text-[14px] font-bold hover:bg-success/90 transition-colors"
                                     >
-                                        <Ban size={14} />
+                                        Approve & publish
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+                                    <h3 className="text-[17px] font-bold text-text">Reject review</h3>
+                                    <button onClick={() => setActionModal(null)} className="text-muted hover:text-text">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <p className="text-[14px] text-muted">
+                                        Rejecting review by {actionModal.review.reviewerName || "Anonymous"} for {actionModal.review.agentName}.
+                                    </p>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] text-muted font-medium">Reason</label>
+                                        <select className="w-full border border-border bg-card rounded px-3 py-2 text-[14px] text-text focus:outline-none focus:border-accent">
+                                            <option>Spam or fake review</option>
+                                            <option>Inappropriate language</option>
+                                            <option>Conflict of interest</option>
+                                            <option>Defamation risk</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] text-muted font-medium">Notes (optional)</label>
+                                        <textarea 
+                                            rows={3} 
+                                            className="w-full border border-border bg-card rounded px-3 py-2 text-[14px] text-text focus:outline-none focus:border-accent resize-none"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <label className="flex items-center gap-2 cursor-pointer mt-4">
+                                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-border accent-accent" />
+                                        <span className="text-[14px] text-text">Send rejection notice to reviewer</span>
+                                    </label>
+                                </div>
+                                <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
+                                    <button
+                                        onClick={() => setActionModal(null)}
+                                        className="px-4 py-2 border border-border rounded text-[14px] font-semibold text-text bg-card hover:bg-page transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            updateReviewStatus(actionModal.review.id, "Rejected");
+                                            setActionModal(null);
+                                            setSelectedReview(null);
+                                            setDrawerTab("Review");
+                                            showToast("Review Rejected", "Review has been rejected.");
+                                        }}
+                                        className="px-4 py-2 bg-danger text-card rounded text-[14px] font-bold hover:bg-rose-600 transition-colors"
+                                    >
                                         Reject
                                     </button>
-                                )}
-
-                                {/* Approve button */}
-                                {selectedReview.status !== "Approved" && (
-                                    <button
-                                        onClick={() => updateReviewStatus(selectedReview.id, "Approved")}
-                                        className="px-3.5 py-2 bg-success text-card rounded-md text-xs font-bold hover:bg-success/90 transition-colors flex items-center gap-1.5"
-                                    >
-                                        <Check size={14} />
-                                        Approve Review
-                                    </button>
-                                )}
-                            </div>
-                        </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
+
+            {/* SLEEK GLASSMORPHIC TOAST TOOLTIP (BOTTOM-RIGHT) */}
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+            />
         </div>
     );
 };

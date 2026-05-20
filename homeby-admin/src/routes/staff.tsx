@@ -3,6 +3,7 @@ import { useState, useEffect, Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { Toast } from "../components/Toast";
 import { 
     Search, 
     Plus, 
@@ -1448,30 +1449,13 @@ const RouteComponent = () => {
             })()}
 
             {/* SLEEK GLASSMORPHIC TOAST TOOLTIP (BOTTOM-RIGHT) */}
-            {toast.visible && (
-                <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-white/95 backdrop-blur-md border border-border rounded-lg shadow-xl px-4 py-3.5 max-w-sm animate-slide-left select-none">
-                    {/* Circle checkmark in green */}
-                    <div className="bg-green-100 text-green-700 p-1.5 rounded-full shrink-0">
-                        <Check size={15} strokeWidth={3} />
-                    </div>
-                    {/* Message content */}
-                    <div className="flex-1 min-w-0 pr-1">
-                        <h4 className="font-bold text-[13px] text-text font-sans">
-                            {toast.title}
-                        </h4>
-                        <p className="text-[12px] text-muted mt-0.5 font-medium leading-tight font-sans truncate">
-                            {toast.message}
-                        </p>
-                    </div>
-                    {/* Close button */}
-                    <button
-                        onClick={() => setToast(prev => ({ ...prev, visible: false }))}
-                        className="text-muted/80 hover:text-text p-0.5 rounded hover:bg-page transition-colors cursor-pointer"
-                    >
-                        <X size={14} strokeWidth={2.5} />
-                    </button>
-                </div>
-            )}
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+            />
         </div>
     );
 };
