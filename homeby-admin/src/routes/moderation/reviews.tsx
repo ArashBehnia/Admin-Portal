@@ -180,7 +180,7 @@ const ReviewModerationComponent = () => {
     };
 
     return (
-        <div className="max-w-screen mx-auto pb-12">
+        <div className="w-full max-w-content mx-auto pb-12">
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-text">

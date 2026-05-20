@@ -351,7 +351,7 @@ const RouteComponent = () => {
     };
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-[1400px] mx-auto pb-16 px-1 lg:px-4">
+        <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-16 px-1 lg:px-4">
             {/* Header & Subtitle */}
             <div className="flex flex-col gap-1.5">
                 <h1 className="text-[26px] font-bold text-text tracking-tight font-sans">

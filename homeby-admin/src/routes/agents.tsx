@@ -61,7 +61,7 @@ const RouteComponent = () => {
     };
 
     return (
-        <div className="max-w-content mx-auto">
+        <div className="w-full max-w-content mx-auto">
             {/* Header */}
             <div className="my-6">
                 <h1 className="text-2xl font-bold text-text">Agents</h1>

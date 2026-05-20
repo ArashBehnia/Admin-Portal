@@ -76,7 +76,7 @@ const RouteComponent = () => {
     const filterTabs: FilterTab[] = ['All', 'Active', 'Paused', 'Terminated'];
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-[1200px] mx-auto pb-10">
+        <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-10">
             {/* Header */}
             <div className="flex flex-col gap-1">
                 <h1 className="text-[20px] font-bold text-gray-900 leading-tight">Vendors</h1>

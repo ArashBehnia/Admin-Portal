@@ -29,7 +29,7 @@ const RouteComponent = () => {
     const [activeTab, setActiveTab] = useState<"Overview" | "Lookup">("Overview");
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-[1200px] mx-auto pb-10">
+        <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-10">
             {/* Header & Tabs */}
             <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1">

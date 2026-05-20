@@ -157,7 +157,7 @@ const RouteComponent = () => {
     const [notes, setNotes] = useState(vendor.notes);
 
     return (
-        <div className="flex flex-col gap-0 w-full max-w-[1200px] mx-auto pb-10">
+        <div className="flex flex-col gap-0 w-full max-w-content mx-auto pb-10">
             {/* Breadcrumb */}
             <div className="flex items-center gap-1.5 text-[13px] text-gray-500 mb-5">
                 <Link to="/vendors" className="hover:text-gray-700 transition-colors">Vendors</Link>

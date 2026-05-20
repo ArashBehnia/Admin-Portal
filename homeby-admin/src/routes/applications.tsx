@@ -52,7 +52,7 @@ const RouteComponent = () => {
     const [activeTab, setActiveTab] = useState<"Application" | "Verification" | "Notes">("Application");
 
     return (
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-6 w-full max-w-content mx-auto">
             <div className="flex flex-col gap-1">
                 <h1 className="text-[20px] font-bold text-gray-900 leading-tight">Applications</h1>
                 <p className="text-[13px] text-gray-500">Review and process incoming agent registration requests.</p>

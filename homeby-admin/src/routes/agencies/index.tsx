@@ -89,7 +89,7 @@ const RouteComponent = () => {
     const filters = ["All", "Active", "Onboarding", "Pending", "Suspended", "Trial"];
 
     return (
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>

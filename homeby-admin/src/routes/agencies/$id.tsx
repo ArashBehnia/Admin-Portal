@@ -14,7 +14,7 @@ const RouteComponent = () => {
     const tabs = ["Overview", "Agents", "Listings", "Subscription & Billing", "Reviews", "Notes", "Audit"];
 
     return (
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-[12px] text-gray-500">
                 <Link to="/agencies" className="hover:text-gray-900 transition-colors">Agencies</Link>

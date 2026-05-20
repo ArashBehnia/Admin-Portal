@@ -295,7 +295,7 @@ HomeBy`,
     };
 
     return (
-        <div className="max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">
+        <div className="w-full max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">
             {/* Breadcrumb Header Row */}
             <div className="flex flex-col gap-1.5 mb-6">
                 <div className="flex items-center gap-1.5 text-xs text-muted font-semibold tracking-wide uppercase select-none">

@@ -346,7 +346,7 @@ const RouteComponent = () => {
     useEffect(() => { setCurrentPage(1); }, [searchQuery, filterStatus]);
 
     return (
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full max-w-content mx-auto flex flex-col gap-4">
 
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
