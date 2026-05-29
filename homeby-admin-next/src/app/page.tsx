@@ -1,7 +1,7 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-    return (
-        <div> app </div>
-    );
-}
+const RootPage = () => {
+    redirect("/dashboard");
+};
+
+export default RootPage;
