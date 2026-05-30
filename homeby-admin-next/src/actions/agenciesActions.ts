@@ -1,0 +1,206 @@
+export type AgencyHighlight = "orange" | "red" | null;
+
+export type Agency = {
+    id: string;
+    name: string;
+    location: string;
+    subscription: string;
+    onboarding: string;
+    listings: number;
+    agents: number;
+    feed: string;
+    mrr: string;
+    lastActivity: string;
+    highlight: AgencyHighlight;
+};
+
+export type AgencyStats = {
+    total: string;
+    active: string;
+    onboarding: string;
+    suspended: string;
+};
+
+export type AgenciesData = {
+    stats: AgencyStats;
+    agencies: Agency[];
+};
+
+export const AGENCY_FILTERS = [
+    "All",
+    "Active",
+    "Onboarding",
+    "Pending",
+    "Suspended",
+    "Trial",
+] as const;
+export type AgencyFilter = (typeof AGENCY_FILTERS)[number];
+
+export const fetchAgenciesData = async (): Promise<AgenciesData> => {
+    return {
+        stats: {
+            total: "1,247",
+            active: "847",
+            onboarding: "23",
+            suspended: "4",
+        },
+        agencies: [
+            {
+                id: "1",
+                name: "Ray White Bondi",
+                location: "Bondi, NSW",
+                subscription: "Founding Partner",
+                onboarding: "Live",
+                listings: 247,
+                agents: 8,
+                feed: "Healthy",
+                mrr: "$890/mo",
+                lastActivity: "2 hours ago",
+                highlight: null,
+            },
+            {
+                id: "2",
+                name: "McGrath Surry Hills",
+                location: "Surry Hills, NSW",
+                subscription: "Founding Partner",
+                onboarding: "Live",
+                listings: 183,
+                agents: 6,
+                feed: "Healthy",
+                mrr: "$890/mo",
+                lastActivity: "4 hours ago",
+                highlight: null,
+            },
+            {
+                id: "3",
+                name: "Belle Property Mosman",
+                location: "Mosman, NSW",
+                subscription: "Premier",
+                onboarding: "Live",
+                listings: 142,
+                agents: 5,
+                feed: "Healthy",
+                mrr: "$650/mo",
+                lastActivity: "1 day ago",
+                highlight: null,
+            },
+            {
+                id: "4",
+                name: "LJ Hooker Parramatta",
+                location: "Parramatta, NSW",
+                subscription: "Professional",
+                onboarding: "Live",
+                listings: 98,
+                agents: 4,
+                feed: "Healthy",
+                mrr: "$450/mo",
+                lastActivity: "2 days ago",
+                highlight: null,
+            },
+            {
+                id: "5",
+                name: "Harcourts Melbourne",
+                location: "Melbourne, VIC",
+                subscription: "Founding Partner",
+                onboarding: "Live",
+                listings: 312,
+                agents: 11,
+                feed: "Healthy",
+                mrr: "$890/mo",
+                lastActivity: "3 hours ago",
+                highlight: null,
+            },
+            {
+                id: "6",
+                name: "Jellis Craig Fitzroy",
+                location: "Fitzroy, VIC",
+                subscription: "Professional",
+                onboarding: "Validation",
+                listings: 0,
+                agents: 3,
+                feed: "Warning",
+                mrr: "$450/mo",
+                lastActivity: "1 day ago",
+                highlight: "orange",
+            },
+            {
+                id: "7",
+                name: "Barry Plant Doncaster",
+                location: "Doncaster, VIC",
+                subscription: "Trial",
+                onboarding: "Syncing",
+                listings: 0,
+                agents: 2,
+                feed: "Warning",
+                mrr: "$0/mo",
+                lastActivity: "31 hours ago",
+                highlight: "orange",
+            },
+            {
+                id: "8",
+                name: "Nelson Alexander",
+                location: "Carlton, VIC",
+                subscription: "Essential",
+                onboarding: "Live",
+                listings: 176,
+                agents: 7,
+                feed: "Healthy",
+                mrr: "$290/mo",
+                lastActivity: "5 hours ago",
+                highlight: null,
+            },
+            {
+                id: "9",
+                name: "Stone Real Estate Newtown",
+                location: "Newtown, NSW",
+                subscription: "Professional",
+                onboarding: "Live",
+                listings: 134,
+                agents: 5,
+                feed: "Healthy",
+                mrr: "$450/mo",
+                lastActivity: "6 hours ago",
+                highlight: null,
+            },
+            {
+                id: "10",
+                name: "First National Geelong",
+                location: "Geelong, VIC",
+                subscription: "Trial",
+                onboarding: "Approved",
+                listings: 0,
+                agents: 1,
+                feed: "Failing",
+                mrr: "$0/mo",
+                lastActivity: "5 days ago",
+                highlight: "red",
+            },
+            {
+                id: "11",
+                name: "Hocking Stuart Richmond",
+                location: "Richmond, VIC",
+                subscription: "Trial",
+                onboarding: "CRM Connected",
+                listings: 0,
+                agents: 2,
+                feed: "Failing",
+                mrr: "$0/mo",
+                lastActivity: "3 days ago",
+                highlight: "red",
+            },
+            {
+                id: "12",
+                name: "First Home Buyers Melbourne",
+                location: "South Yarra, VIC",
+                subscription: "Trial",
+                onboarding: "Approved",
+                listings: 0,
+                agents: 1,
+                feed: "Not configured",
+                mrr: "$0/mo",
+                lastActivity: "1 week ago",
+                highlight: null,
+            },
+        ],
+    };
+};
