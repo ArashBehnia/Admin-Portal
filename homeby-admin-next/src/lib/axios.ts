@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
 // The instruction mentioned VITE-ADMIN-API-URL, but Vite uses VITE_ prefix.
 // We'll use import.meta.env.VITE_ADMIN_API_URL or fallback.
 const api = axios.create({
-    baseURL:
-        import.meta.env.VITE_ADMIN_API_URL || "https://admin-api.homeby.com.au",
+    baseURL: process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au",
 });
 
 // We can't directly use React Context inside an Axios interceptor file because hooks
@@ -19,7 +19,7 @@ let currentRefreshToken: string | null = null;
 let isRefreshing = false;
 let failedQueue: Array<{
     resolve: (token: string) => void;
-    reject: (err: any) => void;
+    reject: (err: unknown) => void;
 }> = [];
 let onTokenRefresh:
     | ((accessToken: string, refreshToken: string) => void)

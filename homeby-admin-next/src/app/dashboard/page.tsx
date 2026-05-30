@@ -1,7 +1,10 @@
-const Dashboard = () => {
-    return (
-        <div>dashboard</div>
-    );
-}
+import { fetchDashboardData } from './actions';
+import DashboardPageClient from './_components/DashboardPageClient';
 
-export default Dashboard;
+const DashboardPage = async () => {
+    const initialData = await fetchDashboardData();
+
+    return <DashboardPageClient initialData={initialData} />;
+};
+
+export default DashboardPage;

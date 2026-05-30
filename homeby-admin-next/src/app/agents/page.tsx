@@ -1,7 +1,10 @@
-const Agents = () => {
-    return (
-        <div>Agents</div>
-    );
-}
+import { fetchAgents } from '@/actions/agentsActions';
+import AgentsPageClient from '@/components/Agents/AgentsPageClient';
 
-export default Agents;
+const AgentsPage = async () => {
+    const initialAgents = await fetchAgents();
+
+    return <AgentsPageClient initialAgents={initialAgents} />;
+};
+
+export default AgentsPage;
