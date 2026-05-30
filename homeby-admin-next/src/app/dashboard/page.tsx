@@ -1,5 +1,5 @@
-import { fetchDashboardData } from './actions';
-import DashboardPageClient from './_components/DashboardPageClient';
+import { fetchDashboardData } from "@/actions/dashboardActions";
+import DashboardPageClient from "@/components/Dashboard/DashboardPageClient";
 
 const DashboardPage = async () => {
     const initialData = await fetchDashboardData();
