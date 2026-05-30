@@ -1,7 +1,10 @@
-const EmailTemplates = () => {
-    return (
-        <div>EmailTemplates</div>
-    );
-}
+import { fetchEmailTemplates } from "@/actions/emailTemplatesActions";
+import EmailTemplatesPageClient from "@/components/EmailTemplates/EmailTemplatesPageClient";
 
-export default EmailTemplates;
+const EmailTemplatesPage = async () => {
+    const initialTemplates = await fetchEmailTemplates();
+
+    return <EmailTemplatesPageClient initialTemplates={initialTemplates} />;
+};
+
+export default EmailTemplatesPage;
