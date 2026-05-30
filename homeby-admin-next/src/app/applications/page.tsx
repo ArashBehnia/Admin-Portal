@@ -1,7 +1,10 @@
-const Applications = () => {
-    return (
-        <div>Applications</div>
-    );
-}
+import { fetchApplications } from "@/actions/applicationsActions";
+import ApplicationsPageClient from "@/components/Applications/ApplicationsPageClient";
 
-export default Applications;
+const ApplicationsPage = async () => {
+    const initialApplications = await fetchApplications();
+
+    return <ApplicationsPageClient initialApplications={initialApplications} />;
+};
+
+export default ApplicationsPage;
