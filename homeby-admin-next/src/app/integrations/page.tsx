@@ -1,7 +1,9 @@
-const Integrations = () => {
-    return (
-        <div>Integrations</div>
-    );
-}
+import { fetchIntegrationsData } from "@/actions/integrationsActions";
+import IntegrationsPageClient from "@/components/Integrations/IntegrationsPageClient";
 
-export default Integrations;
+const IntegrationsPage = async () => {
+    const initialData = await fetchIntegrationsData();
+    return <IntegrationsPageClient initialData={initialData} />;
+};
+
+export default IntegrationsPage;

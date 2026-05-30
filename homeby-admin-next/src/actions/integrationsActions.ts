@@ -1,0 +1,214 @@
+export type FeedStatus = "Healthy" | "Failing" | "Pending setup" | "Warning";
+export type FeedMethod = "FTP" | "API" | "Internal";
+
+export type Feed = {
+    id: string;
+    agencyName: string;
+    crm: string;
+    method: FeedMethod;
+    status: FeedStatus;
+    lastSync: string;
+    listings24h: number | null;
+    errors24h: number | null;
+    distribution: string;
+    onboarding: string;
+};
+
+export type FeedStats = {
+    total: number;
+    healthy: number;
+    warning: number;
+    failing: number;
+};
+
+export type IntegrationsData = {
+    stats: FeedStats;
+    feeds: Feed[];
+};
+
+export const ROWS_PER_PAGE = 10;
+
+export const STATUS_FILTERS = [
+    "All",
+    "Healthy",
+    "Warning",
+    "Failing",
+    "Pending setup",
+] as const;
+export type StatusFilter = (typeof STATUS_FILTERS)[number];
+
+export const fetchIntegrationsData = async (): Promise<IntegrationsData> => {
+    return {
+        stats: { total: 14, healthy: 11, warning: 0, failing: 2 },
+        feeds: [
+            {
+                id: "1",
+                agencyName: "Ray White Bondi",
+                crm: "Box+Dice",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "14 min ago",
+                listings24h: 47,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "2",
+                agencyName: "McGrath Surry Hills",
+                crm: "VaultRE",
+                method: "API",
+                status: "Healthy",
+                lastSync: "1 hour ago",
+                listings24h: 23,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "3",
+                agencyName: "Belle Property Mosman",
+                crm: "AgentBox",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "2 hours ago",
+                listings24h: 31,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "4",
+                agencyName: "LJ Hooker Parramatta",
+                crm: "Rex Software",
+                method: "API",
+                status: "Healthy",
+                lastSync: "3 hours ago",
+                listings24h: 18,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "5",
+                agencyName: "Stone Real Estate Newtown",
+                crm: "Box+Dice",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "4 hours ago",
+                listings24h: 29,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "6",
+                agencyName: "Harcourts Melbourne",
+                crm: "VaultRE",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "5 hours ago",
+                listings24h: 52,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "7",
+                agencyName: "Ray White Carlton",
+                crm: "MyDesktop",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "6 hours ago",
+                listings24h: 14,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "8",
+                agencyName: "McGrath Double Bay",
+                crm: "AgentBox",
+                method: "API",
+                status: "Healthy",
+                lastSync: "8 hours ago",
+                listings24h: 38,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "9",
+                agencyName: "Jellis Craig Fitzroy",
+                crm: "Rex Software",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "11 hours ago",
+                listings24h: 22,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "10",
+                agencyName: "Nelson Alexander",
+                crm: "Box+Dice",
+                method: "FTP",
+                status: "Healthy",
+                lastSync: "12 hours ago",
+                listings24h: 19,
+                errors24h: 0,
+                distribution: "4/4",
+                onboarding: "Live",
+            },
+            {
+                id: "11",
+                agencyName: "Barry Plant Doncaster",
+                crm: "HomeBy Internal",
+                method: "Internal",
+                status: "Healthy",
+                lastSync: "Live - real time",
+                listings24h: 14,
+                errors24h: 0,
+                distribution: "HomeBy only",
+                onboarding: "Live",
+            },
+            {
+                id: "12",
+                agencyName: "Hocking Stuart Richmond",
+                crm: "VaultRE",
+                method: "FTP",
+                status: "Failing",
+                lastSync: "3 days ago",
+                listings24h: 0,
+                errors24h: 14,
+                distribution: "2/4",
+                onboarding: "CRM Connected",
+            },
+            {
+                id: "13",
+                agencyName: "First National Geelong",
+                crm: "Manual",
+                method: "FTP",
+                status: "Failing",
+                lastSync: "5 days ago",
+                listings24h: 0,
+                errors24h: 28,
+                distribution: "Failing",
+                onboarding: "Approved",
+            },
+            {
+                id: "14",
+                agencyName: "First Home Buyers Melbourne",
+                crm: "AgentBox",
+                method: "FTP",
+                status: "Pending setup",
+                lastSync: "Never",
+                listings24h: null,
+                errors24h: null,
+                distribution: "Not set up",
+                onboarding: "Approved",
+            },
+        ],
+    };
+};
