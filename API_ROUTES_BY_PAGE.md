@@ -2,9 +2,31 @@
 
 This document organizes all backend API endpoints by their corresponding frontend pages for easier integration and development.
 
-> **⚠️ IMPORTANT NOTE:** This documentation is based on the API docs provided at `https://st1.homeby.com.au/api/admin-portal-api-help-json`. 
-> 
-> **Authentication routes are NOT included in the OpenAPI spec.** You'll need to check with your backend team for the actual login, logout, and token management endpoints.
+> **✅ UPDATED:** Now includes authentication routes from the latest API docs at `https://st1.homeby.com.au/api/admin-portal-api-help-json`
+
+---
+
+## Authentication / Login Page
+**Path:** `/login`
+
+### Admin Login & OTP Flow
+- **POST** `/api/auth/admin/login` - Step 1: Admin login with credentials (returns OTP token)
+  - **Request Body:**
+    - `username` (string, required) - Email or mobile number
+    - `password` (string, required) - User password
+    - `rememberMe` (boolean, required) - Remember user for future logins
+    - `turnstileToken` (string, optional) - CAPTCHA token for security
+  - **Response:** `OTPResponseDto` with temporary OTP token and expiration time
+
+- **POST** `/api/auth/verify-2fa` - Step 2: Verify OTP code and get JWT access tokens
+  - **Request Body:**
+    - `token` (string, required) - OTP token from `/api/auth/admin/login` response
+    - `code` (string, required) - 6-digit OTP code from user
+  - **Response:** `AuthResponseDto` with:
+    - `accessToken` - JWT bearer token for API requests
+    - `refreshToken` - Token for refreshing access
+    - `user` - User profile data (id, email, role, permissions, etc.)
+    - `permissions` - User permissions object
 
 ---
 
@@ -345,26 +367,6 @@ This document organizes all backend API endpoints by their corresponding fronten
 
 ---
 
-## Missing / Undocumented Routes
-
-⚠️ **Authentication Routes** - NOT included in OpenAPI spec but likely exist:
-- **POST** `/api/auth/login` or `/api/admin/auth/login` - Login endpoint
-- **POST** `/api/auth/logout` - Logout endpoint  
-- **POST** `/api/auth/refresh-token` - Token refresh
-- **GET** `/api/auth/me` - Current user profile
-- **POST** `/api/auth/forgot-password` - Password reset request
-- **POST** `/api/auth/reset-password` - Reset password with token
-- **POST** `/api/auth/request-otp` - Request OTP
-- **POST** `/api/auth/verify-otp` - Verify OTP code
-
-**Action items:**
-1. Ask backend team for authentication endpoint paths
-2. Get login/logout response structures
-3. Confirm token refresh mechanism
-4. Understand OTP flow and MFA setup
-
----
-
 ## API Route Patterns
 
 ### Standard CRUD Patterns
@@ -402,7 +404,7 @@ GET    /api/admin/{resource}/export   # Export to Excel
 
 ### Common Headers
 - `x-lang` - Language for responses (optional)
-- `Authorization: Bearer {JWT}` - Required for secure endpoints
+- `Authorization: Bearer {JWT}` - Required for secure endpoints (from login response)
 
 ### Response Status Codes
 - `200` - Success (GET, PUT, DELETE, POST)
@@ -412,29 +414,86 @@ GET    /api/admin/{resource}/export   # Export to Excel
 
 ---
 
+## Authentication Flow
+
+### Complete Login Sequence:
+
+1. **GET Login Form** - User navigates to `/login`
+   
+2. **Submit Credentials** - POST to `/api/auth/admin/login`
+   ```json
+   {
+     "username": "admin@homeby.com.au",
+     "password": "password123",
+     "rememberMe": true,
+     "turnstileToken": "optional-captcha-token"
+   }
+   ```
+   Response: `{ "token": "eyJhbGc...", "expires": 1234567890 }`
+
+3. **Receive OTP** - User receives OTP code via email/SMS
+
+4. **Submit OTP** - POST to `/api/auth/verify-2fa`
+   ```json
+   {
+     "token": "eyJhbGc...",
+     "code": "123456"
+   }
+   ```
+   Response:
+   ```json
+   {
+     "accessToken": "eyJhbGc...",
+     "refreshToken": "eyJhbGc...",
+     "user": {
+       "id": "uuid",
+       "email": "admin@homeby.com.au",
+       "firstName": "Admin",
+       "lastName": "User",
+       "role": "admin",
+       "status": "enabled"
+     },
+     "permissions": { ... }
+   }
+   ```
+
+5. **Use accessToken** - Include in all subsequent API requests:
+   ```
+   Authorization: Bearer eyJhbGc...
+   ```
+
+### Token Management:
+- `accessToken` - Short-lived JWT, use for API requests (typically expires in 1 hour)
+- `refreshToken` - Long-lived JWT, use to get new access tokens when expired
+- Always include `x-lang` header for language preference
+
+---
+
 ## Notes for Implementation
 
-1. **Authentication**: Most endpoints require Bearer JWT token in Authorization header
-2. **Bulk vs. ID-based Operations**: Use `PUT /api/admin/{resource}/{id}` for single updates and `PUT /api/admin/{resource}` for bulk updates
-3. **Composite Keys**: The `/change` endpoints use matrix-style query parameters for composite key updates
-4. **Pagination**: Default limit is usually 20, with max of 100 for security/performance
-5. **Error Handling**: All endpoints return standard error responses with status codes and messages
-6. **Rate Limiting**: Not specified in API docs but should be implemented for `/import` and `/export` endpoints
-7. **File Uploads**: `/import` endpoints likely accept multipart form data with Excel files
-8. **Export Formats**: `/export` endpoints likely return downloadable files (CSV or Excel)
+1. **Authentication** is required for all endpoints except `/api/auth/admin/login` and `/api/auth/verify-2fa`
+2. **OTP Flow** - Uses two-factor authentication with temporary OTP tokens before issuing JWT
+3. **Bulk vs. ID-based Operations** - Use `PUT /api/admin/{resource}/{id}` for single updates and `PUT /api/admin/{resource}` for bulk updates
+4. **Composite Keys** - The `/change` endpoints use matrix-style query parameters for composite key updates
+5. **Pagination** - Default limit is usually 20, with max of 100 for security/performance
+6. **Error Handling** - All endpoints return standard error responses with status codes and messages
+7. **File Uploads** - `/import` endpoints accept multipart form data with Excel files
+8. **Export Formats** - `/export` endpoints return downloadable files (CSV or Excel)
 
 ---
 
 ## Quick Reference by HTTP Method
 
 ### GET Requests (Read-only)
-- Dashboard analytics: `/dashboard/*`
+- Authentication: `/api/auth/verify-2fa` (no auth needed)
+- Dashboard analytics: `/api/admin/dashboard/*`
 - List views: `/{resource}/page`, `/{resource}/query`, `/{resource}/all`
 - Details: `/{resource}/{id}`, `/{resource}/{id}/overview`, `/{resource}/{id}/activity`
-- Metadata: `/roles`, `/permissions`, `/config/keys`
+- Metadata: `/admin/roles`, `/admin/permissions`, `/admin/config/keys`
 - Export: `/{resource}/export`, `/{resource}/import-columns`
 
 ### POST Requests (Create)
+- Login: `/api/auth/admin/login`, `/api/auth/verify-2fa`
 - Create records: `/api/admin/{resource}`
 - Special actions: `/{resource}/{id}/approve`, `/{resource}/{id}/reject`, `/{resource}/{id}/generate`
 - Bulk import: `/{resource}/import`
