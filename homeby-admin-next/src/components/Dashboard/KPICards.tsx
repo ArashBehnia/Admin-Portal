@@ -1,11 +1,13 @@
-import { DashboardData } from "@/actions/dashboardActions";
+import { OverviewData } from "@/actions/dashboardActions";
 
 interface KPICardsProps {
-    kpis: DashboardData["kpis"];
+    kpis?: OverviewData["kpis"];
     getTrendClass: (type: "success" | "warning" | "danger") => string;
 }
 
 const KPICards = ({ kpis, getTrendClass }: KPICardsProps) => {
+    if (!kpis) return null;
+
     const cards = [
         { label: "Active agencies", data: kpis.activeAgencies, warning: false },
         {

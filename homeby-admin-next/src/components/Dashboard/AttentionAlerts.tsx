@@ -35,9 +35,9 @@ const AttentionAlerts = ({ items, getAttentionLink }: AttentionAlertsProps) => {
                 Attention required
             </span>
             <div className="flex flex-wrap items-center gap-3">
-                {items.map((item) => (
+                {items.map((item, idx) => (
                     <Link
-                        key={item.id}
+                        key={item.id ?? idx}
                         href={getAttentionLink(item.id)}
                         className="bg-warning/10 hover:bg-warning/15 border border-warning/20 text-warning rounded-md px-3.5 py-2 flex items-center gap-2 text-xs font-semibold transition-all cursor-pointer"
                     >
