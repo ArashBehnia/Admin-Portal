@@ -1,8 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useRef } from "react";
-import useAuth from "@/hooks/useAuth";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
     Search,
     Bell,
@@ -15,9 +14,11 @@ import {
     Menu,
 } from "lucide-react";
 import Link from "next/link";
+import type { User as UserType } from "@/lib/auth";
 
 interface TopbarProps {
     onOpenSidebar: () => void;
+    user: UserType | null;
 }
 
 type RecentItem = {
@@ -33,34 +34,36 @@ const recentSearches: RecentItem[] = [
     { id: "3", name: "McGrath Surry Hills", type: "Agency", path: "/agencies" },
 ];
 
-export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
-    const { role, name, logout } = useAuth();
+export const Topbar = ({ onOpenSidebar, user }: TopbarProps) => {
+    const router = useRouter();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const profileRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Derived User Email & Initials
-    const userEmail = name
-        ? `${name.toLowerCase().replace(/\s+/g, ".")}@homeby.com.au`
-        : "admin@homeby.com.au";
+    const name = user
+        ? (`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Admin")
+        : "Admin";
+    const role = (user?.role as string) || "user";
+    const userEmail = user?.email || "admin@homeby.com.au";
     const userInitials = name
-        ? name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .substring(0, 2)
-              .toUpperCase()
+        ? name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase()
         : "AD";
 
-    // Parse breadcrumbs based on active route
+    const logout = useCallback(async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } finally {
+            router.push("/login");
+        }
+    }, [router]);
+
     const getBreadcrumbs = (pathname: string) => {
         const segments = pathname.split("/").filter(Boolean);
         if (segments.length === 0) return ["Admin"];
 
         return segments.map((segment) => {
-            // If the segment is a dynamic parameter/ID (numeric or long hash)
             if (/^\d+$/.test(segment) || segment.length > 20) {
                 return "Detail";
             }
@@ -77,7 +80,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const pathname = usePathname();
     const breadcrumbs = getBreadcrumbs(pathname);
 
-    // Click outside handler for profile dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -92,7 +94,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Global keyboard shortcut (⌘K or Ctrl+K)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -107,7 +108,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    // Focus input on search popup open
     useEffect(() => {
         if (isSearchOpen && searchInputRef.current) {
             setTimeout(() => searchInputRef.current?.focus(), 50);
@@ -121,7 +121,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     return (
         <>
             <header className="sticky top-0 z-30 w-full h-[64px] bg-card border-b border-border px-4 lg:px-6 flex items-center justify-between shrink-0">
-                {/* Left Side: Breadcrumbs and Mobile toggle */}
                 <div className="flex items-center gap-3">
                     <button
                         onClick={onOpenSidebar}
@@ -130,7 +129,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         <Menu size={20} />
                     </button>
 
-                    {/* Breadcrumbs */}
                     <nav className="flex items-center text-sm font-medium text-muted">
                       {breadcrumbs.map((crumb, idx) => {
                         const isLast = idx === breadcrumbs.length - 1;
@@ -151,9 +149,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                     </nav>
                 </div>
 
-                {/* Right Side: Search, Notifications & User Info */}
                 <div className="flex items-center gap-3">
-                    {/* Search Trigger Button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
                         className="hidden xl:flex items-center justify-between w-64 lg:w-96 px-3 py-1.5 bg-page border border-border rounded-md text-sm text-muted/65 hover:bg-page/80 hover:text-muted transition-colors cursor-pointer"
@@ -167,7 +163,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         </span>
                     </button>
 
-                    {/* Mobile Search Button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
                         className="xl:hidden p-2 text-muted hover:bg-page rounded-md border border-border/80 transition-colors"
@@ -175,16 +170,13 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         <Search size={18} />
                     </button>
 
-                    {/* Notification Bell */}
                     <button className="p-2 text-muted hover:bg-page rounded-md border border-border/80 transition-colors relative">
                         <Bell size={18} />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-card" />
                     </button>
 
-                    {/* Divider */}
                     <div className="w-px h-5 bg-border/85 mx-1 hidden sm:block" />
 
-                    {/* User Profile Dropdown */}
                     <div className="relative" ref={profileRef}>
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -199,10 +191,8 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                             <ChevronDown size={14} className="text-muted/80" />
                         </button>
 
-                        {/* Dropdown Menu */}
                         {isProfileOpen && (
                             <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-md shadow-lg py-1 z-50 text-sm">
-                                {/* Profile Info Header */}
                                 <div className="px-4 py-2 border-b border-border/60">
                                     <p className="font-semibold text-text truncate">
                                         {name || "Admin"}
@@ -211,11 +201,10 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                                         {userEmail}
                                     </p>
                                     <span className="inline-block mt-1 text-[10px] font-semibold bg-page text-accent px-1.5 py-0.5 rounded capitalize">
-                                        {role || "superadmin"}
+                                        {role}
                                     </span>
                                 </div>
 
-                                {/* Menu Items */}
                                 <div className="py-1">
                                     <Link
                                         href="/staff"
@@ -252,7 +241,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                 </div>
             </header>
 
-            {/* Global Search Modal Overlay */}
             {isSearchOpen && (
                 <div
                     className="fixed inset-0 bg-[#0F1115]/50 z-50 flex items-start justify-center pt-20 px-4 transition-opacity animate-fade-in"
@@ -262,7 +250,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         className="bg-card border border-border rounded-lg shadow-xl w-full max-w-2xl overflow-hidden animate-slide-down"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Search Input Bar */}
                         <div className="flex items-center justify-between p-4 border-b border-border/70">
                             <div className="flex items-center gap-3 flex-1">
                                 <Search size={20} className="text-muted" />
@@ -290,7 +277,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                             </div>
                         </div>
 
-                        {/* Recent Searches Section */}
                         <div className="p-4 max-h-[350px] overflow-y-auto">
                             <h3 className="text-[11px] font-bold tracking-wider text-muted uppercase mb-3 px-2">
                                 {searchQuery ? "SEARCH RESULTS" : "RECENT"}
