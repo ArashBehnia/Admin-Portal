@@ -15,7 +15,7 @@ interface EditorFormProps {
     language: string;
     smsProvider: "Twilio" | "GAMA";
     bodyText: string;
-    textareaRef: RefObject<HTMLTextAreaElement>;
+    textareaRef: RefObject<HTMLTextAreaElement | null>;
     availableVariables: string[];
     getCategoryStyles: (category: string) => string;
     onFromNameChange: (v: string) => void;

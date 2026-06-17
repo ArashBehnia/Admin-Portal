@@ -1,29 +1,59 @@
 "use client";
 
-import { Template } from "@/actions/emailTemplatesActions";
+import { useEffect } from "react";
 import useEmailTemplates from "@/hooks/useEmailTemplates";
 import EmailTemplatesStats from "./EmailTemplatesStats";
 import EmailTemplatesTable from "./EmailTemplatesTable";
 
-interface EmailTemplatesPageClientProps {
-    initialTemplates: Template[];
-}
-
-const EmailTemplatesPageClient = ({
-    initialTemplates,
-}: EmailTemplatesPageClientProps) => {
+const EmailTemplatesPageClient = () => {
     const {
         filteredTemplates,
         stats,
+        isLoading,
+        isError,
         searchQuery,
         setSearchQuery,
         selectedCategory,
         setSelectedCategory,
         getCategoryStyles,
-    } = useEmailTemplates({ initialTemplates });
+    } = useEmailTemplates();
+
+    useEffect(() => {
+        console.log("[EmailTemplatesPageClient] render state:", {
+            isLoading,
+            isError,
+            totalTemplates: filteredTemplates.length,
+            stats,
+        });
+    }, [isLoading, isError, filteredTemplates.length, stats]);
+
+    useEffect(() => {
+        console.log("[EmailTemplatesPageClient] filteredTemplates:", JSON.stringify(filteredTemplates, null, 2));
+    }, [filteredTemplates]);
+
+    if (isError) {
+        return (
+            <div className="w-full max-w-content mx-auto px-6">
+                <div className="my-6">
+                    <h1 className="text-2xl font-bold text-text">
+                        Email Templates
+                    </h1>
+                    <p className="text-sm text-muted mt-1">
+                        Manage all transactional email, SMS and push notification
+                        templates. Changes take effect immediately without a deploy.
+                    </p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <p className="text-danger font-medium">
+                        Failed to load email templates. Please try again later.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="w-full max-w-content mx-auto">
+        <div className="w-full max-w-content mx-auto px-6">
             <div className="my-6">
                 <h1 className="text-2xl font-bold text-text">
                     Email Templates
@@ -35,19 +65,101 @@ const EmailTemplatesPageClient = ({
             </div>
 
             <div className="flex flex-col gap-6">
-                <EmailTemplatesStats stats={stats} />
+                {isLoading ? (
+                    <EmailTemplatesSkeleton />
+                ) : (
+                    <>
+                        <EmailTemplatesStats stats={stats} />
 
-                <EmailTemplatesTable
-                    filteredTemplates={filteredTemplates}
-                    searchQuery={searchQuery}
-                    selectedCategory={selectedCategory}
-                    onSearchChange={setSearchQuery}
-                    onCategoryChange={setSelectedCategory}
-                    getCategoryStyles={getCategoryStyles}
-                />
+                        <EmailTemplatesTable
+                            filteredTemplates={filteredTemplates}
+                            searchQuery={searchQuery}
+                            selectedCategory={selectedCategory}
+                            onSearchChange={setSearchQuery}
+                            onCategoryChange={setSelectedCategory}
+                            getCategoryStyles={getCategoryStyles}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
 };
+
+function EmailTemplatesSkeleton() {
+    return (
+        <div className="space-y-6 animate-pulse">
+            {/* Stats cards skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="bg-card border border-border rounded-lg p-5 space-y-3"
+                    >
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-border" />
+                            <div className="h-3 w-24 bg-border rounded" />
+                        </div>
+                        <div className="h-8 w-12 bg-border rounded" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Search + filter skeleton */}
+            <div className="flex items-center justify-between gap-4">
+                <div className="relative w-full max-w-xs">
+                    <div className="h-9 w-full bg-card border border-border rounded-md" />
+                </div>
+                <div className="h-9 w-40 bg-card border border-border rounded-md" />
+            </div>
+
+            {/* Table skeleton */}
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-border/80 bg-page/50 text-[11px] text-muted font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4">Template name</th>
+                                <th className="px-6 py-4">Category</th>
+                                <th className="px-6 py-4">Channel</th>
+                                <th className="px-6 py-4">Last modified</th>
+                                <th className="px-6 py-4">Modified by</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/60">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <tr key={i} className="text-sm">
+                                    <td className="px-6 py-4">
+                                        <div className="h-4 w-32 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="h-5 w-16 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="h-5 w-14 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="h-4 w-20 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="h-4 w-24 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="h-5 w-14 bg-border rounded" />
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="h-4 w-10 bg-border rounded ml-auto" />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default EmailTemplatesPageClient;

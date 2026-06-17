@@ -1,4 +1,7 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Template } from "@/actions/emailTemplatesActions";
 
 export type ChannelTab = "Email" | "SMS" | "Push";
@@ -23,7 +26,12 @@ export type ToastState = {
 
 interface UseTemplateEditorProps {
     templateName: string;
-    currentTemplate: Template;
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    return res.json();
 }
 
 const INITIAL_BODY = `Hi {{contact_name}},
@@ -100,20 +108,39 @@ const AVAILABLE_VARIABLES = [
     "{{expiry_hours}}",
 ];
 
-const useTemplateEditor = ({
-    templateName,
-    currentTemplate,
-}: UseTemplateEditorProps) => {
-    // ─── Tab & UI State ───────────────────────────────────────────────
+const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
+    const queryClient = useQueryClient();
+
+    // ─── Data Fetching ─────────────────────────────────────────────
+    console.log("[useTemplateEditor] fetching template:", templateName);
+    const templateQuery = useQuery<Template>({
+        queryKey: ["email-template", templateName],
+        queryFn: () => fetchJson<Template>(`/api/email-templates/${templateName}`),
+    });
+
+    const currentTemplate = templateQuery.data;
+
+    useEffect(() => {
+        if (currentTemplate) {
+            console.log("[useTemplateEditor] template loaded:", JSON.stringify(currentTemplate, null, 2));
+        }
+    }, [currentTemplate]);
+
+    useEffect(() => {
+        if (templateQuery.isError) {
+            console.error("[useTemplateEditor] query error:", templateQuery.error);
+        }
+    }, [templateQuery.isError, templateQuery.error]);
+
+    // ─── Tab & UI State ───────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ChannelTab>("Email");
     const [previewMode, setPreviewMode] = useState<PreviewMode>("Desktop");
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-    const [isActiveStatus, setIsActiveStatus] = useState(
-        currentTemplate.status === "Active",
-    );
+    const [isActiveStatus, setIsActiveStatus] = useState(false);
+    const initializedRef = useRef(false);
 
-    // ─── Form State ───────────────────────────────────────────────────
+    // ─── Form State ───────────────────────────────────────────────
     const [fromName, setFromName] = useState("HomeBy Team");
     const [fromEmail, setFromEmail] = useState("info@homeby.com.au");
     const [subject, setSubject] = useState(
@@ -127,16 +154,12 @@ const useTemplateEditor = ({
         "james@raywhitebondi.com.au",
     );
 
-    // ─── Version History State ────────────────────────────────────────
+    // ─── Version History State ────────────────────────────────────
     const [versionHistory, setVersionHistory] = useState<VersionLog[]>(
         INITIAL_VERSION_HISTORY,
     );
 
-    // ─── Loading States ───────────────────────────────────────────────
-    const [isSaving, setIsSaving] = useState(false);
-    const [isSendingTest, setIsSendingTest] = useState(false);
-
-    // ─── Toast State ──────────────────────────────────────────────────
+    // ─── Toast State ──────────────────────────────────────────────
     const [toast, setToast] = useState<ToastState>({
         title: "",
         message: "",
@@ -144,12 +167,44 @@ const useTemplateEditor = ({
         visible: false,
     });
 
-    // ─── Refs ─────────────────────────────────────────────────────────
+    // ─── Refs ─────────────────────────────────────────────────────
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // ─── Effects ──────────────────────────────────────────────────────
+    // ─── Mutations ────────────────────────────────────────────────
+    const saveMutation = useMutation({
+        mutationFn: async (data: Partial<Template>) => {
+            console.log("[useTemplateEditor] save mutation payload:", JSON.stringify(data, null, 2));
+            const res = await fetch(`/api/email-templates/${data.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+            const result = await res.json();
+            console.log("[useTemplateEditor] save mutation response:", JSON.stringify(result, null, 2));
+            return result;
+        },
+        onSuccess: () => {
+            console.log("[useTemplateEditor] save mutation success, invalidating queries");
+            queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            queryClient.invalidateQueries({ queryKey: ["email-template", templateName] });
+            showToast(
+                "Template Saved",
+                `${templateName} has been successfully updated.`,
+            );
+        },
+        onError: (error: Error) => {
+            console.error("[useTemplateEditor] save mutation error:", error);
+            showToast("Save Failed", error.message, "error");
+        },
+    });
+
+    // ─── Effects ──────────────────────────────────────────────────
     useEffect(() => {
-        setIsActiveStatus(currentTemplate.status === "Active");
+        if (currentTemplate && !initializedRef.current) {
+            setIsActiveStatus(currentTemplate.status === "Active");
+            initializedRef.current = true;
+        }
     }, [currentTemplate]);
 
     useEffect(() => {
@@ -161,7 +216,7 @@ const useTemplateEditor = ({
         return () => clearTimeout(timer);
     }, [toast.visible]);
 
-    // ─── Helpers ──────────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────
     const showToast = (
         title: string,
         message: string,
@@ -200,7 +255,7 @@ const useTemplateEditor = ({
         }
     };
 
-    // ─── Handlers ─────────────────────────────────────────────────────
+    // ─── Handlers ─────────────────────────────────────────────────
     const handleInsertVariable = (token: string) => {
         const textarea = textareaRef.current;
         if (textarea) {
@@ -237,31 +292,34 @@ const useTemplateEditor = ({
     };
 
     const handleSaveTemplate = () => {
-        setIsSaving(true);
-        setTimeout(() => {
-            setIsSaving(false);
-            showToast(
-                "Template Saved",
-                `${templateName} has been successfully updated.`,
-            );
-        }, 1200);
+        if (!currentTemplate?.id) {
+            console.warn("[useTemplateEditor] save called but no template id available");
+            return;
+        }
+        const payload: Partial<Template> = {
+            id: currentTemplate.id,
+            name: templateName,
+            category: currentTemplate.category,
+            channels: currentTemplate.channels,
+            status: (isActiveStatus ? "Active" : "Draft") as Template["status"],
+        };
+        console.log("[useTemplateEditor] handleSaveTemplate payload:", JSON.stringify(payload, null, 2));
+        saveMutation.mutate(payload);
     };
 
     const handleSendTest = (emailAddress: string) => {
-        setIsSendingTest(true);
-        setTimeout(() => {
-            setIsSendingTest(false);
-            setIsTestEmailModalOpen(false);
-            showToast(
-                "Test Email Sent",
-                `Test ${templateName} email dispatched to ${emailAddress}.`,
-            );
-        }, 1000);
+        console.log("[useTemplateEditor] handleSendTest to:", emailAddress);
+        setIsTestEmailModalOpen(false);
+        showToast(
+            "Test Email Sent",
+            `Test ${templateName} email dispatched to ${emailAddress}.`,
+        );
     };
 
     return {
         // Template meta
         currentTemplate,
+        isLoadingTemplate: templateQuery.isLoading,
 
         // Tab & UI
         activeTab,
@@ -298,8 +356,8 @@ const useTemplateEditor = ({
         versionHistory,
 
         // Loading
-        isSaving,
-        isSendingTest,
+        isSaving: saveMutation.isPending,
+        isSendingTest: false,
 
         // Toast
         toast,

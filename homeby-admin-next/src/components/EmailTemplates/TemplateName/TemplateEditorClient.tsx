@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { Template } from "@/actions/emailTemplatesActions";
 import useTemplateEditor from "@/hooks/useTemplateEditor";
 import Toast from "@/components/Shared/Toast";
 import EditorForm from "./EditorForm";
@@ -13,14 +13,14 @@ import TestEmailModal from "./TestEmailModal";
 
 interface TemplateEditorClientProps {
     templateName: string;
-    currentTemplate: Template;
 }
 
 const TemplateEditorClient = ({
     templateName,
-    currentTemplate,
 }: TemplateEditorClientProps) => {
     const {
+        currentTemplate,
+        isLoadingTemplate,
         activeTab,
         setActiveTab,
         previewMode,
@@ -60,9 +60,66 @@ const TemplateEditorClient = ({
         handleRestoreVersion,
         handleSaveTemplate,
         handleSendTest,
-    } = useTemplateEditor({ templateName, currentTemplate });
+    } = useTemplateEditor({ templateName });
+
+    useEffect(() => {
+        console.log("[TemplateEditorClient] render state:", {
+            templateName,
+            isLoadingTemplate,
+            currentTemplate: currentTemplate ? JSON.stringify(currentTemplate, null, 2) : "null",
+            isSaving,
+        });
+    }, [templateName, isLoadingTemplate, currentTemplate, isSaving]);
 
     const CHANNEL_TABS = ["Email", "SMS", "Push Notification"] as const;
+
+    if (isLoadingTemplate) {
+        return (
+            <div className="w-full max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">
+                <div className="flex flex-col gap-1.5 mb-6">
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-semibold tracking-wide uppercase">
+                        <Link
+                            href="/email-templates"
+                            className="hover:text-text flex items-center gap-1 transition-colors"
+                        >
+                            <ArrowLeft size={12} strokeWidth={3} />
+                            Email Templates
+                        </Link>
+                        <span>&gt;</span>
+                        <span className="text-text font-bold">{templateName}</span>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center py-24">
+                    <Loader2 size={24} className="animate-spin text-muted" />
+                </div>
+            </div>
+        );
+    }
+
+    if (!currentTemplate) {
+        return (
+            <div className="w-full max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">
+                <div className="flex flex-col gap-1.5 mb-6">
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-semibold tracking-wide uppercase">
+                        <Link
+                            href="/email-templates"
+                            className="hover:text-text flex items-center gap-1 transition-colors"
+                        >
+                            <ArrowLeft size={12} strokeWidth={3} />
+                            Email Templates
+                        </Link>
+                        <span>&gt;</span>
+                        <span className="text-text font-bold">{templateName}</span>
+                    </div>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <p className="text-danger font-medium">
+                        Template &quot;{templateName}&quot; not found.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-content mx-auto select-none font-sans bg-page min-h-screen relative pb-16">

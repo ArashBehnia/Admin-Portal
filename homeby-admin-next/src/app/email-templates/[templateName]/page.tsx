@@ -1,29 +1,49 @@
-import { fetchEmailTemplates } from "@/actions/emailTemplatesActions";
+import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { fetchEmailTemplatesPage } from "@/lib/email-templates-service";
 import TemplateEditorClient from "@/components/EmailTemplates/TemplateName/TemplateEditorClient";
 
 interface PageProps {
     params: Promise<{ templateName: string }>;
 }
 
-const TemplateEditorPage = async ({ params }: PageProps) => {
+export default async function TemplateEditorPage({ params }: PageProps) {
     const { templateName } = await params;
-    const templates = await fetchEmailTemplates();
-    const currentTemplate = templates.find((t) => t.name === templateName) ?? {
-        id: "",
-        name: templateName,
-        category: "Auth" as const,
-        channels: ["Email" as const],
-        lastModified: "",
-        modifiedBy: "",
-        status: "Active" as const,
-    };
+    console.log("[email-templates/[templateName]/page.tsx] server-side prefetch for:", templateName);
+
+    const queryClient = new QueryClient();
+
+    await Promise.allSettled([
+        queryClient.prefetchQuery({
+            queryKey: ["email-templates"],
+            queryFn: fetchEmailTemplatesPage,
+        }),
+        queryClient.prefetchQuery({
+            queryKey: ["email-template", templateName],
+            queryFn: async () => {
+                const templates = await fetchEmailTemplatesPage();
+                const found = templates.find((t) => t.name === templateName);
+                console.log("[email-templates/[templateName]/page.tsx] template lookup result:", found ? JSON.stringify(found, null, 2) : "not found, using fallback");
+                return (
+                    found ?? {
+                        id: "",
+                        name: templateName,
+                        category: "System" as const,
+                        channels: ["Email" as const],
+                        lastModified: "",
+                        modifiedBy: "",
+                        status: "Active" as const,
+                    }
+                );
+            },
+        }),
+    ]);
+
+    const dehydratedState = dehydrate(queryClient);
+    console.log("[email-templates/[templateName]/page.tsx] prefetch complete, dehydrated queries:", dehydratedState.queries.length);
 
     return (
-        <TemplateEditorClient
-            templateName={templateName}
-            currentTemplate={currentTemplate}
-        />
+        <HydrationBoundary state={dehydratedState}>
+            <TemplateEditorClient templateName={templateName} />
+        </HydrationBoundary>
     );
-};
-
-export default TemplateEditorPage;
+}
