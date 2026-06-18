@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { AgenciesData } from "@/actions/agenciesActions";
+import { AgenciesData } from "@/types/agencyTypes";
 import useAgencies from "@/hooks/useAgencies";
 import AgenciesStats from "./AgenciesStats";
 import AgenciesTable from "./AgenciesTable";
@@ -15,6 +15,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
     const {
         stats,
         filteredAgencies,
+        isLoading,
         isModalOpen,
         setIsModalOpen,
         searchQuery,
@@ -49,12 +50,9 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
 
             <AgenciesStats stats={stats} />
 
-            <p className="text-[12px] text-muted -mt-1">
-                Showing demo dataset of 12 agencies below.
-            </p>
-
             <AgenciesTable
                 filteredAgencies={filteredAgencies}
+                isLoading={isLoading}
                 searchQuery={searchQuery}
                 activeFilter={activeFilter}
                 openMenuId={openMenuId}

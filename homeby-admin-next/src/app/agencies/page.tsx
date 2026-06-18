@@ -1,4 +1,4 @@
-import { fetchAgenciesData } from "@/actions/agenciesActions";
+import { fetchAgenciesData } from "@/actions/agenciesListActions";
 import AgenciesPageClient from "@/components/Agencies/AgenciesPageClient";
 
 const AgenciesPage = async () => {

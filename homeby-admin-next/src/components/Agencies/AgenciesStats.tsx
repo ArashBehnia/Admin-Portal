@@ -1,4 +1,4 @@
-import { AgencyStats } from "@/actions/agenciesActions";
+import { AgencyStats } from "@/types/agencyTypes";
 
 interface AgenciesStatsProps {
     stats: AgencyStats;

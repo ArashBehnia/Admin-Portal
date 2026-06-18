@@ -6,7 +6,7 @@ import {
     Agency,
     AGENCY_FILTERS,
     AgencyFilter,
-} from "@/actions/agenciesActions";
+} from "@/types/agencyTypes";
 import {
     SubscriptionBadge,
     OnboardingBadge,
@@ -15,6 +15,7 @@ import {
 
 interface AgenciesTableProps {
     filteredAgencies: Agency[];
+    isLoading?: boolean;
     searchQuery: string;
     activeFilter: AgencyFilter;
     openMenuId: string | null;
@@ -27,6 +28,7 @@ interface AgenciesTableProps {
 
 const AgenciesTable = ({
     filteredAgencies,
+    isLoading,
     searchQuery,
     activeFilter,
     openMenuId,
@@ -99,7 +101,16 @@ const AgenciesTable = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredAgencies.length === 0 ? (
+                            {isLoading ? (
+                                <tr>
+                                    <td
+                                        colSpan={9}
+                                        className="py-10 text-center text-muted"
+                                    >
+                                        Loading…
+                                    </td>
+                                </tr>
+                            ) : filteredAgencies.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={8}

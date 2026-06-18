@@ -1,7 +1,7 @@
 import {
-    fetchAgenciesData,
     fetchAgencyDetailData,
 } from "@/actions/agenciesActions";
+import { fetchAgenciesData } from "@/actions/agenciesListActions";
 import AgencyDetailClient from "@/components/AgencyDetail/AgencyDetailClient";
 
 interface PageProps {
