@@ -16,6 +16,13 @@ export type Template = {
     lastModified: string;
     modifiedBy: string;
     status: TemplateStatus;
+    fromName: string;
+    fromEmail: string;
+    subject: string;
+    body: string;
+    country: string;
+    language: string;
+    smsProvider: "Twilio" | "GAMA";
 };
 
 export const CATEGORIES = [
@@ -40,6 +47,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "2 days ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Welcome to HomeBy — Your agency account is ready",
+            body: "Hi {{contact_name}},\n\nWelcome to HomeBy! Your agency account for {{agency_name}} has been approved and is ready to use.\n\nYour login details:\nEmail: {{contact_name}}\nTemporary password: {{temp_password}}\n\nPlease log in at {{login_url}} and change your password immediately.\nYour temporary password will expire in {{expiry_hours}} hours.\n\nOnce logged in you can:\n- Complete your agency profile\n- Connect your CRM\n- Start adding your listings\n\nIf you need help getting started, contact us at {{support_email}}.\n\nWelcome aboard,\nThe HomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "2",
@@ -49,6 +63,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "2 days ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Your One-Time Password",
+            body: "Hi {{contact_name}},\n\nYour one-time password is: {{otp_code}}\n\nThis code expires in {{expiry_minutes}} minutes.\n\nDo not share this code with anyone.\n\n Regards,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "3",
@@ -58,6 +79,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "2 days ago",
             modifiedBy: "Hirad",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Verify your email address",
+            body: "Hi {{contact_name}},\n\nPlease verify your email address by clicking the link below:\n{{verification_url}}\n\nIf you did not create an account, please ignore this email.\n\nThanks,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "4",
@@ -67,6 +95,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 week ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Reset your password",
+            body: "Hi {{contact_name}},\n\nYou requested a password reset. Click the link below to set a new password:\n{{reset_url}}\n\nThis link expires in {{expiry_hours}} hours.\n\nIf you did not request this, please ignore this email.\n\nThanks,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "5",
@@ -76,6 +111,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "3 days ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Welcome to HomeBy!",
+            body: "Hi {{contact_name}},\n\nWelcome to HomeBy! Your account has been created successfully.\n\nStart exploring the platform at {{login_url}}.\n\nIf you need help, contact us at {{support_email}}.\n\nCheers,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "6",
@@ -85,6 +127,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "2 weeks ago",
             modifiedBy: "Sarah Chen",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Your account has been suspended",
+            body: "Hi {{contact_name}},\n\nYour account has been suspended due to: {{reason}}.\n\nPlease contact support at {{support_email}} for more information.\n\nRegards,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "7",
@@ -94,6 +143,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 day ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Your agency has been approved",
+            body: "Hi {{contact_name}},\n\nGreat news! Your agency {{agency_name}} has been approved on HomeBy.\n\nYou can now log in at {{login_url}} and start managing your listings.\n\nWelcome aboard,\nThe HomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "8",
@@ -103,6 +159,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 week ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Agency application update",
+            body: "Hi {{contact_name}},\n\nUnfortunately, your agency application for {{agency_name}} was not approved at this time.\n\nReason: {{reason}}\n\nPlease contact us at {{support_email}} for more information.\n\nRegards,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "9",
@@ -112,6 +175,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 day ago",
             modifiedBy: "Arash",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Welcome to HomeBy — Agent Account",
+            body: "Hi {{contact_name}},\n\nWelcome to HomeBy! Your agent account for {{agency_name}} is ready.\n\nLogin: {{login_url}}\nTemporary password: {{temp_password}}\n\nPlease change your password after first login.\n\nCheers,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "10",
@@ -121,6 +191,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "3 weeks ago",
             modifiedBy: "Sarah Chen",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Your review has been approved",
+            body: "Hi {{contact_name}},\n\nYour review for {{agency_name}} has been approved and is now visible on the platform.\n\nThank you for your feedback!\n\nRegards,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "11",
@@ -130,6 +207,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "3 weeks ago",
             modifiedBy: "Sarah Chen",
             status: "Active",
+            fromName: "HomeBy Team",
+            fromEmail: "info@homeby.com.au",
+            subject: "Your review was not approved",
+            body: "Hi {{contact_name}},\n\nYour review for {{agency_name}} was not approved as it does not meet our guidelines.\n\nIf you have questions, contact us at {{support_email}}.\n\nRegards,\nHomeBy Team",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "12",
@@ -139,6 +223,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 month ago",
             modifiedBy: "Hirad",
             status: "Active",
+            fromName: "HomeBy Billing",
+            fromEmail: "billing@homeby.com.au",
+            subject: "Your invoice is ready",
+            body: "Hi {{contact_name}},\n\nYour invoice for {{agency_name}} is now available.\n\nInvoice amount: {{amount}}\nDue date: {{due_date}}\n\nView your invoice at {{invoice_url}}.\n\nThanks,\nHomeBy Billing",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "13",
@@ -148,6 +239,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "1 month ago",
             modifiedBy: "Hirad",
             status: "Draft",
+            fromName: "HomeBy Billing",
+            fromEmail: "billing@homeby.com.au",
+            subject: "Payment failed for your subscription",
+            body: "Hi {{contact_name}},\n\nWe were unable to process your payment for {{agency_name}}.\n\nPlease update your payment method at {{billing_url}}.\n\nIf you need help, contact {{support_email}}.\n\nRegards,\nHomeBy Billing",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
         {
             id: "14",
@@ -157,6 +255,13 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
             lastModified: "2 weeks ago",
             modifiedBy: "Hirad",
             status: "Draft",
+            fromName: "HomeBy System",
+            fromEmail: "alerts@homeby.com.au",
+            subject: "Feed failure alert — {{agency_name}}",
+            body: "Hi {{contact_name}},\n\nA feed failure has been detected for {{agency_name}}.\n\nError: {{error_message}}\nTime: {{timestamp}}\n\nPlease investigate and resolve the issue.\n\nHomeBy System Alerts",
+            country: "Australia",
+            language: "English",
+            smsProvider: "Twilio",
         },
     ];
 };

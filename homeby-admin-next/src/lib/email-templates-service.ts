@@ -48,7 +48,31 @@ function normalizeTemplate(raw: Record<string, unknown>): Template {
         lastModified: toStr(raw.lastModified ?? raw.last_modified ?? raw.updatedAt ?? raw.updated_at ?? ""),
         modifiedBy: toStr(raw.modifiedBy ?? raw.modified_by ?? raw.updatedBy ?? ""),
         status: toStr(raw.status ?? "Active") as Template["status"],
+        fromName: toStr(raw.fromName ?? raw.from_name ?? raw.senderName ?? raw.sender_name ?? "HomeBy Team"),
+        fromEmail: toStr(raw.fromEmail ?? raw.from_email ?? raw.senderEmail ?? raw.sender_email ?? "info@homeby.com.au"),
+        subject: toStr(raw.subject ?? raw.title ?? ""),
+        body: toStr(raw.body ?? raw.content ?? raw.html ?? raw.text ?? ""),
+        country: toStr(raw.country ?? "Australia"),
+        language: toStr(raw.language ?? "English"),
+        smsProvider: toStr(raw.smsProvider ?? raw.sms_provider ?? "Twilio") as "Twilio" | "GAMA",
     };
+}
+
+function serializeTemplate(data: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    if (data.id != null) out.id = data.id;
+    if (data.name != null) out.name = data.name;
+    if (data.category != null) out.category = data.category;
+    if (data.channels != null) out.channels = data.channels;
+    if (data.status != null) out.status = data.status;
+    if (data.fromName != null) out.from_name = data.fromName;
+    if (data.fromEmail != null) out.from_email = data.fromEmail;
+    if (data.subject != null) out.subject = data.subject;
+    if (data.body != null) out.body = data.body;
+    if (data.country != null) out.country = data.country;
+    if (data.language != null) out.language = data.language;
+    if (data.smsProvider != null) out.sms_provider = data.smsProvider;
+    return out;
 }
 
 function logApiData(method: string, endpoint: string, payload?: unknown, response?: unknown) {
@@ -100,10 +124,11 @@ export async function fetchEmailTemplateById(id: string): Promise<Template | nul
 
 export async function createTemplate(template: Partial<Template>): Promise<Template> {
     const endpoint = "/admin/template";
-    logApiData("POST", endpoint, template);
+    const serialized = serializeTemplate(template as Record<string, unknown>);
+    logApiData("POST", endpoint, serialized);
     const raw = await backendFetch<Record<string, unknown>>(endpoint, {
         method: "POST",
-        body: JSON.stringify(template),
+        body: JSON.stringify(serialized),
     });
     console.log("[email-templates-service] createTemplate raw response:", JSON.stringify(raw, null, 2));
     const result = normalizeTemplate(toObject(raw));
@@ -111,12 +136,17 @@ export async function createTemplate(template: Partial<Template>): Promise<Templ
     return result;
 }
 
-export async function updateTemplate(id: string, data: Partial<Template>): Promise<Template> {
+export async function updateTemplate(id: string, data: Record<string, unknown>): Promise<Template> {
     const endpoint = `/admin/template/${encodeURIComponent(id)}`;
-    logApiData("PATCH", endpoint, data);
+    const serialized = serializeTemplate(data);
+    console.log("[email-templates-service] updateTemplate serialized payload:", JSON.stringify(serialized, null, 2));
+    logApiData("PUT", endpoint, serialized);
     const raw = await backendFetch<Record<string, unknown>>(endpoint, {
         method: "PUT",
-        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(serialized),
     });
     console.log("[email-templates-service] updateTemplate raw response:", JSON.stringify(raw, null, 2));
     const result = normalizeTemplate(toObject(raw));

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { VersionLog } from "@/hooks/useTemplateEditor";
 
 interface VersionHistoryProps {
@@ -16,24 +17,26 @@ const VersionHistory = ({
     onRestore,
 }: VersionHistoryProps) => {
     return (
-        <div className="mt-12 bg-card border border-border rounded-lg shadow-sm overflow-hidden select-none">
+        <div className="mt-8 bg-card border border-border rounded-lg shadow-sm overflow-hidden select-none">
             <div
                 onClick={onToggle}
-                className="px-6 py-4 border-b border-border bg-page/10 flex justify-between items-center cursor-pointer hover:bg-page/20 transition-colors"
+                className="px-6 py-4 flex justify-between items-center cursor-pointer hover:bg-page/30 transition-colors"
             >
-                <h3 className="font-bold text-sm text-text font-sans uppercase tracking-wider">
+                <h3 className="font-bold text-sm text-text font-sans">
                     Version history
                 </h3>
-                <span className="text-muted/60 text-xs font-bold">
-                    {isOpen ? "▲" : "▼"}
-                </span>
+                {isOpen ? (
+                    <ChevronUp size={18} className="text-muted" />
+                ) : (
+                    <ChevronDown size={18} className="text-muted" />
+                )}
             </div>
 
             {isOpen && (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
+                <div className="overflow-x-auto border-t border-border">
+                    <table className="w-full text-left border-collapse text-sm">
                         <thead>
-                            <tr className="border-b border-border/80 bg-page/30 text-[10px] text-muted font-bold tracking-wider uppercase select-none">
+                            <tr className="border-b border-border bg-page/30 text-[11px] text-muted font-bold tracking-wider uppercase select-none">
                                 <th className="px-6 py-3">Version</th>
                                 <th className="px-6 py-3">Modified by</th>
                                 <th className="px-6 py-3">Date</th>
@@ -49,25 +52,25 @@ const VersionHistory = ({
                                     key={item.version}
                                     className={`hover:bg-page/20 transition-colors text-text ${
                                         item.isActive
-                                            ? "bg-page/40 font-semibold"
+                                            ? "bg-page/30"
                                             : ""
                                     }`}
                                 >
-                                    <td className="px-6 py-3.5 font-bold">
+                                    <td className="px-6 py-3.5 font-semibold">
                                         {item.version}
                                     </td>
-                                    <td className="px-6 py-3.5 text-muted font-medium">
+                                    <td className="px-6 py-3.5 text-muted">
                                         {item.modifiedBy}
                                     </td>
                                     <td className="px-6 py-3.5 text-muted">
                                         {item.date}
                                     </td>
-                                    <td className="px-6 py-3.5 text-slate-700">
+                                    <td className="px-6 py-3.5 text-slate-600">
                                         {item.changes}
                                     </td>
-                                    <td className="px-6 py-3.5 text-right font-bold font-sans">
+                                    <td className="px-6 py-3.5 text-right font-semibold font-sans">
                                         {item.isActive ? (
-                                            <span className="text-muted/50 cursor-default">
+                                            <span className="text-muted/60 cursor-default">
                                                 Current
                                             </span>
                                         ) : (

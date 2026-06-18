@@ -34,7 +34,16 @@ async function fetchJson<T>(url: string): Promise<T> {
     return res.json();
 }
 
-const INITIAL_BODY = `Hi {{contact_name}},
+const AVAILABLE_VARIABLES = [
+    "{{agency_name}}",
+    "{{contact_name}}",
+    "{{temp_password}}",
+    "{{login_url}}",
+    "{{support_email}}",
+    "{{expiry_hours}}",
+];
+
+const DEFAULT_BODY = `Hi {{contact_name}},
 
 Welcome to HomeBy! Your agency account for {{agency_name}} has been approved and is ready to use.
 
@@ -55,82 +64,16 @@ If you need help getting started, contact us at {{support_email}}.
 Welcome aboard,
 The HomeBy Team`;
 
-const INITIAL_VERSION_HISTORY: VersionLog[] = [
-    {
-        version: "v3 (current)",
-        modifiedBy: "Arash",
-        date: "1 May 2026",
-        changes: "Added temp password expiry notice",
-        subject: "Welcome to HomeBy — Your agency account is ready",
-        body: INITIAL_BODY,
-        isActive: true,
-    },
-    {
-        version: "v2",
-        modifiedBy: "Sarah Chen",
-        date: "15 Mar 2026",
-        changes: "Updated login URL",
-        subject: "Welcome to HomeBy! Account Approved",
-        body: `Hi {{contact_name}},
-
-Your agency account for {{agency_name}} is now approved.
-
-Login here: portal.homeby.com.au/login
-Password: {{temp_password}}
-
-Regards,
-HomeBy Team`,
-        isActive: false,
-    },
-    {
-        version: "v1",
-        modifiedBy: "Hirad",
-        date: "1 Jan 2026",
-        changes: "Initial template",
-        subject: "HomeBy Agent Account Setup",
-        body: `Hi {{contact_name}},
-
-This is the initial setup email for your agency {{agency_name}}.
-Your password is {{temp_password}}.
-
-Thanks,
-HomeBy`,
-        isActive: false,
-    },
-];
-
-const AVAILABLE_VARIABLES = [
-    "{{agency_name}}",
-    "{{contact_name}}",
-    "{{temp_password}}",
-    "{{login_url}}",
-    "{{support_email}}",
-    "{{expiry_hours}}",
-];
-
 const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const queryClient = useQueryClient();
 
     // ─── Data Fetching ─────────────────────────────────────────────
-    console.log("[useTemplateEditor] fetching template:", templateName);
     const templateQuery = useQuery<Template>({
         queryKey: ["email-template", templateName],
         queryFn: () => fetchJson<Template>(`/api/email-templates/${templateName}`),
     });
 
     const currentTemplate = templateQuery.data;
-
-    useEffect(() => {
-        if (currentTemplate) {
-            console.log("[useTemplateEditor] template loaded:", JSON.stringify(currentTemplate, null, 2));
-        }
-    }, [currentTemplate]);
-
-    useEffect(() => {
-        if (templateQuery.isError) {
-            console.error("[useTemplateEditor] query error:", templateQuery.error);
-        }
-    }, [templateQuery.isError, templateQuery.error]);
 
     // ─── Tab & UI State ───────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ChannelTab>("Email");
@@ -140,24 +83,20 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const [isActiveStatus, setIsActiveStatus] = useState(false);
     const initializedRef = useRef(false);
 
-    // ─── Form State ───────────────────────────────────────────────
-    const [fromName, setFromName] = useState("HomeBy Team");
-    const [fromEmail, setFromEmail] = useState("info@homeby.com.au");
-    const [subject, setSubject] = useState(
-        "Welcome to HomeBy — Your agency account is ready",
-    );
+    // ─── Form State (initialized from backend) ────────────────────
+    const [fromName, setFromName] = useState("");
+    const [fromEmail, setFromEmail] = useState("");
+    const [subject, setSubject] = useState("");
     const [country, setCountry] = useState("Australia");
     const [language, setLanguage] = useState("English");
     const [smsProvider, setSmsProvider] = useState<"Twilio" | "GAMA">("Twilio");
-    const [bodyText, setBodyText] = useState(INITIAL_BODY);
+    const [bodyText, setBodyText] = useState(DEFAULT_BODY);
     const [testEmailAddress, setTestEmailAddress] = useState(
         "james@raywhitebondi.com.au",
     );
 
     // ─── Version History State ────────────────────────────────────
-    const [versionHistory, setVersionHistory] = useState<VersionLog[]>(
-        INITIAL_VERSION_HISTORY,
-    );
+    const [versionHistory, setVersionHistory] = useState<VersionLog[]>([]);
 
     // ─── Toast State ──────────────────────────────────────────────
     const [toast, setToast] = useState<ToastState>({
@@ -170,24 +109,48 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     // ─── Refs ─────────────────────────────────────────────────────
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // ─── Initialize form from fetched template ────────────────────
+    useEffect(() => {
+        if (currentTemplate && !initializedRef.current) {
+            console.log("[useTemplateEditor] initializing form from template:", currentTemplate.name);
+            setFromName(currentTemplate.fromName || "HomeBy Team");
+            setFromEmail(currentTemplate.fromEmail || "info@homeby.com.au");
+            setSubject(currentTemplate.subject || "");
+            setBodyText(currentTemplate.body || DEFAULT_BODY);
+            setCountry(currentTemplate.country || "Australia");
+            setLanguage(currentTemplate.language || "English");
+            setSmsProvider(currentTemplate.smsProvider || "Twilio");
+            setIsActiveStatus(currentTemplate.status === "Active");
+            initializedRef.current = true;
+        }
+    }, [currentTemplate]);
+
     // ─── Mutations ────────────────────────────────────────────────
     const saveMutation = useMutation({
-        mutationFn: async (data: Partial<Template>) => {
-            console.log("[useTemplateEditor] save mutation payload:", JSON.stringify(data, null, 2));
-            const res = await fetch(`/api/email-templates/${data.id}`, {
+        mutationFn: async (data: Record<string, unknown>) => {
+            const urlId = (data.id as string) || templateName;
+            console.log("[useTemplateEditor] save mutation URL id:", urlId, "payload:", JSON.stringify(data, null, 2));
+            const res = await fetch(`/api/email-templates/${encodeURIComponent(urlId)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-            if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+            if (!res.ok) {
+                const errorBody = await res.json().catch(() => ({}));
+                const errorMessage = errorBody.error || `Save failed: ${res.status}`;
+                throw new Error(errorMessage);
+            }
             const result = await res.json();
             console.log("[useTemplateEditor] save mutation response:", JSON.stringify(result, null, 2));
             return result;
         },
-        onSuccess: () => {
-            console.log("[useTemplateEditor] save mutation success, invalidating queries");
-            queryClient.invalidateQueries({ queryKey: ["email-templates"] });
-            queryClient.invalidateQueries({ queryKey: ["email-template", templateName] });
+        onSuccess: async () => {
+            console.log("[useTemplateEditor] save mutation success, refetching template data");
+            // Reset initializedRef so useEffect can re-sync form with fresh data
+            initializedRef.current = false;
+            // Refetch the template to get fresh data from backend
+            await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            await queryClient.refetchQueries({ queryKey: ["email-template", templateName] });
             showToast(
                 "Template Saved",
                 `${templateName} has been successfully updated.`,
@@ -200,13 +163,6 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     });
 
     // ─── Effects ──────────────────────────────────────────────────
-    useEffect(() => {
-        if (currentTemplate && !initializedRef.current) {
-            setIsActiveStatus(currentTemplate.status === "Active");
-            initializedRef.current = true;
-        }
-    }, [currentTemplate]);
-
     useEffect(() => {
         if (!toast.visible) return;
         const timer = setTimeout(
@@ -245,13 +201,19 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const getCategoryStyles = (category: string) => {
         switch (category) {
             case "Auth":
-                return "bg-blue-50 border-blue-100 text-blue-700";
+                return "bg-blue-50 text-blue-700";
             case "Account":
-                return "bg-emerald-50 border-emerald-100 text-emerald-700";
+                return "bg-emerald-50 text-emerald-700";
             case "Agency":
-                return "bg-purple-50 border-purple-100 text-purple-700";
+                return "bg-purple-50 text-purple-700";
+            case "Reviews":
+                return "bg-orange-50 text-orange-700";
+            case "Billing":
+                return "bg-amber-50 text-amber-700";
+            case "System":
+                return "bg-slate-50 text-slate-700";
             default:
-                return "bg-slate-50 border-slate-200 text-slate-700";
+                return "bg-slate-50 text-slate-700";
         }
     };
 
@@ -294,14 +256,22 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const handleSaveTemplate = () => {
         if (!currentTemplate?.id) {
             console.warn("[useTemplateEditor] save called but no template id available");
+            showToast("Save Failed", "Template ID not found. Please reload and try again.", "error");
             return;
         }
-        const payload: Partial<Template> = {
+        const payload: Record<string, unknown> = {
             id: currentTemplate.id,
             name: templateName,
             category: currentTemplate.category,
             channels: currentTemplate.channels,
-            status: (isActiveStatus ? "Active" : "Draft") as Template["status"],
+            status: isActiveStatus ? "Active" : "Draft",
+            fromName,
+            fromEmail,
+            subject,
+            body: bodyText,
+            country,
+            language,
+            smsProvider,
         };
         console.log("[useTemplateEditor] handleSaveTemplate payload:", JSON.stringify(payload, null, 2));
         saveMutation.mutate(payload);

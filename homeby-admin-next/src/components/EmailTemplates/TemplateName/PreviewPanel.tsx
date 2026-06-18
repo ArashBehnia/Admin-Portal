@@ -28,27 +28,27 @@ const PreviewPanel = ({
         <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Panel Header */}
             <div className="flex flex-wrap justify-between items-center gap-3 select-none">
-                <h3 className="font-bold text-[14px] text-text font-sans">
+                <h3 className="font-bold text-base text-text font-sans">
                     Preview
                 </h3>
                 <div className="flex items-center gap-3">
                     {/* Viewport Toggle */}
-                    <div className="bg-card border border-border rounded p-0.5 flex items-center shadow-sm">
+                    <div className="bg-card border border-border rounded-md p-0.5 flex items-center shadow-sm">
                         {(["Desktop", "Mobile"] as const).map((mode) => (
                             <button
                                 key={mode}
                                 type="button"
                                 onClick={() => onPreviewModeChange(mode)}
-                                className={`px-3 py-1.5 rounded-sm text-xs font-bold font-sans flex items-center gap-1 cursor-pointer transition-colors ${
+                                className={`px-3 py-1.5 rounded text-xs font-semibold font-sans flex items-center gap-1.5 cursor-pointer transition-colors ${
                                     previewMode === mode
                                         ? "bg-text text-white"
                                         : "text-muted hover:text-text bg-transparent"
                                 }`}
                             >
                                 {mode === "Desktop" ? (
-                                    <Monitor size={12} />
+                                    <Monitor size={13} />
                                 ) : (
-                                    <Smartphone size={12} />
+                                    <Smartphone size={13} />
                                 )}
                                 {mode}
                             </button>
@@ -59,7 +59,7 @@ const PreviewPanel = ({
                     <button
                         type="button"
                         onClick={onSendTestClick}
-                        className="px-3 py-2 border border-border bg-card hover:bg-page hover:text-text rounded text-xs font-bold font-sans text-muted transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-4 py-2 border border-border bg-card hover:bg-page hover:text-text rounded-md text-xs font-semibold font-sans text-muted transition-colors cursor-pointer shadow-sm"
                     >
                         Send test email
                     </button>
@@ -67,37 +67,40 @@ const PreviewPanel = ({
             </div>
 
             {/* Preview Container */}
-            <div className="w-full rounded-lg p-5 flex justify-center items-start min-h-[460px]">
+            <div className="w-full rounded-lg flex justify-center items-start">
                 <div
-                    className={`bg-white w-full rounded border border-slate-200 shadow-md p-6 flex flex-col font-sans transition-all duration-300 text-xs ${
+                    className={`bg-white w-full rounded-lg border border-slate-200 shadow-md p-6 flex flex-col font-sans transition-all duration-300 text-sm ${
                         previewMode === "Mobile"
                             ? "max-w-[340px]"
                             : "max-w-full"
                     }`}
                 >
-                    <div className="flex flex-col gap-1 text-[13px] text-muted pb-4 border-b border-slate-100 font-sans">
+                    {/* Email header */}
+                    <div className="flex flex-col gap-1.5 text-sm text-slate-500 pb-4 border-b border-slate-100 font-sans">
                         <div>
-                            <span className="font-bold text-slate-800">
-                                From:
-                            </span>{" "}
+                            <span className="font-semibold text-slate-700">
+                                From:{" "}
+                            </span>
                             {fromName} &lt;{fromEmail}&gt;
                         </div>
                         <div>
-                            <span className="font-bold text-slate-800">
-                                To:
-                            </span>{" "}
+                            <span className="font-semibold text-slate-700">
+                                To:{" "}
+                            </span>
                             james@raywhitebondi.com.au
                         </div>
                         <div className="mt-0.5">
-                            <span className="font-bold text-slate-800">
-                                {activeTab === "Email" ? "Subject:" : "Title:"}
-                            </span>{" "}
+                            <span className="font-semibold text-slate-700">
+                                {activeTab === "Email" ? "Subject: " : "Title: "}
+                            </span>
                             <span className="font-semibold text-text">
                                 {subject}
                             </span>
                         </div>
                     </div>
-                    <div className="pt-5 text-[13px] leading-relaxed text-slate-700 font-sans break-words whitespace-pre-wrap select-text">
+
+                    {/* Email body */}
+                    <div className="pt-5 text-sm leading-relaxed text-slate-600 font-sans break-words whitespace-pre-wrap select-text">
                         {compiledBody}
                     </div>
                 </div>
