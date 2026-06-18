@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, Search } from "lucide-react";
-import { IntegrationsData, STATUS_FILTERS, StatusFilter } from "@/actions/integrationsActions";
+import { IntegrationsData, STATUS_FILTERS, StatusFilter } from "@/types/integrationTypes";
 import useIntegrations from "@/hooks/useIntegrations";
 import FeedStats from "./FeedStats";
 import FeedsTable from "./FeedsTable";
@@ -23,6 +23,8 @@ const IntegrationsPageClient = ({
         filteredFeeds,
         paginatedFeeds,
         totalPages,
+        totalCount,
+        isLoading,
         activeTab,
         setActiveTab,
         isAddModalOpen,
@@ -124,18 +126,20 @@ const IntegrationsPageClient = ({
 
                     <FeedsTable
                         paginatedFeeds={paginatedFeeds}
+                        isLoading={isLoading}
                         onViewDetails={openDetails}
                     />
                     <FeedsMobileList
                         paginatedFeeds={paginatedFeeds}
+                        isLoading={isLoading}
                         onViewDetails={openDetails}
                     />
 
-                    {filteredFeeds.length > 0 && (
+                    {totalCount > 0 && (
                         <FeedsPagination
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            totalCount={filteredFeeds.length}
+                            totalCount={totalCount}
                             onPageChange={setCurrentPage}
                         />
                     )}

@@ -1,4 +1,4 @@
-import { FeedStats as FeedStatsType } from "@/actions/integrationsActions";
+import { FeedStats as FeedStatsType } from "@/types/integrationTypes";
 
 interface FeedStatsProps {
     stats: FeedStatsType;

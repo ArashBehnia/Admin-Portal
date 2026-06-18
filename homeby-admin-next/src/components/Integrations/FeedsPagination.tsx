@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ROWS_PER_PAGE } from "@/actions/integrationsActions";
+import { ROWS_PER_PAGE } from "@/types/integrationTypes";
 
 interface FeedsPaginationProps {
     currentPage: number;

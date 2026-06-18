@@ -1,7 +1,7 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
-import { Feed } from "@/actions/integrationsActions";
+import { Feed } from "@/types/integrationTypes";
 import { StatusBadge, MethodBadge, OnboardingBadge } from "@/components/Integrations/StatusBadge";
 
 interface FeedsMobileListProps {

@@ -1,214 +1,149 @@
-export type FeedStatus = "Healthy" | "Failing" | "Pending setup" | "Warning";
-export type FeedMethod = "FTP" | "API" | "Internal";
+import { backendFetch } from "@/lib/api";
+import type {
+    IntegrationSummaryDto,
+    IntegrationPageDto,
+    IntegrationListItemDto,
+    IntegrationDetailDto,
+    IntegrationErrorsDto,
+    Feed,
+    FeedStats,
+    IntegrationsData,
+} from "../types/integrationTypes";
 
-export type Feed = {
-    id: string;
-    agencyName: string;
-    crm: string;
-    method: FeedMethod;
-    status: FeedStatus;
-    lastSync: string;
-    listings24h: number | null;
-    errors24h: number | null;
-    distribution: string;
-    onboarding: string;
-};
+// Re-export types so existing imports still work
+export type {
+    IntegrationSummaryDto,
+    IntegrationPageDto,
+    IntegrationDetailDto,
+    IntegrationErrorDto,
+    IntegrationErrorsDto,
+    Feed,
+    FeedStatus,
+    FeedMethod,
+    FeedStats,
+    IntegrationsData,
+    StatusFilter,
+} from "../types/integrationTypes";
+export { ROWS_PER_PAGE, STATUS_FILTERS } from "../types/integrationTypes";
 
-export type FeedStats = {
-    total: number;
-    healthy: number;
-    warning: number;
-    failing: number;
-};
+// ─── Helpers ─────────────────────────────────────────────────────────
 
-export type IntegrationsData = {
-    stats: FeedStats;
-    feeds: Feed[];
-};
+function inferMethod(crmType?: string, webhookUrl?: string): Feed["method"] {
+    const url = webhookUrl?.toLowerCase() ?? "";
+    if (url.includes("ftp") || url.includes("sftp")) return "FTP";
+    if (crmType?.toLowerCase() === "homeby internal") return "Internal";
+    return "API";
+}
 
-export const ROWS_PER_PAGE = 10;
+function mapConnectionStatus(status: string): Feed["status"] {
+    const s = status.toLowerCase();
+    if (s === "healthy") return "Healthy";
+    if (s === "failing" || s === "error") return "Failing";
+    if (s === "warning" || s === "stale") return "Warning";
+    if (s === "pending" || s === "pending_setup" || s === "not configured")
+        return "Pending setup";
+    return "Healthy";
+}
 
-export const STATUS_FILTERS = [
-    "All",
-    "Healthy",
-    "Warning",
-    "Failing",
-    "Pending setup",
-] as const;
-export type StatusFilter = (typeof STATUS_FILTERS)[number];
+function formatLastSync(iso?: string): string {
+    if (!iso) return "Never";
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+}
 
-export const fetchIntegrationsData = async (): Promise<IntegrationsData> => {
-    return {
-        stats: { total: 14, healthy: 11, warning: 0, failing: 2 },
-        feeds: [
-            {
-                id: "1",
-                agencyName: "Ray White Bondi",
-                crm: "Box+Dice",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "14 min ago",
-                listings24h: 47,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "2",
-                agencyName: "McGrath Surry Hills",
-                crm: "VaultRE",
-                method: "API",
-                status: "Healthy",
-                lastSync: "1 hour ago",
-                listings24h: 23,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "3",
-                agencyName: "Belle Property Mosman",
-                crm: "AgentBox",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "2 hours ago",
-                listings24h: 31,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "4",
-                agencyName: "LJ Hooker Parramatta",
-                crm: "Rex Software",
-                method: "API",
-                status: "Healthy",
-                lastSync: "3 hours ago",
-                listings24h: 18,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "5",
-                agencyName: "Stone Real Estate Newtown",
-                crm: "Box+Dice",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "4 hours ago",
-                listings24h: 29,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "6",
-                agencyName: "Harcourts Melbourne",
-                crm: "VaultRE",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "5 hours ago",
-                listings24h: 52,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "7",
-                agencyName: "Ray White Carlton",
-                crm: "MyDesktop",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "6 hours ago",
-                listings24h: 14,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "8",
-                agencyName: "McGrath Double Bay",
-                crm: "AgentBox",
-                method: "API",
-                status: "Healthy",
-                lastSync: "8 hours ago",
-                listings24h: 38,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "9",
-                agencyName: "Jellis Craig Fitzroy",
-                crm: "Rex Software",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "11 hours ago",
-                listings24h: 22,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "10",
-                agencyName: "Nelson Alexander",
-                crm: "Box+Dice",
-                method: "FTP",
-                status: "Healthy",
-                lastSync: "12 hours ago",
-                listings24h: 19,
-                errors24h: 0,
-                distribution: "4/4",
-                onboarding: "Live",
-            },
-            {
-                id: "11",
-                agencyName: "Barry Plant Doncaster",
-                crm: "HomeBy Internal",
-                method: "Internal",
-                status: "Healthy",
-                lastSync: "Live - real time",
-                listings24h: 14,
-                errors24h: 0,
-                distribution: "HomeBy only",
-                onboarding: "Live",
-            },
-            {
-                id: "12",
-                agencyName: "Hocking Stuart Richmond",
-                crm: "VaultRE",
-                method: "FTP",
-                status: "Failing",
-                lastSync: "3 days ago",
-                listings24h: 0,
-                errors24h: 14,
-                distribution: "2/4",
-                onboarding: "CRM Connected",
-            },
-            {
-                id: "13",
-                agencyName: "First National Geelong",
-                crm: "Manual",
-                method: "FTP",
-                status: "Failing",
-                lastSync: "5 days ago",
-                listings24h: 0,
-                errors24h: 28,
-                distribution: "Failing",
-                onboarding: "Approved",
-            },
-            {
-                id: "14",
-                agencyName: "First Home Buyers Melbourne",
-                crm: "AgentBox",
-                method: "FTP",
-                status: "Pending setup",
-                lastSync: "Never",
-                listings24h: null,
-                errors24h: null,
-                distribution: "Not set up",
-                onboarding: "Approved",
-            },
-        ],
+function mapAgencyStatus(status?: string): string {
+    if (!status) return "Live";
+    const s = status.toLowerCase();
+    if (s === "active" || s === "live") return "Live";
+    if (s === "onboarding") return "CRM Connected";
+    if (s === "approved") return "Approved";
+    if (s === "trial") return "Approved";
+    return status;
+}
+
+// ─── Server Actions ──────────────────────────────────────────────────
+
+export const fetchIntegrationsData = async (
+    offset = 0,
+    limit = 10,
+    keywords?: string,
+): Promise<IntegrationsData> => {
+    const params = new URLSearchParams({
+        offset: String(offset),
+        limit: String(limit),
+    });
+    if (keywords) params.set("keywords", keywords);
+
+    const [summaryRaw, pageRaw] = await Promise.all([
+        backendFetch<unknown>("/admin/integrations/summary"),
+        backendFetch<unknown>(
+            `/admin/integrations/page?${params.toString()}`,
+        ),
+    ]);
+
+    // Handle different possible API response shapes
+    const summary = (summaryRaw as IntegrationSummaryDto) ?? {
+        totalAgencies: 0,
+        connected: 0,
+        feedErrors24h: 0,
+        syncingFeeds: 0,
     };
+
+    // page could be: { data: [...], total } OR an array directly
+    const pageItems: IntegrationListItemDto[] = Array.isArray(pageRaw)
+        ? pageRaw
+        : Array.isArray((pageRaw as IntegrationPageDto)?.data)
+          ? (pageRaw as IntegrationPageDto).data
+          : [];
+    const pageTotal = Array.isArray(pageRaw)
+        ? pageRaw.length
+        : (pageRaw as IntegrationPageDto)?.total ?? 0;
+
+    const stats: FeedStats = {
+        total: summary.totalAgencies,
+        healthy: summary.connected,
+        warning: Math.max(
+            0,
+            summary.totalAgencies - summary.connected - summary.feedErrors24h,
+        ),
+        failing: summary.feedErrors24h,
+    };
+
+    const feeds: Feed[] = pageItems.map((item) => ({
+        id: item.agencyId,
+        agencyName: item.agencyName,
+        crm: item.crmType ?? "—",
+        method: inferMethod(item.crmType, item.webhookUrl),
+        status: mapConnectionStatus(item.connectionStatus),
+        lastSync: formatLastSync(item.lastSyncAt),
+        listings24h: item.totalFeeds,
+        errors24h: item.errorFeeds,
+        distribution: "—",
+        onboarding: mapAgencyStatus(item.agencyStatus),
+    }));
+
+    return { stats, feeds, total: pageTotal };
+};
+
+export const fetchIntegrationDetail = async (
+    id: string,
+): Promise<IntegrationDetailDto> => {
+    return backendFetch<IntegrationDetailDto>(
+        `/admin/integrations/${id}`,
+    );
+};
+
+export const fetchIntegrationErrors = async (
+    id: string,
+    limit = 20,
+): Promise<IntegrationErrorsDto> => {
+    return backendFetch<IntegrationErrorsDto>(
+        `/admin/integrations/${id}/errors?limit=${limit}`,
+    );
 };
