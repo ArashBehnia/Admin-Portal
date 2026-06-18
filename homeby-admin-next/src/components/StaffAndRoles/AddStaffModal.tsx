@@ -1,6 +1,7 @@
 'use client';
 
 import { X, Loader2, AlertTriangle } from 'lucide-react';
+import { RoleItem } from '@/actions/staffAndRolesActions';
 
 interface AddStaffModalProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface AddStaffModalProps {
     formEmail: string;
     formMobile: string;
     formRole: string;
+    rolesList: RoleItem[];
     sendWelcome: boolean;
     formError: string;
     isSubmitting: boolean;
@@ -24,7 +26,7 @@ interface AddStaffModalProps {
 
 const AddStaffModal = ({
     isOpen, onClose, formFirstName, formLastName, formEmail, formMobile,
-    formRole, sendWelcome, formError, isSubmitting,
+    formRole, rolesList, sendWelcome, formError, isSubmitting,
     onFirstNameChange, onLastNameChange, onEmailChange, onMobileChange,
     onRoleChange, onSendWelcomeChange, onSubmit,
 }: AddStaffModalProps) => {
@@ -77,10 +79,9 @@ const AddStaffModal = ({
                         <label className="text-[13px] text-muted font-medium font-sans">Role <span className="text-accent">*</span></label>
                         <select value={formRole} onChange={(e) => onRoleChange(e.target.value)}
                             className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors">
-                            <option value="Admin">Admin</option>
-                            <option value="Support">Support</option>
-                            <option value="Reviewer">Reviewer</option>
-                            <option value="Content editor">Content editor</option>
+                            {rolesList.filter(r => r.slug !== 'superadmin').map((role) => (
+                                <option key={role.id} value={role.name}>{role.name}</option>
+                            ))}
                         </select>
                         <p className="text-[12px] text-muted leading-tight mt-1.5 font-sans">
                             Superadmin role can only be assigned by existing superadmin after account creation.

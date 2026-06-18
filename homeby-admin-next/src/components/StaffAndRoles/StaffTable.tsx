@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Plus, Loader2, MoreHorizontal } from "lucide-react";
-import { StaffMember } from "./StaffPageClient";
+import { StaffMember } from "@/actions/staffAndRolesActions";
 
 const ROLES_INFO: Record<string, { badgeStyle: string }> = {
     Superadmin: {

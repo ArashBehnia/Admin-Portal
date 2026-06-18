@@ -1,7 +1,8 @@
 "use client";
 
-import { X, AlertTriangle } from "lucide-react";
-import { StaffMember } from "./StaffPageClient";
+import { Fragment } from "react";
+import { X, AlertTriangle, Loader2, Check } from "lucide-react";
+import { StaffMember, RoleItem, PermissionCategory } from "@/actions/staffAndRolesActions";
 
 interface EditStaffDrawerProps {
     isOpen: boolean;
@@ -14,9 +15,14 @@ interface EditStaffDrawerProps {
     formEmail: string;
     formMobile: string;
     formRole: string;
+    rolesList: RoleItem[];
     formStatus: "Active" | "Inactive";
     formMfa: "Enabled" | "Not set up";
     formError: string;
+    isSubmitting: boolean;
+    permissions: PermissionCategory[];
+    staffActivity: Record<string, unknown>[];
+    isActivityLoading: boolean;
     onFirstNameChange: (v: string) => void;
     onLastNameChange: (v: string) => void;
     onMobileChange: (v: string) => void;
@@ -38,9 +44,14 @@ const EditStaffDrawer = ({
     formEmail,
     formMobile,
     formRole,
+    rolesList,
     formStatus,
     formMfa,
     formError,
+    isSubmitting,
+    permissions,
+    staffActivity,
+    isActivityLoading,
     onFirstNameChange,
     onLastNameChange,
     onMobileChange,
@@ -210,15 +221,11 @@ const EditStaffDrawer = ({
                                     }
                                     className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
                                 >
-                                    <option value="Superadmin">
-                                        Superadmin
-                                    </option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="Support">Support</option>
-                                    <option value="Reviewer">Reviewer</option>
-                                    <option value="Content editor">
-                                        Content editor
-                                    </option>
+                                    {rolesList.map((role) => (
+                                        <option key={role.id} value={role.name}>
+                                            {role.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -299,9 +306,17 @@ const EditStaffDrawer = ({
                         <div className="px-6 py-4 border-t border-border flex justify-end bg-page/20">
                             <button
                                 type="submit"
-                                className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded font-bold text-sm transition-colors cursor-pointer font-sans shadow-sm"
+                                disabled={isSubmitting}
+                                className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded font-bold text-sm transition-colors cursor-pointer font-sans shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-75 disabled:cursor-not-allowed min-w-[80px]"
                             >
-                                Save
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 size={14} className="animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    "Save"
+                                )}
                             </button>
                         </div>
                     </form>
@@ -319,198 +334,93 @@ const EditStaffDrawer = ({
                                 customised per user in this version.
                             </p>
                         </div>
-                        <div className="border border-border rounded overflow-hidden shadow-sm">
-                            <table className="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
-                                        <th className="px-3 py-2.5">
-                                            Permission
-                                        </th>
-                                        <th className="px-2 py-2.5 text-center">
-                                            Superadmin
-                                        </th>
-                                        <th className="px-2 py-2.5 text-center">
-                                            Admin
-                                        </th>
-                                        <th className="px-2 py-2.5 text-center">
-                                            Support
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/60">
-                                    {[
-                                        {
-                                            cat: "Operations",
-                                            rows: [
-                                                [
-                                                    "View agencies",
-                                                    "✓",
-                                                    "✓",
-                                                    "✓",
-                                                ],
-                                                [
-                                                    "Edit agencies",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                                ["View agents", "✓", "✓", "✓"],
-                                                [
-                                                    "Approve applications",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "View integrations",
-                                                    "✓",
-                                                    "✓",
-                                                    "✓",
-                                                ],
-                                                [
-                                                    "Retry feed sync",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                                ["View vendors", "✓", "✓", "—"],
-                                                ["Edit vendors", "✓", "✓", "—"],
-                                            ],
-                                        },
-                                        {
-                                            cat: "Moderation",
-                                            rows: [
-                                                [
-                                                    "Review moderation",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "Approve reviews",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "Flag for legal",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                            ],
-                                        },
-                                        {
-                                            cat: "Commercial",
-                                            rows: [
-                                                [
-                                                    "View billing",
-                                                    "✓",
-                                                    "read",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "Issue refunds",
-                                                    "✓",
-                                                    "—",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "Lead distribution",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                            ],
-                                        },
-                                        {
-                                            cat: "Content",
-                                            rows: [
-                                                ["Insights CMS", "✓", "✓", "—"],
-                                                [
-                                                    "Email templates",
-                                                    "✓",
-                                                    "✓",
-                                                    "—",
-                                                ],
-                                            ],
-                                        },
-                                        {
-                                            cat: "System",
-                                            rows: [
-                                                [
-                                                    "Staff & Roles",
-                                                    "✓",
-                                                    "—",
-                                                    "—",
-                                                ],
-                                                ["Audit Log", "✓", "—", "—"],
-                                                [
-                                                    "Auth Settings",
-                                                    "✓",
-                                                    "—",
-                                                    "—",
-                                                ],
-                                                [
-                                                    "Feature Flags",
-                                                    "✓",
-                                                    "—",
-                                                    "—",
-                                                ],
-                                                ["Blocked IPs", "✓", "✓", "—"],
-                                            ],
-                                        },
-                                    ].map(({ cat, rows }) => (
-                                        <>
-                                            <tr
-                                                key={cat}
-                                                className="bg-page/40 text-[11px] text-accent font-bold select-none"
-                                            >
-                                                <td
-                                                    colSpan={4}
-                                                    className="px-3 py-1.5 uppercase tracking-wide"
-                                                >
-                                                    {cat}
-                                                </td>
-                                            </tr>
-                                            {rows.map(([perm, sa, ad, su]) => (
-                                                <tr
-                                                    key={perm}
-                                                    className="hover:bg-page/20"
-                                                >
-                                                    <td className="px-3 py-2 text-muted font-medium">
-                                                        {perm}
+                        {permissions.length > 0 ? (
+                            <div className="border border-border rounded overflow-hidden shadow-sm">
+                                <table className="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
+                                            <th className="px-3 py-2.5">
+                                                Permission
+                                            </th>
+                                            <th className="px-2 py-2.5 text-center">
+                                                Superadmin
+                                            </th>
+                                            <th className="px-2 py-2.5 text-center">
+                                                Admin
+                                            </th>
+                                            <th className="px-2 py-2.5 text-center">
+                                                Support
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/60">
+                                        {permissions.map((category) => (
+                                            <Fragment key={category.category}>
+                                                <tr className="bg-page/40 text-[11px] text-accent font-bold select-none">
+                                                    <td
+                                                        colSpan={4}
+                                                        className="px-3 py-1.5 uppercase tracking-wide"
+                                                    >
+                                                        {category.category}
                                                     </td>
-                                                    {[sa, ad, su].map(
-                                                        (v, i) => (
-                                                            <td
-                                                                key={i}
-                                                                className="px-2 py-2 text-center"
-                                                            >
-                                                                {v === "✓" ? (
-                                                                    <span className="text-green-600 font-bold">
-                                                                        ✓
-                                                                    </span>
-                                                                ) : v ===
-                                                                  "read" ? (
-                                                                    <span className="text-text font-bold text-[11px]">
-                                                                        read
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-muted">
-                                                                        —
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        ),
-                                                    )}
                                                 </tr>
-                                            ))}
-                                        </>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                {category.permissions.map(
+                                                    (perm) => (
+                                                        <tr
+                                                            key={perm.id}
+                                                            className="hover:bg-page/20"
+                                                        >
+                                                            <td className="px-3 py-2 text-muted font-medium">
+                                                                {perm.name}
+                                                            </td>
+                                                            {[
+                                                                perm.superadmin,
+                                                                perm.admin,
+                                                                perm.support,
+                                                            ].map((v, i) => (
+                                                                <td
+                                                                    key={i}
+                                                                    className="px-2 py-2 text-center"
+                                                                >
+                                                                    {v ===
+                                                                    "✓" ? (
+                                                                        <Check
+                                                                            size={
+                                                                                14
+                                                                            }
+                                                                            className="text-green-600 inline-block"
+                                                                            strokeWidth={
+                                                                                3
+                                                                            }
+                                                                        />
+                                                                    ) : v ===
+                                                                      "read" ? (
+                                                                        <span className="text-text font-bold text-[11px]">
+                                                                            read
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-muted">
+                                                                            —
+                                                                        </span>
+                                                                    )}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </Fragment>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-8 gap-2">
+                                <Loader2 className="h-5 w-5 text-accent animate-spin" />
+                                <span className="text-xs text-muted">
+                                    Loading permissions...
+                                </span>
+                            </div>
+                        )}
                         <p className="text-[12px] text-muted leading-tight font-medium font-sans bg-page/35 border border-border/80 rounded p-2 select-none">
                             Role permissions are managed in code. Contact your
                             developer to modify role definitions.
@@ -524,54 +434,103 @@ const EditStaffDrawer = ({
                         <h4 className="font-bold text-[16px] text-text font-sans">
                             Recent activity
                         </h4>
-                        <div className="flex flex-col gap-4 relative border-l border-border/80 pl-4 ml-1.5 mt-2">
-                            {(selectedStaff.activity?.length
-                                ? selectedStaff.activity
-                                : [
-                                      "Approved agency application — James Wilson — Today 9:47am",
-                                      "Updated notes — Ray White Bondi — Today 9:32am",
-                                      "Approved review — David Kowalski — Yesterday 4:12pm",
-                                      "Logged in — Today 9:14am",
-                                      "Reset password — Atiye Afrasiabi — 3 days ago 9:15am",
-                                  ]
-                            ).map((act, index) => {
-                                const [actionName, entityName, timeLabel] =
-                                    act.split(" — ");
-                                return (
-                                    <div
-                                        key={index}
-                                        className="flex flex-col gap-0.5 relative text-[13px]"
-                                    >
-                                        <span className="absolute -left-[21px] top-1.5 h-2 w-2 bg-accent border border-card rounded-full shadow-sm" />
-                                        <div className="font-sans text-text">
-                                            <span className="font-bold">
-                                                {actionName}
-                                            </span>
-                                            {entityName && (
-                                                <>
-                                                    <span className="text-muted/70 mx-1.5">
-                                                        —
-                                                    </span>
-                                                    <span className="font-semibold text-muted">
-                                                        {entityName}
-                                                    </span>
-                                                </>
+                        {isActivityLoading ? (
+                            <div className="flex flex-col items-center justify-center py-8 gap-2">
+                                <Loader2 className="h-5 w-5 text-accent animate-spin" />
+                                <span className="text-xs text-muted">
+                                    Loading activity...
+                                </span>
+                            </div>
+                        ) : staffActivity.length > 0 ? (
+                            <div className="flex flex-col gap-4 relative border-l border-border/80 pl-4 ml-1.5 mt-2">
+                                {staffActivity.map((item, index) => {
+                                    const action = String(
+                                        item.action ??
+                                            item.description ??
+                                            item.type ??
+                                            "Activity",
+                                    );
+                                    const detail = String(
+                                        item.detail ??
+                                            item.entity ??
+                                            item.message ??
+                                            "",
+                                    );
+                                    const timestamp = String(
+                                        item.timestamp ??
+                                            item.createdAt ??
+                                            item.date ??
+                                            item.time ??
+                                            "",
+                                    );
+                                    const timeLabel = timestamp
+                                        ? formatActivityTime(timestamp)
+                                        : "";
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="flex flex-col gap-0.5 relative text-[13px]"
+                                        >
+                                            <span className="absolute -left-[21px] top-1.5 h-2 w-2 bg-accent border border-card rounded-full shadow-sm" />
+                                            <div className="font-sans text-text">
+                                                <span className="font-bold">
+                                                    {action}
+                                                </span>
+                                                {detail && (
+                                                    <>
+                                                        <span className="text-muted/70 mx-1.5">
+                                                            —
+                                                        </span>
+                                                        <span className="font-semibold text-muted">
+                                                            {detail}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {timeLabel && (
+                                                <span className="text-[11px] text-muted/65 font-bold tracking-tight">
+                                                    {timeLabel}
+                                                </span>
                                             )}
                                         </div>
-                                        {timeLabel && (
-                                            <span className="text-[11px] text-muted/65 font-bold tracking-tight">
-                                                {timeLabel}
-                                            </span>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-8 gap-2">
+                                <span className="text-xs text-muted">
+                                    No recent activity found.
+                                </span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </div>
     );
 };
+
+function formatActivityTime(timestamp: string): string {
+    try {
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return timestamp;
+        const diff = Date.now() - date.getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return "Just now";
+        if (mins < 60) return `${mins} min ago`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days === 1) return "Yesterday";
+        if (days < 30) return `${days} days ago`;
+        return date.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    } catch {
+        return timestamp;
+    }
+}
 
 export default EditStaffDrawer;

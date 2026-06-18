@@ -1,7 +1,7 @@
 'use client';
 
 import Toast from '@/components/Shared/Toast';
-import { StaffMember, RoleItem, PermissionCategory } from '@/actions/staffAndRolesActions';
+import { StaffMember, StaffSummary, RoleItem, PermissionCategory } from '@/actions/staffAndRolesActions';
 import useStaffAndRoles from '@/hooks/useStaffAndRoles';
 import StaffStats from './StaffStats';
 import StaffTabs from './StaffTabs';
@@ -16,11 +16,14 @@ interface StaffPageClientProps {
     initialStaff: StaffMember[];
     initialRoles: RoleItem[];
     initialPermissions: PermissionCategory[];
+    initialSummary: StaffSummary;
 }
 
-const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions }: StaffPageClientProps) => {
+const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initialSummary }: StaffPageClientProps) => {
     const {
         filteredStaff, rolesList, localPermissions, stats,
+        staffActivity, isActivityLoading,
+        isLoading,
         searchQuery, setSearchQuery,
         roleFilter, setRoleFilter,
         activeTab, setActiveTab,
@@ -44,7 +47,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions }: Sta
         handleAddStaff, handleEditStaff,
         handleMfaReset, handleRevokeConfirm,
         openEditModal, handleOpenAddModal, handleOpenPermsModal,
-    } = useStaffAndRoles({ initialStaff, initialRoles, initialPermissions });
+    } = useStaffAndRoles({ initialStaff, initialRoles, initialPermissions, initialSummary });
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-16 px-1 lg:px-4">
@@ -53,14 +56,14 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions }: Sta
                 <p className="text-sm text-muted">Manage HomeBy internal staff accounts and access levels.</p>
             </div>
 
-            <StaffStats stats={stats} isLoading={false} />
+            <StaffStats stats={stats} isLoading={isLoading} />
 
             <StaffTabs activeTab={activeTab} onChange={setActiveTab} />
 
             {activeTab === 'Staff' && (
                 <StaffTable
                     filteredStaff={filteredStaff}
-                    isLoading={false}
+                    isLoading={isLoading}
                     isError={false}
                     searchQuery={searchQuery}
                     roleFilter={roleFilter}
@@ -87,6 +90,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions }: Sta
                 formEmail={formEmail}
                 formMobile={formMobile}
                 formRole={formRole}
+                rolesList={rolesList}
                 sendWelcome={sendWelcome}
                 formError={formError}
                 isSubmitting={isSubmitting}
@@ -110,9 +114,14 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions }: Sta
                 formEmail={formEmail}
                 formMobile={formMobile}
                 formRole={formRole}
+                rolesList={rolesList}
                 formStatus={formStatus}
                 formMfa={formMfa}
                 formError={formError}
+                isSubmitting={isSubmitting}
+                permissions={localPermissions}
+                staffActivity={staffActivity}
+                isActivityLoading={isActivityLoading}
                 onFirstNameChange={setFormFirstName}
                 onLastNameChange={setFormLastName}
                 onMobileChange={setFormMobile}

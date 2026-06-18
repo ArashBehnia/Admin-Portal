@@ -26,7 +26,14 @@ export async function backendFetch<T>(
 
     if (!response.ok) {
         const body = await response.text();
-        throw new Error(`Backend error ${response.status}: ${body}`);
+        try {
+            const parsed = JSON.parse(body);
+            const msg = parsed.message || parsed.error || body;
+            throw new Error(msg);
+        } catch (e) {
+            if (e instanceof SyntaxError) throw new Error(body || `Request failed with status ${response.status}`);
+            throw e;
+        }
     }
 
     const json = await response.json();

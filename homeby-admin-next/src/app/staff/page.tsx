@@ -1,11 +1,12 @@
-import { fetchStaffData, fetchRolesList, fetchRolePermissions } from '@/actions/staffAndRolesActions';
+import { fetchStaffData, fetchRolesList, fetchRolePermissions, fetchStaffSummaryData } from '@/actions/staffAndRolesActions';
 import StaffPageClient from '@/components/StaffAndRoles/StaffPageClient';
 
 const StaffPage = async () => {
-    const [initialStaff, initialRoles, initialPermissions] = await Promise.all([
+    const [initialStaff, initialRoles, initialPermissions, initialSummary] = await Promise.all([
         fetchStaffData(),
         fetchRolesList(),
         fetchRolePermissions(),
+        fetchStaffSummaryData(),
     ]);
 
     return (
@@ -13,6 +14,7 @@ const StaffPage = async () => {
             initialStaff={initialStaff}
             initialRoles={initialRoles}
             initialPermissions={initialPermissions}
+            initialSummary={initialSummary}
         />
     );
 };

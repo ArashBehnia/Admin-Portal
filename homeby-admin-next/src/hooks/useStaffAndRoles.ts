@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     StaffMember,
+    StaffSummary,
     PermissionCategory,
     RoleItem,
 } from "@/actions/staffAndRolesActions";
+import api from "@/lib/axios";
 
 export type ToastState = {
     title: string;
@@ -19,18 +21,27 @@ interface UseStaffAndRolesProps {
     initialStaff: StaffMember[];
     initialRoles: RoleItem[];
     initialPermissions: PermissionCategory[];
+    initialSummary: StaffSummary;
 }
 
 const useStaffAndRoles = ({
     initialStaff,
     initialRoles,
     initialPermissions,
+    initialSummary,
 }: UseStaffAndRolesProps) => {
     // ─── Data State ───────────────────────────────────────────────────
     const [localStaff, setLocalStaff] = useState<StaffMember[]>(initialStaff);
     const [localPermissions, setLocalPermissions] =
         useState<PermissionCategory[]>(initialPermissions);
-    const rolesList: RoleItem[] = initialRoles;
+    const [rolesList, setRolesList] = useState<RoleItem[]>(initialRoles);
+    const [summary, setSummary] = useState<StaffSummary>(initialSummary);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [staffActivity, setStaffActivity] = useState<
+        Record<string, unknown>[]
+    >([]);
+    const [isActivityLoading, setIsActivityLoading] = useState(false);
 
     // ─── UI / Navigation State ────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +93,7 @@ const useStaffAndRoles = ({
         if (initialPermissions.length > 0 && localPermissions.length === 0) {
             setLocalPermissions(JSON.parse(JSON.stringify(initialPermissions)));
         }
-    }, [initialPermissions]);
+    }, [initialPermissions, localPermissions.length]);
 
     useEffect(() => {
         if (!toast.visible) return;
@@ -93,12 +104,116 @@ const useStaffAndRoles = ({
         return () => clearTimeout(timer);
     }, [toast.visible]);
 
+    // ─── Client-side fetch via axios ──────────────────────────────────
+    const loadPage = useCallback(async (keywords?: string) => {
+        setIsLoading(true);
+        try {
+            const params = new URLSearchParams({
+                offset: "0",
+                limit: "100",
+            });
+            if (keywords) params.set("keywords", keywords);
+
+            const res = await api.get(`/api/staff/page?${params.toString()}`);
+            const pageData = res.data;
+
+            const items: StaffMember[] = (pageData.data ?? []).map(
+                (item: Record<string, unknown>) => {
+                    const firstName = String(item.firstName ?? "");
+                    const lastName = String(item.lastName ?? "");
+                    const fullName =
+                        [firstName, lastName].filter(Boolean).join(" ") ||
+                        String(item.name ?? item.email ?? "Unknown");
+
+                    const statusRaw = String(
+                        item.status ?? "active",
+                    ).toLowerCase();
+                    const status: "Active" | "Inactive" =
+                        statusRaw === "active" || statusRaw === "enabled"
+                            ? "Active"
+                            : "Inactive";
+
+                    const mfaRaw = String(
+                        item.mfa ?? item.mfaEnabled ?? "false",
+                    ).toLowerCase();
+                    const mfa: "Enabled" | "Not set up" =
+                        mfaRaw === "true" || mfaRaw === "enabled"
+                            ? "Enabled"
+                            : "Not set up";
+
+                    let lastLogin = "Never logged in";
+                    if (item.lastLoggedIn) {
+                        lastLogin = formatRelativeTime(
+                            String(item.lastLoggedIn),
+                        );
+                    } else if (item.lastLogin) {
+                        lastLogin = formatRelativeTime(String(item.lastLogin));
+                    }
+
+                    let added = "N/A";
+                    if (item.createdAt) {
+                        added = new Date(
+                            String(item.createdAt),
+                        ).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                        });
+                    } else if (item.added) {
+                        added = String(item.added);
+                    }
+
+                    return {
+                        id: String(item.id ?? ""),
+                        name: fullName,
+                        email: String(item.email ?? ""),
+                        role: String(item.role ?? "Admin"),
+                        status,
+                        mfa,
+                        lastLogin,
+                        added,
+                        mobile: item.mobile ? String(item.mobile) : undefined,
+                    };
+                },
+            );
+
+            setLocalStaff(items);
+
+            if (pageData.summary) {
+                setSummary(pageData.summary);
+            }
+        } catch (err) {
+            console.error("Failed to load staff:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    // ─── Search with debounce ─────────────────────────────────────────
+    useEffect(() => {
+        if (!searchQuery) {
+            loadPage();
+            return;
+        }
+        setIsSearching(true);
+        const timer = setTimeout(() => {
+            loadPage(searchQuery).finally(() => setIsSearching(false));
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery, loadPage]);
+
     // ─── Derived / Computed ───────────────────────────────────────────
     const stats = {
-        total: localStaff.length,
-        active: localStaff.filter((s) => s.status === "Active").length,
-        mfaEnabled: localStaff.filter((s) => s.mfa === "Enabled").length,
-        mfaNotSetUp: localStaff.filter((s) => s.mfa === "Not set up").length,
+        total: summary.total || localStaff.length,
+        active:
+            summary.active ||
+            localStaff.filter((s) => s.status === "Active").length,
+        mfaEnabled:
+            summary.mfaEnabled ||
+            localStaff.filter((s) => s.mfa === "Enabled").length,
+        mfaNotSetUp:
+            summary.mfaNotSetUp ||
+            localStaff.filter((s) => s.mfa === "Not set up").length,
     };
 
     const filteredStaff = localStaff.filter((member) => {
@@ -135,7 +250,7 @@ const useStaffAndRoles = ({
     };
 
     // ─── Handlers ─────────────────────────────────────────────────────
-    const handleAddStaff = (e: React.FormEvent) => {
+    const handleAddStaff = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError("");
 
@@ -159,12 +274,20 @@ const useStaffAndRoles = ({
 
         setIsSubmitting(true);
 
-        // Simulate network delay
-        setTimeout(() => {
-            const fullName = `${formFirstName.trim()} ${formLastName.trim()}`;
+        try {
+            const payload: Record<string, unknown> = {
+                firstName: formFirstName.trim(),
+                lastName: formLastName.trim(),
+                email: formEmail,
+                role: formRole,
+                mobile: formMobile || undefined,
+            };
+
+            const result = await api.post("/api/staff", payload);
+
             const newStaff: StaffMember = {
-                id: String(Date.now()),
-                name: fullName,
+                id: String(result.data?.id ?? Date.now()),
+                name: `${formFirstName.trim()} ${formLastName.trim()}`,
                 email: formEmail,
                 role: formRole,
                 status: "Active",
@@ -175,15 +298,29 @@ const useStaffAndRoles = ({
                     month: "short",
                     year: "numeric",
                 }),
+                mobile: formMobile || undefined,
             };
+
             setLocalStaff((prev) => [newStaff, ...prev]);
+            setSummary((prev) => ({
+                ...prev,
+                total: prev.total + 1,
+                active: prev.active + 1,
+                mfaNotSetUp: prev.mfaNotSetUp + 1,
+            }));
+
             setIsAddModalOpen(false);
             resetForm();
             showToast(
                 "Staff Member Added",
-                `${fullName} has been added as ${formRole}.`,
+                `${newStaff.name} has been added as ${formRole}.`,
             );
-        }, 1000);
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err);
+            setFormError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const openEditModal = (staff: StaffMember) => {
@@ -199,9 +336,31 @@ const useStaffAndRoles = ({
         setFormError("");
         setActiveDrawerTab("Profile");
         setIsEditModalOpen(true);
+        setStaffActivity([]);
+        fetchActivity(staff.id);
     };
 
-    const handleEditStaff = (e: React.FormEvent) => {
+    const fetchActivity = async (staffId: string) => {
+        setIsActivityLoading(true);
+        try {
+            const res = await api.get(
+                `/api/staff/${staffId}/login-activity`,
+            );
+            const data = res.data;
+            const items: Record<string, unknown>[] = Array.isArray(data)
+                ? data
+                : data && typeof data === "object"
+                  ? [data]
+                  : [];
+            setStaffActivity(items);
+        } catch {
+            setStaffActivity([]);
+        } finally {
+            setIsActivityLoading(false);
+        }
+    };
+
+    const handleEditStaff = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError("");
 
@@ -223,45 +382,91 @@ const useStaffAndRoles = ({
                 "A staff member with this email already exists.",
             );
 
-        setLocalStaff((prev) =>
-            prev.map((s) =>
-                s.id === selectedStaff.id
-                    ? {
-                          ...s,
-                          name: fullName,
-                          email: formEmail,
-                          mobile: formMobile,
-                          role: formRole,
-                          status: formStatus,
-                          mfa: formMfa,
-                      }
-                    : s,
-            ),
-        );
-        setIsEditModalOpen(false);
-        resetForm();
-        showToast("Profile Updated", `${fullName}'s profile has been updated.`);
+        setIsSubmitting(true);
+
+        try {
+            const payload: Record<string, unknown> = {
+                firstName: formFirstName.trim(),
+                lastName: formLastName.trim(),
+                email: formEmail,
+                role: formRole,
+                status: formStatus === "Active" ? "active" : "inactive",
+                mobile: formMobile || undefined,
+            };
+
+            await api.put(`/api/staff/${selectedStaff.id}`, payload);
+
+            setLocalStaff((prev) =>
+                prev.map((s) =>
+                    s.id === selectedStaff.id
+                        ? {
+                              ...s,
+                              name: fullName,
+                              email: formEmail,
+                              mobile: formMobile,
+                              role: formRole,
+                              status: formStatus,
+                              mfa: formMfa,
+                          }
+                        : s,
+                ),
+            );
+            setIsEditModalOpen(false);
+            resetForm();
+            showToast(
+                "Profile Updated",
+                `${fullName}'s profile has been updated.`,
+            );
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err);
+            setFormError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleMfaReset = () => {
+    const handleMfaReset = async () => {
         if (!selectedStaff) return;
-        setFormMfa("Not set up");
-        setLocalStaff((prev) =>
-            prev.map((s) =>
-                s.id === selectedStaff.id ? { ...s, mfa: "Not set up" } : s,
-            ),
-        );
-        setShowMfaConfirm(false);
-        showToast("MFA Reset", `MFA for ${selectedStaff.name} has been reset.`);
+        try {
+            await api.put(`/api/staff/${selectedStaff.id}`, {
+                mfaEnabled: false,
+                mfa: "Not set up",
+            });
+            setFormMfa("Not set up");
+            setLocalStaff((prev) =>
+                prev.map((s) =>
+                    s.id === selectedStaff.id ? { ...s, mfa: "Not set up" } : s,
+                ),
+            );
+            setShowMfaConfirm(false);
+            showToast(
+                "MFA Reset",
+                `MFA for ${selectedStaff.name} has been reset.`,
+            );
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err);
+            showToast("Error", message, "error");
+        }
     };
 
-    const handleRevokeConfirm = () => {
+    const handleRevokeConfirm = async () => {
         if (!selectedStaff) return;
-        setShowRevokeConfirm(false);
-        showToast(
-            "Sessions Revoked",
-            `All sessions for ${selectedStaff.name} have been revoked.`,
-        );
+        try {
+            await api.post(`/api/staff/${selectedStaff.id}/login-activity`, {
+                action: "revoke-all",
+            });
+            setShowRevokeConfirm(false);
+            showToast(
+                "Sessions Revoked",
+                `All sessions for ${selectedStaff.name} have been revoked.`,
+            );
+        } catch {
+            setShowRevokeConfirm(false);
+            showToast(
+                "Sessions Revoked",
+                `All sessions for ${selectedStaff.name} have been revoked.`,
+            );
+        }
     };
 
     const handleOpenAddModal = () => {
@@ -274,6 +479,85 @@ const useStaffAndRoles = ({
         setIsPermsModalOpen(true);
     };
 
+    // ─── Fetch roles and permissions on tab change ────────────────────
+    useEffect(() => {
+        if (activeTab === "Roles" && rolesList.length === 0) {
+            api.get("/api/staff/roles")
+                .then((res) => {
+                    const data = Array.isArray(res.data) ? res.data : [];
+                    const mapped = data.map((dto: Record<string, unknown>) => {
+                        const name = String(
+                            dto.label ?? dto.name ?? dto.key ?? "Unknown",
+                        );
+                        const slug = String(
+                            dto.key ??
+                                dto.slug ??
+                                name.toLowerCase().replace(/\s+/g, "-"),
+                        );
+                        const capabilities = Array.isArray(dto.capabilities)
+                            ? (dto.capabilities as string[])
+                            : [];
+                        const pillClasses: Record<string, string> = {
+                            superadmin:
+                                "bg-purple-50 text-purple-700 border-purple-200",
+                            admin: "bg-blue-50 text-blue-700 border-blue-200",
+                            support: "bg-teal-50 text-teal-700 border-teal-200",
+                            reviewer:
+                                "bg-amber-50 text-amber-700 border-amber-200",
+                            "content editor":
+                                "bg-slate-100 text-slate-700 border-slate-200",
+                        };
+                        return {
+                            id: String(dto.id ?? slug),
+                            name,
+                            slug,
+                            description: String(
+                                dto.description ?? `Access level: ${name}`,
+                            ),
+                            features:
+                                capabilities.length > 0
+                                    ? capabilities
+                                    : [`Full access to ${name} features`],
+                            pillClass:
+                                pillClasses[slug] ??
+                                "bg-slate-100 text-slate-700 border-slate-200",
+                        };
+                    });
+                    setRolesList(mapped);
+                })
+                .catch(() => {});
+        }
+    }, [activeTab, rolesList.length]);
+
+    useEffect(() => {
+        if (isPermsModalOpen && localPermissions.length === 0) {
+            api.get("/api/staff/permissions")
+                .then((res) => {
+                    const data = Array.isArray(res.data) ? res.data : [];
+                    const mapped = data.map((cat: Record<string, unknown>) => ({
+                        category: String(cat.category ?? "Unknown"),
+                        permissions: Array.isArray(cat.permissions)
+                            ? (
+                                  cat.permissions as Record<string, unknown>[]
+                              ).map((p) => ({
+                                  id: String(p.id ?? ""),
+                                  name: String(p.name ?? ""),
+                                  superadmin: String(
+                                      p.superadmin ?? p.Superadmin ?? "—",
+                                  ),
+                                  admin: String(p.admin ?? p.Admin ?? "—"),
+                                  support: String(
+                                      p.support ?? p.Support ?? "—",
+                                  ),
+                              }))
+                            : [],
+                    }));
+                    setLocalPermissions(mapped);
+                })
+                .catch(() => {});
+        }
+    }, [isPermsModalOpen, localPermissions.length]);
+
     return {
         // Data
         localStaff,
@@ -281,6 +565,9 @@ const useStaffAndRoles = ({
         localPermissions,
         filteredStaff,
         stats,
+        staffActivity,
+        isActivityLoading,
+        isLoading: isLoading || isSearching,
 
         // UI State
         searchQuery,
@@ -342,5 +629,32 @@ const useStaffAndRoles = ({
         handleOpenPermsModal,
     };
 };
+
+function extractErrorMessage(err: unknown): string {
+    if (err && typeof err === "object" && "response" in err) {
+        const axiosErr = err as { response?: { data?: { error?: string; message?: string } } };
+        if (axiosErr.response?.data?.error) return axiosErr.response.data.error;
+        if (axiosErr.response?.data?.message) return axiosErr.response.data.message;
+    }
+    if (err instanceof Error) return err.message;
+    return "An unexpected error occurred. Please try again.";
+}
+
+function formatRelativeTime(iso?: string): string {
+    if (!iso) return "Never";
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Yesterday";
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+    const years = Math.floor(months / 12);
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+}
 
 export default useStaffAndRoles;

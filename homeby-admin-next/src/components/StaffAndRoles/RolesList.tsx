@@ -2,7 +2,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { StaffMember } from "./StaffPageClient";
+import { StaffMember } from "@/actions/staffAndRolesActions";
 
 interface RolesListProps {
     rolesList: any[];
