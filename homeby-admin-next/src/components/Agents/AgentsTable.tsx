@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Loader2 } from "lucide-react";
-import { Agent } from "@/actions/agentsActions";
+import { Agent } from "@/types/agentTypes";
 
 interface AgentsTableProps {
     filteredAgents: Agent[];
@@ -10,6 +10,8 @@ interface AgentsTableProps {
     onSearchChange: (val: string) => void;
     onViewClick: (agentId: string) => void;
     getStatusClasses: (status: Agent["status"]) => string;
+    isLoading?: boolean;
+    totalCount?: number;
 }
 
 const AgentsTable = ({
@@ -19,6 +21,8 @@ const AgentsTable = ({
     onSearchChange,
     onViewClick,
     getStatusClasses,
+    isLoading = false,
+    totalCount = 0,
 }: AgentsTableProps) => {
     return (
         <div className="flex flex-col gap-6">
@@ -35,8 +39,9 @@ const AgentsTable = ({
             </div>
 
             <p className="text-xs text-muted -mt-2">
-                Showing all agents. Use search to filter by name, email, licence
-                or agency.
+                {searchQuery
+                    ? `Showing ${filteredAgents.length} of ${totalCount} agents matching "${searchQuery}".`
+                    : `Showing ${totalCount} agents. Use search to filter by name, email, licence or agency.`}
             </p>
 
             {/* Table */}
@@ -64,7 +69,24 @@ const AgentsTable = ({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
-                            {filteredAgents.length > 0 ? (
+                            {isLoading ? (
+                                <tr>
+                                    <td
+                                        colSpan={6}
+                                        className="px-6 py-12 text-center"
+                                    >
+                                        <div className="flex items-center justify-center gap-2 text-muted">
+                                            <Loader2
+                                                className="animate-spin"
+                                                size={18}
+                                            />
+                                            <span className="text-sm">
+                                                Loading agents...
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : filteredAgents.length > 0 ? (
                                 filteredAgents.map((agent) => (
                                     <tr
                                         key={agent.id}
@@ -118,7 +140,9 @@ const AgentsTable = ({
                                         colSpan={6}
                                         className="px-6 py-10 text-center text-sm text-muted"
                                     >
-                                        No agents match your search criteria.
+                                        {searchQuery
+                                            ? "No agents match your search criteria."
+                                            : "No agents found."}
                                     </td>
                                 </tr>
                             )}

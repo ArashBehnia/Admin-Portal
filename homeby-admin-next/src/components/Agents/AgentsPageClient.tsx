@@ -1,18 +1,21 @@
 "use client";
 
-import { Agent } from "@/actions/agentsActions";
+import { Agent } from "@/types/agentTypes";
 import useAgents from "@/hooks/useAgents"
 import AgentsTable from "./AgentsTable";
 import AgentDrawer from "./AgentDrawer";
 
 interface AgentsPageClientProps {
     initialAgents: Agent[];
+    initialTotal: number;
 }
 
-const AgentsPageClient = ({ initialAgents }: AgentsPageClientProps) => {
+const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps) => {
     const {
-        filteredAgents,
+        agents,
         selectedAgent,
+        totalCount,
+        isLoading,
         searchQuery,
         setSearchQuery,
         activeDrawerTab,
@@ -21,7 +24,7 @@ const AgentsPageClient = ({ initialAgents }: AgentsPageClientProps) => {
         getStatusClasses,
         openDrawer,
         closeDrawer,
-    } = useAgents({ initialAgents });
+    } = useAgents({ initialAgents, initialTotal });
 
     return (
         <div className="w-full max-w-content mx-auto">
@@ -33,12 +36,14 @@ const AgentsPageClient = ({ initialAgents }: AgentsPageClientProps) => {
             </div>
 
             <AgentsTable
-                filteredAgents={filteredAgents}
+                filteredAgents={agents}
                 searchQuery={searchQuery}
                 selectedAgentId={selectedAgent?.id}
                 onSearchChange={setSearchQuery}
                 onViewClick={openDrawer}
                 getStatusClasses={getStatusClasses}
+                isLoading={isLoading}
+                totalCount={totalCount}
             />
 
             {selectedAgent && (

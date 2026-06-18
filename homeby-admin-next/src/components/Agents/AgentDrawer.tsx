@@ -1,7 +1,29 @@
 "use client";
 
-import { X } from "lucide-react";
-import { Agent, DrawerTab } from "@/actions/agentsActions";
+import { useState, useEffect, useRef } from "react";
+import { X, Loader2 } from "lucide-react";
+import { Agent, DrawerTab } from "@/types/agentTypes";
+import api from "@/lib/axios";
+
+interface AgentOverview {
+    email?: string;
+    mobile?: string;
+    role?: string;
+    agencyName?: string;
+    isActive: boolean;
+    totalListings: number;
+    activeListings: number;
+    sales12m: number;
+    performanceValue: number;
+    totalViews: number;
+}
+
+interface AgentActivityItem {
+    type: string;
+    entityId: string;
+    label?: string;
+    createdAt?: string;
+}
 
 interface AgentDrawerProps {
     selectedAgent: Agent;
@@ -12,6 +34,23 @@ interface AgentDrawerProps {
     getStatusClasses: (status: Agent["status"]) => string;
 }
 
+function formatRelativeTime(iso?: string): string {
+    if (!iso) return "Never";
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Yesterday";
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+    const years = Math.floor(months / 12);
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+}
+
 const AgentDrawer = ({
     selectedAgent,
     activeDrawerTab,
@@ -20,6 +59,62 @@ const AgentDrawer = ({
     getInitials,
     getStatusClasses,
 }: AgentDrawerProps) => {
+    const [overview, setOverview] = useState<AgentOverview | null>(null);
+    const [activities, setActivities] = useState<AgentActivityItem[]>([]);
+    const [loadingOverview, setLoadingOverview] = useState(false);
+    const [loadingActivity, setLoadingActivity] = useState(false);
+    const fetchedOverviewRef = useRef<string | null>(null);
+    const fetchedActivityRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadOverview() {
+            if (activeDrawerTab !== "profile" || overview || fetchedOverviewRef.current === selectedAgent.id) return;
+            fetchedOverviewRef.current = selectedAgent.id;
+            setLoadingOverview(true);
+            try {
+                const res = await api.get(`/api/agents/overview/${selectedAgent.id}`);
+                if (!cancelled) setOverview(res.data);
+            } catch (err) {
+                console.error("Failed to load agent overview:", err);
+            } finally {
+                if (!cancelled) setLoadingOverview(false);
+            }
+        }
+
+        loadOverview();
+        return () => { cancelled = true; };
+    }, [activeDrawerTab, selectedAgent.id, overview]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadActivity() {
+            if (activeDrawerTab !== "activity" || fetchedActivityRef.current === selectedAgent.id) return;
+            fetchedActivityRef.current = selectedAgent.id;
+            setLoadingActivity(true);
+            try {
+                const res = await api.get(`/api/agents/activity/${selectedAgent.id}?limit=20`);
+                if (!cancelled) {
+                    const data = res.data;
+                    setActivities(data.data ?? data ?? []);
+                }
+            } catch (err) {
+                console.error("Failed to load agent activity:", err);
+            } finally {
+                if (!cancelled) setLoadingActivity(false);
+            }
+        }
+
+        loadActivity();
+        return () => { cancelled = true; };
+    }, [activeDrawerTab, selectedAgent.id]);
+
+    const displayName = overview
+        ? [overview.role].filter(Boolean).join(" ") || selectedAgent.role
+        : selectedAgent.role;
+
     return (
         <>
             {/* Backdrop */}
@@ -41,11 +136,11 @@ const AgentDrawer = ({
                                 {selectedAgent.name}
                             </h2>
                             <p className="text-sm text-muted font-medium">
-                                {selectedAgent.agency}
+                                {overview?.agencyName ?? selectedAgent.agency}
                             </p>
                             <div className="flex items-center gap-2 pt-0.5">
                                 <span className="hidden md:inline-block px-2 py-0.5 bg-page border border-border rounded text-[11px] font-semibold text-muted">
-                                    {selectedAgent.role}
+                                    {displayName}
                                 </span>
                                 <span
                                     className={`px-2 py-0.5 rounded text-[11px] font-semibold ${getStatusClasses(selectedAgent.status)}`}
@@ -87,90 +182,96 @@ const AgentDrawer = ({
                     {/* Profile Tab */}
                     {activeDrawerTab === "profile" && (
                         <div className="space-y-4 text-sm">
-                            {[
-                                {
-                                    label: "Email",
-                                    value: selectedAgent.email,
-                                    extra: "break-all select-all",
-                                },
-                                { label: "Phone", value: selectedAgent.phone },
-                                {
-                                    label: "Agency",
-                                    value: selectedAgent.agency,
-                                    accent: true,
-                                },
-                                { label: "Role", value: selectedAgent.role },
-                                {
-                                    label: "Licence",
-                                    value: selectedAgent.licence,
-                                    extra: "select-all",
-                                },
-                                {
-                                    label: "Joined",
-                                    value: selectedAgent.joined,
-                                },
-                                {
-                                    label: "Last login",
-                                    value: selectedAgent.lastLogin,
-                                },
-                            ].map(({ label, value, extra, accent }) => (
-                                <div
-                                    key={label}
-                                    className="flex py-2.5 border-b border-border/30"
-                                >
-                                    <span className="w-1/3 text-muted">
-                                        {label}
-                                    </span>
-                                    <span
-                                        className={`w-2/3 font-medium ${accent ? "text-accent hover:underline cursor-pointer" : "text-text"} ${extra ?? ""}`}
-                                    >
-                                        {value}
-                                    </span>
+                            {loadingOverview ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="animate-spin text-muted" size={20} />
                                 </div>
-                            ))}
+                            ) : (
+                                <>
+                                    {[
+                                        {
+                                            label: "Email",
+                                            value: overview?.email ?? selectedAgent.email,
+                                            extra: "break-all select-all",
+                                        },
+                                        { label: "Phone", value: overview?.mobile ?? selectedAgent.phone },
+                                        {
+                                            label: "Agency",
+                                            value: overview?.agencyName ?? selectedAgent.agency,
+                                            accent: true,
+                                        },
+                                        { label: "Role", value: overview?.role ?? selectedAgent.role },
+                                        {
+                                            label: "Licence",
+                                            value: selectedAgent.licence,
+                                            extra: "select-all",
+                                        },
+                                        {
+                                            label: "Joined",
+                                            value: selectedAgent.joined,
+                                        },
+                                        {
+                                            label: "Last login",
+                                            value: selectedAgent.lastLogin,
+                                        },
+                                    ].map(({ label, value, extra, accent }) => (
+                                        <div
+                                            key={label}
+                                            className="flex py-2.5 border-b border-border/30"
+                                        >
+                                            <span className="w-1/3 text-muted">
+                                                {label}
+                                            </span>
+                                            <span
+                                                className={`w-2/3 font-medium ${accent ? "text-accent hover:underline cursor-pointer" : "text-text"} ${extra ?? ""}`}
+                                            >
+                                                {value}
+                                            </span>
+                                        </div>
+                                    ))}
 
-                            {/* Licence status as badge */}
-                            <div className="flex py-2.5 border-b border-border/30">
-                                <span className="w-1/3 text-muted">
-                                    Licence status
-                                </span>
-                                <span className="w-2/3 flex items-center">
-                                    <span className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-semibold">
-                                        {selectedAgent.licenceStatus}
-                                    </span>
-                                </span>
-                            </div>
+                                    {/* Licence status as badge */}
+                                    <div className="flex py-2.5 border-b border-border/30">
+                                        <span className="w-1/3 text-muted">
+                                            Licence status
+                                        </span>
+                                        <span className="w-2/3 flex items-center">
+                                            <span className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-semibold">
+                                                {selectedAgent.licenceStatus}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
                     {/* Activity Tab */}
                     {activeDrawerTab === "activity" && (
                         <div className="relative pl-6 border-l-2 border-border/70 space-y-8 py-2">
-                            {selectedAgent.activities.map((act, index) => {
-                                const isRating = act.event.includes("★");
-                                return (
+                            {loadingActivity ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="animate-spin text-muted" size={20} />
+                                </div>
+                            ) : activities.length > 0 ? (
+                                activities.map((act, index) => (
                                     <div key={index} className="relative">
                                         <span className="absolute left-[-31px] top-1.5 w-3.5 h-3.5 rounded-full bg-accent border-[3px] border-card shadow-sm" />
                                         <div className="space-y-1">
                                             <p className="font-semibold text-sm text-text">
-                                                {isRating ? (
-                                                    <span className="flex items-center gap-1">
-                                                        Review received
-                                                        <span className="inline-flex items-center text-amber-500 font-bold tracking-tight">
-                                                            (★★★★★)
-                                                        </span>
-                                                    </span>
-                                                ) : (
-                                                    act.event
-                                                )}
+                                                {act.label ?? act.type}
                                             </p>
                                             <p className="text-xs text-muted">
-                                                {act.time}
+                                                {formatRelativeTime(act.createdAt)}
                                             </p>
                                         </div>
                                     </div>
-                                );
-                            })}
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted text-center py-8">
+                                    No recent activity found.
+                                </p>
+                            )}
                         </div>
                     )}
 

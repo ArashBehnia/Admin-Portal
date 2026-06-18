@@ -2,9 +2,9 @@ import { fetchAgents } from '@/actions/agentsActions';
 import AgentsPageClient from '@/components/Agents/AgentsPageClient';
 
 const AgentsPage = async () => {
-    const initialAgents = await fetchAgents();
+    const { agents, total } = await fetchAgents();
 
-    return <AgentsPageClient initialAgents={initialAgents} />;
+    return <AgentsPageClient initialAgents={agents} initialTotal={total} />;
 };
 
 export default AgentsPage;
