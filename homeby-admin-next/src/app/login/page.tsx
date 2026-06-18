@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 type LoginStep = "password" | "mfa" | "forgot_password";
 
@@ -21,6 +21,7 @@ export default function LoginPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const goToStep = (next: LoginStep) => {
         setError(null);
@@ -58,7 +59,8 @@ export default function LoginPage() {
 
             if (!res.ok) {
                 setError(
-                    data.error || "Invalid email or password. Please try again.",
+                    data.error ||
+                        "Invalid email or password. Please try again.",
                 );
                 return;
             }
@@ -226,28 +228,43 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => goToStep("forgot_password")}
-                                    className="text-xs font-medium text-accent hover:underline focus:outline-none transition-colors"
+                                    className="text-xs font-medium text-accent hover:underline focus:outline-none transition-colors cursor-pointer"
                                     disabled={loading}
                                 >
                                     Forgot password?
                                 </button>
                             </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full border border-border rounded-[4px] px-3 h-[40px] text-sm text-text font-normal placeholder-muted/50 focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white transition-all"
-                                placeholder="Enter your password"
-                                disabled={loading}
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full border border-border rounded-[4px] px-3 pr-10 h-[40px] text-sm text-text font-normal placeholder-muted/50 focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white transition-all"
+                                    placeholder="Enter your password"
+                                    disabled={loading}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((v) => !v)}
+                                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-text transition-colors focus:outline-none cursor-pointer"
+                                    tabIndex={-1}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                        <Eye className="h-4 w-4" />
+                                    )}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="pt-1">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+                                className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-accent cursor-pointer"
                             >
                                 {loading ? (
                                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -285,13 +302,9 @@ export default function LoginPage() {
                                     onChange={(e) =>
                                         handleOtpChange(idx, e.target.value)
                                     }
-                                    onKeyDown={(e) =>
-                                        handleOtpKeyDown(idx, e)
-                                    }
+                                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                                     onPaste={
-                                        idx === 0
-                                            ? handleOtpPaste
-                                            : undefined
+                                        idx === 0 ? handleOtpPaste : undefined
                                     }
                                     className="w-10 h-10 text-center text-md font-semibold border border-border rounded-[4px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white transition-all text-text"
                                     disabled={loading}
@@ -304,7 +317,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+                                className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-accent cursor-pointer"
                             >
                                 {loading ? (
                                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -317,7 +330,7 @@ export default function LoginPage() {
                                 type="button"
                                 onClick={() => goToStep("password")}
                                 disabled={loading}
-                                className="w-full bg-transparent border border-border text-muted hover:text-text hover:bg-page h-[40px] rounded-[4px] font-medium text-xs transition-all duration-150 flex items-center justify-center gap-1"
+                                className="w-full bg-transparent border border-border text-muted hover:text-text hover:bg-page h-[40px] rounded-[4px] font-medium text-xs transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer"
                             >
                                 <ArrowLeft className="h-3.5 w-3.5" />
                                 Back to Password
@@ -366,7 +379,7 @@ export default function LoginPage() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2"
+                                        className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         {loading ? (
                                             <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -382,7 +395,7 @@ export default function LoginPage() {
                                             setForgotEmail("");
                                         }}
                                         disabled={loading}
-                                        className="w-full bg-transparent border border-border text-muted hover:text-text hover:bg-page h-[40px] rounded-[4px] font-medium text-xs transition-all duration-150 flex items-center justify-center gap-1"
+                                        className="w-full bg-transparent border border-border text-muted hover:text-text hover:bg-page h-[40px] rounded-[4px] font-medium text-xs transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer"
                                     >
                                         <ArrowLeft className="h-3.5 w-3.5" />
                                         Back to Login
@@ -414,7 +427,7 @@ export default function LoginPage() {
                                         setForgotSuccess(false);
                                         setForgotEmail("");
                                     }}
-                                    className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 transition-all duration-150 flex items-center justify-center"
+                                    className="w-full bg-accent text-white h-[40px] rounded-[4px] font-medium text-sm hover:bg-blue-700 transition-all duration-150 flex items-center justify-center cursor-pointer"
                                 >
                                     Return to Login
                                 </button>

@@ -55,8 +55,6 @@ const sidebarConfig: SidebarGroupType[] = [
                 title: "Integrations & Feed",
                 icon: Plug,
                 path: "/integrations",
-                badge: 2,
-                badgeColor: "yellow",
             },
             { title: "Agencies", icon: Building2, path: "/agencies" },
             { title: "Agents", icon: UserCircle, path: "/agents" },
@@ -64,52 +62,43 @@ const sidebarConfig: SidebarGroupType[] = [
                 title: "Applications",
                 icon: ClipboardList,
                 path: "/applications",
-                badge: 8,
-                badgeColor: "yellow",
             },
-            { title: "Users", icon: Users, soon: true },
-            { title: "Segments", icon: Layers, soon: true },
-            { title: "Vendors", icon: Store, soon: true },
+            // { title: "Users", icon: Users, path: "/users" },
+            // { title: "Segments", icon: Layers, path: "/segments" },
+            // { title: "Vendors", icon: Store, path: "/vendors" },
         ],
     },
-    {
-        label: "MODERATION",
-        items: [
-            {
-                title: "Review Moderation",
-                icon: MessageSquare,
-                path: "/moderation/reviews",
-                badge: 12,
-                badgeColor: "gray",
-                soon: true,
-            },
-            {
-                title: "Listing Moderation",
-                icon: Flag,
-                badge: 3,
-                badgeColor: "gray",
-                soon: true,
-            },
-            {
-                title: "Listing Corrections",
-                icon: FileEdit,
-                badge: 7,
-                badgeColor: "gray",
-                soon: true,
-            },
-        ],
-    },
-    {
-        label: "COMMERCIAL",
-        items: [
-            { title: "Billing & Revenue", icon: CreditCard, soon: true },
-            { title: "Lead Distribution", icon: Send, soon: true },
-        ],
-    },
+    // {
+    //     label: "MODERATION",
+    //     items: [
+    //         {
+    //             title: "Review Moderation",
+    //             icon: MessageSquare,
+    //             path: "/moderation/reviews",
+    //         },
+    //         {
+    //             title: "Listing Moderation",
+    //             icon: Flag,
+    //             path: "/moderation/listings",
+    //         },
+    //         {
+    //             title: "Listing Corrections",
+    //             icon: FileEdit,
+    //             path: "/moderation/corrections",
+    //         },
+    //     ],
+    // },
+    // {
+    //     label: "COMMERCIAL",
+    //     items: [
+    //         { title: "Billing & Revenue", icon: CreditCard, path: "/billing" },
+    //         { title: "Lead Distribution", icon: Send, path: "/leads" },
+    //     ],
+    // },
     {
         label: "CONTENT",
         items: [
-            { title: "Insights CMS", icon: BookOpen, soon: true },
+            // { title: "Insights CMS", icon: BookOpen, path: "/insights" },
             { title: "Email Templates", icon: Mail, path: "/email-templates" },
         ],
     },
@@ -120,18 +109,16 @@ const sidebarConfig: SidebarGroupType[] = [
                 title: "Staff & Roles",
                 icon: Shield,
                 path: "/staff",
-                roles: ["superadmin"],
             },
-            { title: "Audit Log", icon: History, soon: true },
-            { title: "Blocked IPs", icon: Ban, soon: true },
-            {
-                title: "System Health",
-                icon: Activity,
-                soon: true,
-                path: "/system-health",
-            },
-            { title: "Auth Settings", icon: Key, soon: true },
-            { title: "Feature Flags", icon: Eye, soon: true },
+            // { title: "Audit Log", icon: History, path: "/audit-log" },
+            // { title: "Blocked IPs", icon: Ban, path: "/blocked-ips" },
+            // {
+            //     title: "System Health",
+            //     icon: Activity,
+            //     path: "/system-health",
+            // },
+            // { title: "Auth Settings", icon: Key, path: "/auth-settings" },
+            // { title: "Feature Flags", icon: Eye, path: "/feature-flags" },
         ],
     },
 ];
@@ -219,7 +206,8 @@ const Sidebar = ({ onClose, user }: SidebarProps) => {
                                                     (typeof displayBadge ===
                                                     "number"
                                                         ? displayBadge > 0
-                                                        : displayBadge !== "") && (
+                                                        : displayBadge !==
+                                                          "") && (
                                                         <span
                                                             className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-medium rounded-full ${
                                                                 item.badgeColor ===
