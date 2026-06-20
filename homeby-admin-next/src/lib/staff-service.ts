@@ -41,12 +41,14 @@ export async function fetchStaffPage(
     offset = 0,
     limit = 20,
     keywords?: string,
+    role?: string,
 ): Promise<{ data: Record<string, unknown>[]; total: number }> {
     const params = new URLSearchParams({
         offset: String(offset),
         limit: String(limit),
     });
     if (keywords) params.set("keywords", keywords);
+    if (role && role !== "All") params.set("role", role);
     params.set("type", "staff");
 
     const raw = await backendFetch<unknown>(
@@ -162,13 +164,11 @@ export async function createOtpForStaff(
 
 export async function fetchStaffLoginActivity(
     id: string,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>[]> {
     const raw = await backendFetch<unknown>(
         `/admin/staff/${encodeURIComponent(id)}/login-activity`,
     );
-    return (
-        raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}
-    ) as Record<string, unknown>;
+    return toArray<Record<string, unknown>>(raw);
 }
 
 // ─── Roles ───────────────────────────────────────────────────────────

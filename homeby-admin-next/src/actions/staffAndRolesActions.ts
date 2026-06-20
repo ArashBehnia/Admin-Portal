@@ -118,9 +118,12 @@ function mapRoleFromDto(dto: Record<string, unknown>): RoleItem {
     const pillClasses: Record<string, string> = {
         superadmin: "bg-purple-50 text-purple-700 border-purple-200",
         admin: "bg-blue-50 text-blue-700 border-blue-200",
+        agency: "bg-teal-50 text-teal-700 border-teal-200",
+        agent: "bg-amber-50 text-amber-700 border-amber-200",
+        user: "bg-slate-100 text-slate-700 border-slate-200",
         support: "bg-teal-50 text-teal-700 border-teal-200",
         reviewer: "bg-amber-50 text-amber-700 border-amber-200",
-        "content editor": "bg-slate-100 text-slate-700 border-slate-200",
+        "content editor": "bg-indigo-50 text-indigo-700 border-indigo-200",
     };
 
     return {
@@ -128,9 +131,16 @@ function mapRoleFromDto(dto: Record<string, unknown>): RoleItem {
         name,
         slug,
         description: String(dto.description ?? `Access level: ${name}`),
-        features: capabilities.length > 0 ? capabilities : [`Full access to ${name} features`],
+        features: capabilities.length > 0 ? capabilities.map(formatCapabilityName) : [`Full access to ${name} features`],
         pillClass: pillClasses[slug] ?? "bg-slate-100 text-slate-700 border-slate-200",
     };
+}
+
+function formatCapabilityName(capability: string): string {
+    return capability
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 }
 
 function mapPermissionsFromDto(raw: unknown): PermissionCategory[] {
@@ -210,10 +220,10 @@ export const fetchRolePermissions = async (): Promise<PermissionCategory[]> => {
 
 export const fetchStaffLoginActivityData = async (
     id: string,
-): Promise<Record<string, unknown>> => {
+): Promise<Record<string, unknown>[]> => {
     try {
         return await fetchStaffLoginActivity(id);
     } catch {
-        return {};
+        return [];
     }
 };

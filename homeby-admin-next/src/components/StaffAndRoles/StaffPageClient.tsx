@@ -24,6 +24,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
         filteredStaff, rolesList, localPermissions, stats,
         staffActivity, isActivityLoading,
         isLoading,
+        currentPage, totalPages, totalItems, setPage,
         searchQuery, setSearchQuery,
         roleFilter, setRoleFilter,
         activeTab, setActiveTab,
@@ -43,8 +44,11 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
         formMfa,
         formError, isSubmitting,
         sendWelcome, setSendWelcome,
+        otpStep, setOtpStep,
+        otpCode, setOtpCode,
+        isOtpLoading, otpError,
         toast, setToast,
-        handleAddStaff, handleEditStaff,
+        handleAddStaff, handleVerifyOtpAndCreate, handleEditStaff,
         handleMfaReset, handleRevokeConfirm,
         openEditModal, handleOpenAddModal, handleOpenPermsModal,
     } = useStaffAndRoles({ initialStaff, initialRoles, initialPermissions, initialSummary });
@@ -67,10 +71,15 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
                     isError={false}
                     searchQuery={searchQuery}
                     roleFilter={roleFilter}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    rolesList={rolesList}
                     onSearchChange={setSearchQuery}
                     onRoleFilterChange={setRoleFilter}
                     onAddClick={handleOpenAddModal}
                     onEditClick={openEditModal}
+                    onPageChange={setPage}
                 />
             )}
 
@@ -94,6 +103,12 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
                 sendWelcome={sendWelcome}
                 formError={formError}
                 isSubmitting={isSubmitting}
+                otpStep={otpStep}
+                setOtpStep={setOtpStep}
+                otpCode={otpCode}
+                setOtpCode={setOtpCode}
+                isOtpLoading={isOtpLoading}
+                otpError={otpError}
                 onFirstNameChange={setFormFirstName}
                 onLastNameChange={setFormLastName}
                 onEmailChange={setFormEmail}
@@ -101,6 +116,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
                 onRoleChange={setFormRole}
                 onSendWelcomeChange={setSendWelcome}
                 onSubmit={handleAddStaff}
+                onVerifyOtp={handleVerifyOtpAndCreate}
             />
 
             <EditStaffDrawer

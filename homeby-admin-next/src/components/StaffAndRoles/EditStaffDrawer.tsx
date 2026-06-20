@@ -222,7 +222,7 @@ const EditStaffDrawer = ({
                                     className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
                                 >
                                     {rolesList.map((role) => (
-                                        <option key={role.id} value={role.name}>
+                                        <option key={role.id} value={role.slug}>
                                             {role.name}
                                         </option>
                                     ))}
@@ -354,8 +354,8 @@ const EditStaffDrawer = ({
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/60">
-                                        {permissions.map((category) => (
-                                            <Fragment key={category.category}>
+                                        {permissions.map((category, catIdx) => (
+                                            <Fragment key={`${category.category}-${catIdx}`}>
                                                 <tr className="bg-page/40 text-[11px] text-accent font-bold select-none">
                                                     <td
                                                         colSpan={4}
@@ -365,9 +365,9 @@ const EditStaffDrawer = ({
                                                     </td>
                                                 </tr>
                                                 {category.permissions.map(
-                                                    (perm) => (
+                                                    (perm, permIdx) => (
                                                         <tr
-                                                            key={perm.id}
+                                                            key={`${perm.id || perm.name}-${permIdx}`}
                                                             className="hover:bg-page/20"
                                                         >
                                                             <td className="px-3 py-2 text-muted font-medium">
@@ -448,12 +448,26 @@ const EditStaffDrawer = ({
                                         item.action ??
                                             item.description ??
                                             item.type ??
-                                            "Activity",
+                                            item.event ??
+                                            "Login",
                                     );
-                                    const detail = String(
-                                        item.detail ??
-                                            item.entity ??
-                                            item.message ??
+                                    const ip = String(
+                                        item.ip ??
+                                            item.ipAddress ??
+                                            item.remoteAddress ??
+                                            "",
+                                    );
+                                    const device = String(
+                                        item.device ??
+                                            item.userAgent ??
+                                            item.browser ??
+                                            item.deviceInfo ??
+                                            "",
+                                    );
+                                    const location = String(
+                                        item.location ??
+                                            item.city ??
+                                            item.region ??
                                             "",
                                     );
                                     const timestamp = String(
@@ -461,14 +475,21 @@ const EditStaffDrawer = ({
                                             item.createdAt ??
                                             item.date ??
                                             item.time ??
+                                            item.loginAt ??
                                             "",
                                     );
                                     const timeLabel = timestamp
                                         ? formatActivityTime(timestamp)
                                         : "";
+                                    const detail = [
+                                        ip,
+                                        location,
+                                        device,
+                                    ].filter(Boolean).join(" · ");
+
                                     return (
                                         <div
-                                            key={index}
+                                            key={item.id ? String(item.id) : index}
                                             className="flex flex-col gap-0.5 relative text-[13px]"
                                         >
                                             <span className="absolute -left-[21px] top-1.5 h-2 w-2 bg-accent border border-card rounded-full shadow-sm" />
@@ -476,17 +497,12 @@ const EditStaffDrawer = ({
                                                 <span className="font-bold">
                                                     {action}
                                                 </span>
-                                                {detail && (
-                                                    <>
-                                                        <span className="text-muted/70 mx-1.5">
-                                                            —
-                                                        </span>
-                                                        <span className="font-semibold text-muted">
-                                                            {detail}
-                                                        </span>
-                                                    </>
-                                                )}
                                             </div>
+                                            {detail && (
+                                                <span className="text-muted text-[12px] font-medium">
+                                                    {detail}
+                                                </span>
+                                            )}
                                             {timeLabel && (
                                                 <span className="text-[11px] text-muted/65 font-bold tracking-tight">
                                                     {timeLabel}

@@ -12,7 +12,7 @@ const StaffTabs = ({ activeTab, onChange }: StaffTabsProps) => {
                 <button
                     key={tab}
                     onClick={() => onChange(tab)}
-                    className={`pb-3 text-sm font-semibold border-b-2 transition-all relative ${
+                    className={`pb-3 text-sm font-semibold border-b-2 transition-all relative cursor-pointer ${
                         activeTab === tab
                             ? 'border-accent text-accent'
                             : 'border-transparent text-muted hover:text-text'

@@ -2,18 +2,29 @@
 
 import { Search, Plus, Loader2, MoreHorizontal } from "lucide-react";
 import { StaffMember } from "@/actions/staffAndRolesActions";
+import StaffPagination from "./StaffPagination";
 
 const ROLES_INFO: Record<string, { badgeStyle: string }> = {
-    Superadmin: {
+    superadmin: {
         badgeStyle: "bg-purple-50 text-purple-700 border-purple-200",
     },
-    Admin: { badgeStyle: "bg-blue-50 text-blue-700 border-blue-200" },
-    Support: { badgeStyle: "bg-teal-50 text-teal-700 border-teal-200" },
-    Reviewer: { badgeStyle: "bg-amber-50 text-amber-700 border-amber-200" },
-    "Content editor": {
-        badgeStyle: "bg-slate-100 text-slate-700 border-slate-200",
+    admin: { badgeStyle: "bg-blue-50 text-blue-700 border-blue-200" },
+    agency: { badgeStyle: "bg-teal-50 text-teal-700 border-teal-200" },
+    agent: { badgeStyle: "bg-amber-50 text-amber-700 border-amber-200" },
+    user: { badgeStyle: "bg-slate-100 text-slate-700 border-slate-200" },
+    support: { badgeStyle: "bg-teal-50 text-teal-700 border-teal-200" },
+    reviewer: { badgeStyle: "bg-amber-50 text-amber-700 border-amber-200" },
+    "content editor": {
+        badgeStyle: "bg-indigo-50 text-indigo-700 border-indigo-200",
     },
 };
+
+function formatRoleName(role: string): string {
+    return role
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+}
 
 interface StaffTableProps {
     filteredStaff: StaffMember[];
@@ -21,10 +32,15 @@ interface StaffTableProps {
     isError: boolean;
     searchQuery: string;
     roleFilter: string;
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    rolesList: { slug: string; name: string }[];
     onSearchChange: (val: string) => void;
     onRoleFilterChange: (val: string) => void;
     onAddClick: () => void;
     onEditClick: (member: StaffMember) => void;
+    onPageChange: (page: number) => void;
 }
 
 const StaffTable = ({
@@ -33,15 +49,20 @@ const StaffTable = ({
     isError,
     searchQuery,
     roleFilter,
+    currentPage,
+    totalPages,
+    totalItems,
+    rolesList,
     onSearchChange,
     onRoleFilterChange,
     onAddClick,
     onEditClick,
+    onPageChange,
 }: StaffTableProps) => {
     return (
         <div className="flex flex-col gap-5 animate-fade-in">
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center mt-1">
-                <div className="relative flex-1 max-w-sm">
+            <div className="flex flex-col md:flex-row gap-3 items-center mt-1">
+                <div className="relative w-[260px] shrink-0">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                     <input
                         type="text"
@@ -51,37 +72,41 @@ const StaffTable = ({
                         className="pl-10 pr-4 py-2 w-full bg-card border border-border rounded-md text-sm text-text placeholder-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-colors"
                     />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-                    <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                        {[
-                            "All",
-                            "Superadmin",
-                            "Admin",
-                            "Support",
-                            "Reviewer",
-                            "Content editor",
-                        ].map((pill) => (
+                <div className="flex gap-2 items-center">
+                    <button
+                        onClick={() => onRoleFilterChange("All")}
+                        className={`whitespace-nowrap px-3 py-1.5 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                            roleFilter === "All"
+                                ? "bg-text text-card border-text"
+                                : "bg-card text-muted hover:text-text border-border hover:bg-page"
+                        }`}
+                    >
+                        All
+                    </button>
+                    {rolesList
+                        .filter((r) => r.slug !== "superadmin")
+                        .map((role) => (
                             <button
-                                key={pill}
-                                onClick={() => onRoleFilterChange(pill)}
-                                className={`whitespace-nowrap px-3 py-1.5 rounded text-xs font-semibold border transition-all ${
-                                    roleFilter === pill
+                                key={role.slug}
+                                onClick={() => onRoleFilterChange(role.slug)}
+                                className={`whitespace-nowrap px-3 py-1.5 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                                    roleFilter === role.slug
                                         ? "bg-text text-card border-text"
                                         : "bg-card text-muted hover:text-text border-border hover:bg-page"
                                 }`}
                             >
-                                {pill}
+                                {role.name}
                             </button>
                         ))}
-                    </div>
-                    <button
-                        onClick={onAddClick}
-                        className="flex items-center justify-center gap-1.5 bg-accent hover:bg-accent/90 text-white font-semibold text-xs py-2 px-4 rounded transition-colors shadow-sm cursor-pointer whitespace-nowrap"
-                    >
-                        <Plus size={14} strokeWidth={2.5} />
-                        Add staff
-                    </button>
                 </div>
+                <div className="flex-1" />
+                <button
+                    onClick={onAddClick}
+                    className="flex items-center justify-center gap-1.5 bg-accent hover:bg-accent/90 text-white font-semibold text-xs py-2 px-4 rounded transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+                >
+                    <Plus size={14} strokeWidth={2.5} />
+                    Add staff
+                </button>
             </div>
 
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
@@ -120,9 +145,8 @@ const StaffTable = ({
                             <tbody className="divide-y divide-border/60">
                                 {filteredStaff.length > 0 ? (
                                     filteredStaff.map((member) => {
-                                        const roleMeta = ROLES_INFO[
-                                            member.role
-                                        ] ?? {
+                                        const roleKey = member.role.toLowerCase();
+                                        const roleMeta = ROLES_INFO[roleKey] ?? {
                                             badgeStyle:
                                                 "bg-slate-100 text-slate-700 border-slate-200",
                                         };
@@ -143,7 +167,7 @@ const StaffTable = ({
                                                     <span
                                                         className={`inline-block px-2.5 py-0.5 border text-xs font-semibold rounded ${roleMeta.badgeStyle}`}
                                                     >
-                                                        {member.role}
+                                                        {formatRoleName(member.role)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -217,6 +241,15 @@ const StaffTable = ({
                     </div>
                 )}
             </div>
+
+            {!isLoading && !isError && totalItems > 0 && (
+                <StaffPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalItems}
+                    onPageChange={onPageChange}
+                />
+            )}
         </div>
     );
 };

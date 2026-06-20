@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     StaffMember,
     StaffSummary,
@@ -37,15 +37,25 @@ const useStaffAndRoles = ({
     const [rolesList, setRolesList] = useState<RoleItem[]>(initialRoles);
     const [summary, setSummary] = useState<StaffSummary>(initialSummary);
     const [isLoading, setIsLoading] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
+    const hasLoadedOnceRef = useRef(false);
     const [staffActivity, setStaffActivity] = useState<
         Record<string, unknown>[]
     >([]);
     const [isActivityLoading, setIsActivityLoading] = useState(false);
 
+    // ─── Pagination State ─────────────────────────────────────────────
+    const PAGE_SIZE = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+
     // ─── UI / Navigation State ────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
     const [roleFilter, setRoleFilter] = useState("All");
+    const roleFilterRef = useRef(roleFilter);
+    roleFilterRef.current = roleFilter;
     const [activeTab, setActiveTab] = useState<MainTab>("Staff");
     const [activeDrawerTab, setActiveDrawerTab] =
         useState<DrawerTab>("Profile");
@@ -69,7 +79,7 @@ const useStaffAndRoles = ({
     const [formLastName, setFormLastName] = useState("");
     const [formMobile, setFormMobile] = useState("");
     const [formEmail, setFormEmail] = useState("");
-    const [formRole, setFormRole] = useState("Admin");
+    const [formRole, setFormRole] = useState("admin");
     const [formStatus, setFormStatus] = useState<"Active" | "Inactive">(
         "Active",
     );
@@ -79,6 +89,14 @@ const useStaffAndRoles = ({
     const [formError, setFormError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sendWelcome, setSendWelcome] = useState(false);
+
+    // ─── OTP State ────────────────────────────────────────────────────
+    const [otpStep, setOtpStep] = useState(false);
+    const [otpToken, setOtpToken] = useState("");
+    const [otpCode, setOtpCode] = useState("");
+    const [isOtpLoading, setIsOtpLoading] = useState(false);
+    const [otpError, setOtpError] = useState("");
+    const [pendingStaffData, setPendingStaffData] = useState<Record<string, unknown> | null>(null);
 
     // ─── Toast State ──────────────────────────────────────────────────
     const [toast, setToast] = useState<ToastState>({
@@ -104,15 +122,64 @@ const useStaffAndRoles = ({
         return () => clearTimeout(timer);
     }, [toast.visible]);
 
-    // ─── Client-side fetch via axios ──────────────────────────────────
-    const loadPage = useCallback(async (keywords?: string) => {
+    // ─── Client-side fetch: summary (separate endpoint) ───────────────
+    const loadSummary = useCallback(async () => {
+        try {
+            const [summaryRes, allStaffRes] = await Promise.all([
+                api.get("/api/staff/summary"),
+                api.get("/api/staff/page?offset=0&limit=1000"),
+            ]);
+
+            const s = summaryRes.data;
+            const allItems: StaffMember[] = ((allStaffRes.data?.data ?? []) as Record<string, unknown>[]).map(
+                (item: Record<string, unknown>) => {
+                    const firstName = String(item.firstName ?? "");
+                    const lastName = String(item.lastName ?? "");
+                    const fullName =
+                        [firstName, lastName].filter(Boolean).join(" ") ||
+                        String(item.name ?? item.email ?? "Unknown");
+
+                    const statusRaw = String(item.status ?? "active").toLowerCase();
+                    const status: "Active" | "Inactive" =
+                        statusRaw === "active" || statusRaw === "enabled" ? "Active" : "Inactive";
+
+                    const mfaRaw = String(item.mfa ?? item.mfaEnabled ?? "false").toLowerCase();
+                    const mfa: "Enabled" | "Not set up" =
+                        mfaRaw === "true" || mfaRaw === "enabled" ? "Enabled" : "Not set up";
+
+                    return { status, mfa } as StaffMember;
+                },
+            );
+
+            const total = Number(s?.total) || allItems.length;
+            const active = allItems.filter((i) => i.status === "Active").length;
+            const mfaEnabled = allItems.filter((i) => i.mfa === "Enabled").length;
+            const mfaNotSetUp = allItems.filter((i) => i.mfa === "Not set up").length;
+
+            setSummary({ total, active, mfaEnabled, mfaNotSetUp });
+        } catch {
+            // keep existing summary
+        }
+    }, []);
+
+    // ─── Load summary once on mount ───────────────────────────────────
+    useEffect(() => {
+        loadSummary();
+    }, [loadSummary]);
+
+    // ─── Client-side fetch: page data only ────────────────────────────
+    const loadPage = useCallback(async (keywords?: string, page?: number, role?: string) => {
+        if (!hasLoadedOnceRef.current) setIsInitialLoad(true);
         setIsLoading(true);
+        const pageNum = page ?? 1;
+        const offset = (pageNum - 1) * PAGE_SIZE;
         try {
             const params = new URLSearchParams({
-                offset: "0",
-                limit: "100",
+                offset: String(offset),
+                limit: String(PAGE_SIZE),
             });
             if (keywords) params.set("keywords", keywords);
+            if (role && role !== "All") params.set("role", role);
 
             const res = await api.get(`/api/staff/page?${params.toString()}`);
             const pageData = res.data;
@@ -178,53 +245,54 @@ const useStaffAndRoles = ({
             );
 
             setLocalStaff(items);
-
-            if (pageData.summary) {
-                setSummary(pageData.summary);
-            }
+            setTotalItems(pageData.total ?? items.length);
         } catch (err) {
             console.error("Failed to load staff:", err);
         } finally {
             setIsLoading(false);
+            setIsInitialLoad(false);
+            hasLoadedOnceRef.current = true;
         }
     }, []);
 
     // ─── Search with debounce ─────────────────────────────────────────
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
+
     useEffect(() => {
         if (!searchQuery) {
-            loadPage();
+            loadPage(undefined, 1, roleFilterRef.current);
             return;
         }
         setIsSearching(true);
+        setCurrentPage(1);
         const timer = setTimeout(() => {
-            loadPage(searchQuery).finally(() => setIsSearching(false));
+            loadPage(searchQuery, 1, roleFilterRef.current).finally(() => setIsSearching(false));
         }, 400);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
+    // ─── Role filter: refetch from backend ────────────────────────────
+    useEffect(() => {
+        loadPage(searchQueryRef.current || undefined, 1, roleFilter);
+        setCurrentPage(1);
+    }, [roleFilter, loadPage]);
+
     // ─── Derived / Computed ───────────────────────────────────────────
     const stats = {
-        total: summary.total || localStaff.length,
+        total: summary.total ?? localStaff.length,
         active:
-            summary.active ||
+            summary.active ??
             localStaff.filter((s) => s.status === "Active").length,
         mfaEnabled:
-            summary.mfaEnabled ||
+            summary.mfaEnabled ??
             localStaff.filter((s) => s.mfa === "Enabled").length,
         mfaNotSetUp:
-            summary.mfaNotSetUp ||
+            summary.mfaNotSetUp ??
             localStaff.filter((s) => s.mfa === "Not set up").length,
     };
 
-    const filteredStaff = localStaff.filter((member) => {
-        const matchesQuery =
-            member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            member.email.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesRole =
-            roleFilter === "All" ||
-            member.role.toLowerCase() === roleFilter.toLowerCase();
-        return matchesQuery && matchesRole;
-    });
+    const filteredStaff = localStaff;
 
     // ─── Helpers ──────────────────────────────────────────────────────
     const showToast = (
@@ -241,12 +309,17 @@ const useStaffAndRoles = ({
         setFormMobile("");
         setSendWelcome(false);
         setFormEmail("");
-        setFormRole("Admin");
+        setFormRole("admin");
         setFormStatus("Active");
         setFormMfa("Not set up");
         setFormError("");
         setSelectedStaff(null);
         setIsSubmitting(false);
+        setOtpStep(false);
+        setOtpToken("");
+        setOtpCode("");
+        setOtpError("");
+        setPendingStaffData(null);
     };
 
     // ─── Handlers ─────────────────────────────────────────────────────
@@ -283,6 +356,41 @@ const useStaffAndRoles = ({
                 mobile: formMobile || undefined,
             };
 
+            const otpRes = await api.post("/api/staff/create-otp", payload);
+            const token = String(otpRes.data?.token ?? "");
+            if (!token) throw new Error("Failed to send OTP. Please try again.");
+
+            setOtpToken(token);
+            setPendingStaffData(payload);
+            setOtpStep(true);
+            setOtpCode("");
+            setOtpError("");
+            showToast("OTP Sent", "A verification code has been sent to your email.", "info");
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err);
+            setFormError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleVerifyOtpAndCreate = async () => {
+        if (!otpCode.trim()) {
+            setOtpError("Please enter the verification code.");
+            return;
+        }
+        if (!pendingStaffData || !otpToken) return;
+
+        setIsOtpLoading(true);
+        setOtpError("");
+
+        try {
+            const payload = {
+                ...pendingStaffData,
+                token: otpToken,
+                code: otpCode.trim(),
+            };
+
             const result = await api.post("/api/staff", payload);
 
             const newStaff: StaffMember = {
@@ -302,12 +410,7 @@ const useStaffAndRoles = ({
             };
 
             setLocalStaff((prev) => [newStaff, ...prev]);
-            setSummary((prev) => ({
-                ...prev,
-                total: prev.total + 1,
-                active: prev.active + 1,
-                mfaNotSetUp: prev.mfaNotSetUp + 1,
-            }));
+            loadSummary();
 
             setIsAddModalOpen(false);
             resetForm();
@@ -317,9 +420,9 @@ const useStaffAndRoles = ({
             );
         } catch (err: unknown) {
             const message = extractErrorMessage(err);
-            setFormError(message);
+            setOtpError(message);
         } finally {
-            setIsSubmitting(false);
+            setIsOtpLoading(false);
         }
     };
 
@@ -330,7 +433,7 @@ const useStaffAndRoles = ({
         setFormLastName(nameParts.slice(1).join(" ") || "");
         setFormEmail(staff.email || "");
         setFormMobile(staff.mobile || "");
-        setFormRole(staff.role || "Admin");
+        setFormRole(staff.role?.toLowerCase() || "admin");
         setFormStatus(staff.status || "Active");
         setFormMfa(staff.mfa || "Not set up");
         setFormError("");
@@ -350,7 +453,7 @@ const useStaffAndRoles = ({
             const items: Record<string, unknown>[] = Array.isArray(data)
                 ? data
                 : data && typeof data === "object"
-                  ? [data]
+                  ? (Object.values(data).find(Array.isArray) as Record<string, unknown>[]) ?? []
                   : [];
             setStaffActivity(items);
         } catch {
@@ -501,11 +604,14 @@ const useStaffAndRoles = ({
                             superadmin:
                                 "bg-purple-50 text-purple-700 border-purple-200",
                             admin: "bg-blue-50 text-blue-700 border-blue-200",
+                            agency: "bg-teal-50 text-teal-700 border-teal-200",
+                            agent: "bg-amber-50 text-amber-700 border-amber-200",
+                            user: "bg-slate-100 text-slate-700 border-slate-200",
                             support: "bg-teal-50 text-teal-700 border-teal-200",
                             reviewer:
                                 "bg-amber-50 text-amber-700 border-amber-200",
                             "content editor":
-                                "bg-slate-100 text-slate-700 border-slate-200",
+                                "bg-indigo-50 text-indigo-700 border-indigo-200",
                         };
                         return {
                             id: String(dto.id ?? slug),
@@ -516,7 +622,7 @@ const useStaffAndRoles = ({
                             ),
                             features:
                                 capabilities.length > 0
-                                    ? capabilities
+                                    ? capabilities.map(formatCapabilityName)
                                     : [`Full access to ${name} features`],
                             pillClass:
                                 pillClasses[slug] ??
@@ -558,6 +664,13 @@ const useStaffAndRoles = ({
         }
     }, [isPermsModalOpen, localPermissions.length]);
 
+    // ─── Pagination ───────────────────────────────────────────────────
+    const setPage = (page: number) => {
+        if (page < 1 || page > totalPages) return;
+        setCurrentPage(page);
+        loadPage(searchQuery || undefined, page, roleFilter);
+    };
+
     return {
         // Data
         localStaff,
@@ -567,7 +680,13 @@ const useStaffAndRoles = ({
         stats,
         staffActivity,
         isActivityLoading,
-        isLoading: isLoading || isSearching,
+        isLoading: isInitialLoad,
+
+        // Pagination
+        currentPage,
+        totalPages,
+        totalItems,
+        setPage,
 
         // UI State
         searchQuery,
@@ -615,12 +734,21 @@ const useStaffAndRoles = ({
         sendWelcome,
         setSendWelcome,
 
+        // OTP State
+        otpStep,
+        setOtpStep,
+        otpCode,
+        setOtpCode,
+        isOtpLoading,
+        otpError,
+
         // Toast
         toast,
         setToast,
 
         // Handlers
         handleAddStaff,
+        handleVerifyOtpAndCreate,
         handleEditStaff,
         handleMfaReset,
         handleRevokeConfirm,
@@ -638,6 +766,13 @@ function extractErrorMessage(err: unknown): string {
     }
     if (err instanceof Error) return err.message;
     return "An unexpected error occurred. Please try again.";
+}
+
+function formatCapabilityName(capability: string): string {
+    return capability
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 }
 
 function formatRelativeTime(iso?: string): string {
