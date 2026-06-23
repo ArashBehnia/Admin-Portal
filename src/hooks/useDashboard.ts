@@ -30,6 +30,23 @@ const TIMEFRAMES: Timeframe[] = ["7d", "30d", "90d", "YTD", "Custom"];
 
 async function fetchJson<T>(url: string): Promise<T> {
     const res = await fetch(url);
+    if (res.status === 401) {
+        try {
+            const refreshRes = await fetch("/api/auth/refresh", {
+                method: "POST",
+            });
+            if (refreshRes.ok) {
+                const retryRes = await fetch(url);
+                if (!retryRes.ok)
+                    throw new Error(`Fetch failed: ${retryRes.status}`);
+                return retryRes.json();
+            }
+        } catch {
+            // refresh failed
+        }
+        window.location.href = "/login";
+        throw new Error("Session expired");
+    }
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     return res.json();
 }

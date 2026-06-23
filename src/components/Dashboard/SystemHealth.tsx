@@ -64,11 +64,16 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
     ];
 
     return (
-        <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted/90">
-                System health
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="flex flex-col gap-2 relative">
+            <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted/90">
+                    System health
+                </span>
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                    Coming soon
+                </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 opacity-50 pointer-events-none">
                 {cards.map(({ label, content, warning }) => (
                     <div
                         key={label}

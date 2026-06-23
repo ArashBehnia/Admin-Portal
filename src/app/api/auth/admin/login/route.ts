@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
         });
 
         return res;
-    } catch {
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : "Internal server error";
+        console.error("[API /auth/admin/login] error:", message);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 },

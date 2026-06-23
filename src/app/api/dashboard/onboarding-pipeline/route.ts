@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchOnboardingPipeline } from "@/lib/dashboard-service";
+import { BackendError } from "@/lib/api";
 
 export async function GET() {
     try {
@@ -8,6 +9,7 @@ export async function GET() {
     } catch (error) {
         const message =
             error instanceof Error ? error.message : "Internal server error";
-        return NextResponse.json({ error: message }, { status: 500 });
+        const status = error instanceof BackendError ? error.status : 500;
+        return NextResponse.json({ error: message }, { status });
     }
 }

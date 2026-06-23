@@ -3,6 +3,15 @@ import { cookies } from "next/headers";
 const BACKEND_URL =
     process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
 
+export class BackendError extends Error {
+    status: number;
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = "BackendError";
+        this.status = status;
+    }
+}
+
 export async function backendFetch<T>(
     path: string,
     options?: RequestInit,
@@ -11,7 +20,7 @@ export async function backendFetch<T>(
     const accessToken = cookieStore.get("access-token")?.value;
 
     if (!accessToken) {
-        throw new Error("Not authenticated");
+        throw new BackendError("Not authenticated", 401);
     }
 
     const response = await fetch(`${BACKEND_URL}${path}`, {
@@ -26,14 +35,14 @@ export async function backendFetch<T>(
 
     if (!response.ok) {
         const body = await response.text();
+        let msg = body;
         try {
             const parsed = JSON.parse(body);
-            const msg = parsed.message || parsed.error || body;
-            throw new Error(msg);
-        } catch (e) {
-            if (e instanceof SyntaxError) throw new Error(body || `Request failed with status ${response.status}`);
-            throw e;
+            msg = parsed.message || parsed.error || body;
+        } catch {
+            // use raw body
         }
+        throw new BackendError(msg || `Backend returned ${response.status}`, response.status);
     }
 
     const json = await response.json();
