@@ -109,11 +109,17 @@ const FeedsMobileList = ({
                                 View details
                             </button>
                             {feed?.status === "Pending setup" ? (
-                                <button className="text-accent hover:underline font-medium text-[12px] cursor-pointer">
+                                <button
+                                    disabled
+                                    className="text-muted/50 font-medium text-[12px] cursor-not-allowed"
+                                >
                                     Send setup
                                 </button>
                             ) : (
-                                <button className="text-muted flex items-center gap-1 font-medium text-[12px] cursor-pointer">
+                                <button
+                                    disabled
+                                    className="text-muted/50 flex items-center gap-1 font-medium text-[12px] cursor-not-allowed"
+                                >
                                     <RefreshCw className="w-3 h-3" /> Retry sync
                                 </button>
                             )}

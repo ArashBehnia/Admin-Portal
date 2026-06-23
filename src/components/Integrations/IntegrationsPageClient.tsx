@@ -54,12 +54,17 @@ const IntegrationsPageClient = ({
                         managed by agencies through the portal.
                     </p>
                 </div>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="self-start sm:shrink-0 bg-accent hover:bg-accent/90 text-white px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
-                >
-                    <Plus className="w-3.5 h-3.5" />+ Add integration
-                </button>
+                <div className="self-start sm:shrink-0 flex items-center gap-2">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                        Coming soon
+                    </span>
+                    <button
+                        disabled
+                        className="bg-accent/50 text-white/70 px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 whitespace-nowrap cursor-not-allowed"
+                    >
+                        <Plus className="w-3.5 h-3.5" />+ Add integration
+                    </button>
+                </div>
             </div>
 
             {/* Main Tabs */}
@@ -68,16 +73,23 @@ const IntegrationsPageClient = ({
                     {(["inbound", "distribution"] as const).map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`pb-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
-                                activeTab === tab
-                                    ? "border-accent text-accent"
-                                    : "border-transparent text-muted hover:text-text"
+                            onClick={() => tab === "inbound" && setActiveTab(tab)}
+                            className={`pb-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
+                                tab === "distribution"
+                                    ? "border-transparent text-muted/50 cursor-not-allowed"
+                                    : activeTab === tab
+                                      ? "border-accent text-accent cursor-pointer"
+                                      : "border-transparent text-muted hover:text-text cursor-pointer"
                             }`}
                         >
                             {tab === "inbound"
                                 ? "Inbound feeds"
                                 : "Distribution"}
+                            {tab === "distribution" && (
+                                <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                    Coming soon
+                                </span>
+                            )}
                         </button>
                     ))}
                 </div>

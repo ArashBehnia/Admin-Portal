@@ -153,11 +153,17 @@ const FeedsTable = ({
                                             View details
                                         </button>
                                         {feed?.status === "Pending setup" ? (
-                                            <button className="text-accent hover:underline font-medium text-[11px] whitespace-nowrap cursor-pointer">
+                                            <button
+                                                disabled
+                                                className="text-muted/50 font-medium text-[11px] whitespace-nowrap cursor-not-allowed"
+                                            >
                                                 Send setup
                                             </button>
                                         ) : (
-                                            <button className="text-muted hover:text-text flex items-center gap-0.5 font-medium text-[11px] whitespace-nowrap cursor-pointer">
+                                            <button
+                                                disabled
+                                                className="text-muted/50 flex items-center gap-0.5 font-medium text-[11px] whitespace-nowrap cursor-not-allowed"
+                                            >
                                                 <RefreshCw className="w-2.5 h-2.5" />{" "}
                                                 Retry sync
                                             </button>

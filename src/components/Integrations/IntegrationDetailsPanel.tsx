@@ -153,21 +153,33 @@ const IntegrationDetailsPanel = ({
                                 "Errors",
                                 "Validation",
                             ] as const
-                        ).map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() =>
-                                    setActiveTab(tab.toLowerCase() as PanelTab)
-                                }
-                                className={`pb-2 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer ${
-                                    activeTab === tab.toLowerCase()
-                                        ? "border-accent text-accent"
-                                        : "border-transparent text-muted hover:text-text"
-                                }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                        ).map((tab) => {
+                            const isDisabled =
+                                tab === "Sync history" || tab === "Validation";
+                            return (
+                                <button
+                                    key={tab}
+                                    onClick={() =>
+                                        !isDisabled &&
+                                        setActiveTab(tab.toLowerCase() as PanelTab)
+                                    }
+                                    className={`pb-2 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
+                                        isDisabled
+                                            ? "border-transparent text-muted/50 cursor-not-allowed"
+                                            : activeTab === tab.toLowerCase()
+                                              ? "border-accent text-accent cursor-pointer"
+                                              : "border-transparent text-muted hover:text-text cursor-pointer"
+                                    }`}
+                                >
+                                    {tab}
+                                    {isDisabled && (
+                                        <span className="ml-1 inline-flex items-center px-1 py-0.5 rounded-full text-[8px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                            Soon
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -292,9 +304,17 @@ const IntegrationDetailsPanel = ({
                             )}
 
                             <div className="space-y-2 pt-4 border-t border-border">
-                                <button className="w-full bg-accent hover:bg-accent/90 text-white rounded py-2 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer">
-                                    <RefreshCw className="w-4 h-4" /> Retry sync
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        disabled
+                                        className="flex-1 bg-accent/50 text-white/70 rounded py-2 text-[13px] font-medium flex items-center justify-center gap-2 cursor-not-allowed"
+                                    >
+                                        <RefreshCw className="w-4 h-4" /> Retry sync
+                                    </button>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
+                                        Coming soon
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     )}
