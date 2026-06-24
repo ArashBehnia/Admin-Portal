@@ -89,7 +89,8 @@ function mapPageData(
         suspended: String(summary.inactive),
     };
 
-    const agencies: Agency[] = page.data.map((item) => ({
+    const items = Array.isArray(page.data) ? page.data : [];
+    const agencies: Agency[] = items.map((item) => ({
         id: item.id,
         name: item.name,
         location: item.location ?? "",
@@ -150,7 +151,15 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
 
                 const summary: ApiSummary =
                     summaryRes.data?.data ?? summaryRes.data;
-                const pageData: ApiPage = pageRes.data;
+                const rawPage = pageRes.data?.data ?? pageRes.data;
+                const pageData: ApiPage = {
+                    data: Array.isArray(rawPage?.data)
+                        ? rawPage.data
+                        : Array.isArray(rawPage)
+                          ? rawPage
+                          : [],
+                    total: rawPage?.total ?? 0,
+                };
                 const result = mapPageData(summary, pageData);
 
                 setStats(result.stats);

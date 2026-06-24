@@ -65,7 +65,6 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                 onFilterChange={setActiveFilter}
                 onToggleMenu={toggleMenu}
                 onCloseMenu={closeMenu}
-                onInviteClick={() => setIsModalOpen(true)}
             />
 
             <AgenciesPagination

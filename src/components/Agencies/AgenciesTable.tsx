@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Plus, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Search, MoreHorizontal } from "lucide-react";
 import {
     Agency,
     AGENCY_FILTERS,
@@ -12,6 +14,8 @@ import {
     OnboardingBadge,
     FeedStatusBadge,
 } from "./AgencyBadges";
+import EditAgencySidebar from "../AgencyDetail/EditAgencySidebar";
+import SuspendAgencyModal from "../AgencyDetail/SuspendAgencyModal";
 
 interface AgenciesTableProps {
     filteredAgencies: Agency[];
@@ -23,7 +27,6 @@ interface AgenciesTableProps {
     onFilterChange: (filter: AgencyFilter) => void;
     onToggleMenu: (id: string) => void;
     onCloseMenu: () => void;
-    onInviteClick: () => void;
 }
 
 const AgenciesTable = ({
@@ -36,8 +39,11 @@ const AgenciesTable = ({
     onFilterChange,
     onToggleMenu,
     onCloseMenu,
-    onInviteClick,
 }: AgenciesTableProps) => {
+    const router = useRouter();
+    const [editAgencyId, setEditAgencyId] = useState<string | null>(null);
+    const [suspendAgencyId, setSuspendAgencyId] = useState<string | null>(null);
+    const [suspendAgencyName, setSuspendAgencyName] = useState("");
     return (
         <div className="flex flex-col gap-5">
             {/* Controls */}
@@ -197,25 +203,37 @@ const AgenciesTable = ({
                                                     {openMenuId ===
                                                         agency?.id && (
                                                         <div
-                                                            className="absolute right-0 top-full mt-1 w-36 bg-card border border-border rounded shadow-lg z-10 py-1 overflow-hidden"
+                                                            className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-lg shadow-lg z-10 py-1.5 overflow-hidden text-left"
                                                             onMouseLeave={
                                                                 onCloseMenu
                                                             }
                                                         >
                                                             <Link
                                                                 href={`/agencies/${agency?.id}`}
-                                                                className="block px-4 py-2 text-[12px] text-text hover:bg-page"
+                                                                className="block px-4 py-2 text-[13px] text-text hover:bg-page"
+                                                                onClick={onCloseMenu}
                                                             >
                                                                 View details
                                                             </Link>
-                                                            <button className="w-full text-left px-4 py-2 text-[12px] text-text hover:bg-page cursor-pointer">
+                                                            <button
+                                                                onClick={() => {
+                                                                    onCloseMenu();
+                                                                    setEditAgencyId(agency?.id ?? null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
+                                                            >
                                                                 Edit
                                                             </button>
-                                                            <button className="w-full text-left px-4 py-2 text-[12px] text-orange-600 hover:bg-orange-50 cursor-pointer">
+                                                            <div className="border-t border-border my-1" />
+                                                            <button
+                                                                onClick={() => {
+                                                                    onCloseMenu();
+                                                                    setSuspendAgencyId(agency?.id ?? null);
+                                                                    setSuspendAgencyName(agency?.name ?? "");
+                                                                }}
+                                                                className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                                            >
                                                                 Suspend
-                                                            </button>
-                                                            <button className="w-full text-left px-4 py-2 text-[12px] text-red-600 hover:bg-red-50 cursor-pointer">
-                                                                Archive
                                                             </button>
                                                         </div>
                                                     )}
@@ -229,6 +247,32 @@ const AgenciesTable = ({
                     </table>
                 </div>
             </div>
+
+            {editAgencyId && (
+                <EditAgencySidebar
+                    isOpen={true}
+                    agencyId={editAgencyId}
+                    initialData={{}}
+                    onClose={() => setEditAgencyId(null)}
+                    onSuccess={() => {
+                        setEditAgencyId(null);
+                        router.refresh();
+                    }}
+                />
+            )}
+
+            {suspendAgencyId && (
+                <SuspendAgencyModal
+                    isOpen={true}
+                    agencyId={suspendAgencyId}
+                    agencyName={suspendAgencyName}
+                    onClose={() => setSuspendAgencyId(null)}
+                    onSuccess={() => {
+                        setSuspendAgencyId(null);
+                        router.refresh();
+                    }}
+                />
+            )}
         </div>
     );
 };

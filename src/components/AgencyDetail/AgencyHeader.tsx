@@ -72,7 +72,7 @@ const AgencyHeader = ({
                         </button>
                         {isMenuOpen && (
                             <div
-                                className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded shadow-lg z-10 py-1 overflow-hidden"
+                                className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-10 py-1.5 overflow-hidden"
                                 onMouseLeave={() => setIsMenuOpen(false)}
                             >
                                 <button
@@ -80,19 +80,19 @@ const AgencyHeader = ({
                                         setIsMenuOpen(false);
                                         setIsEditSidebarOpen(true);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-[12px] text-text hover:bg-page cursor-pointer"
+                                    className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
                                 >
                                     Edit details
                                 </button>
                                 <button
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="w-full text-left px-4 py-2 text-[12px] text-text hover:bg-page cursor-pointer"
+                                    className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
                                 >
                                     Change subscription tier
                                 </button>
                                 <button
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="w-full text-left px-4 py-2 text-[12px] text-text hover:bg-page cursor-pointer"
+                                    className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
                                 >
                                     Send invitation
                                 </button>
@@ -102,13 +102,13 @@ const AgencyHeader = ({
                                         setIsMenuOpen(false);
                                         setIsSuspendModalOpen(true);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-[12px] text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                    className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
                                 >
                                     Suspend agency
                                 </button>
                                 <button
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="w-full text-left px-4 py-2 text-[12px] text-red-600 hover:bg-red-50 cursor-pointer"
+                                    className="w-full text-left px-4 py-2 text-[13px] text-red-600 hover:bg-red-50 cursor-pointer"
                                 >
                                     Archive agency
                                 </button>
