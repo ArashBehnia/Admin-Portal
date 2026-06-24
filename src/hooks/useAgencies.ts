@@ -121,6 +121,10 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
+    // ─── Pagination State ────────────────────────────────────────────
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+
     // ─── UI State ─────────────────────────────────────────────────────
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -129,11 +133,12 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (keywords?: string) => {
+        async (page: number, keywords?: string) => {
             setIsLoading(true);
             try {
+                const offset = (page - 1) * ROWS_PER_PAGE;
                 const params = new URLSearchParams({
-                    offset: "0",
+                    offset: String(offset),
                     limit: String(ROWS_PER_PAGE),
                 });
                 if (keywords) params.set("keywords", keywords);
@@ -160,15 +165,25 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         [],
     );
 
+    // ─── Page change handler ─────────────────────────────────────────
+    const handlePageChange = useCallback(
+        (page: number) => {
+            setCurrentPage(page);
+            loadPage(page, searchQuery || undefined);
+        },
+        [loadPage, searchQuery],
+    );
+
     // ─── Search with debounce ─────────────────────────────────────────
     useEffect(() => {
+        setCurrentPage(1);
         if (!searchQuery) {
-            loadPage();
+            loadPage(1);
             return;
         }
         setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(searchQuery).finally(() => setIsSearching(false));
+            loadPage(1, searchQuery).finally(() => setIsSearching(false));
         }, 400);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
@@ -207,6 +222,11 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         filteredAgencies,
         totalCount,
         isLoading: isLoading || isSearching,
+
+        // Pagination
+        currentPage,
+        totalPages,
+        handlePageChange,
 
         // UI State
         isModalOpen,

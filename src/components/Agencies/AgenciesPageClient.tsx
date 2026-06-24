@@ -5,6 +5,7 @@ import { AgenciesData } from "@/types/agencyTypes";
 import useAgencies from "@/hooks/useAgencies";
 import AgenciesStats from "./AgenciesStats";
 import AgenciesTable from "./AgenciesTable";
+import AgenciesPagination from "./AgenciesPagination";
 import SendInvitationModal from "./SendInvitationModal";
 
 interface AgenciesPageClientProps {
@@ -16,6 +17,10 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
         stats,
         filteredAgencies,
         isLoading,
+        currentPage,
+        totalPages,
+        totalCount,
+        handlePageChange,
         isModalOpen,
         setIsModalOpen,
         searchQuery,
@@ -61,6 +66,13 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                 onToggleMenu={toggleMenu}
                 onCloseMenu={closeMenu}
                 onInviteClick={() => setIsModalOpen(true)}
+            />
+
+            <AgenciesPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                onPageChange={handlePageChange}
             />
 
             <SendInvitationModal

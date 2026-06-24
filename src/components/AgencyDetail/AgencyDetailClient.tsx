@@ -10,10 +10,8 @@ import AgencyTabs from "./AgencyTabs";
 import OverviewTab from "./OverviewTab";
 import AgentsTab from "./AgentsTab";
 import ListingsTab from "./ListingsTab";
-import BillingTab from "./BillingTab";
-import ReviewsTab from "./ReviewsTab";
 import NotesTab from "./NotesTab";
-import AuditTab from "./AuditTab";
+import ComingSoon from "./ComingSoon";
 
 interface AgencyDetailClientProps {
     agency: Agency;
@@ -70,14 +68,17 @@ const AgencyDetailClient = ({
             )}
 
             {activeTab === "Subscription & Billing" && (
-                <BillingTab
-                    agency={agency}
-                    invoices={detailData?.invoices ?? []}
+                <ComingSoon
+                    title="Subscription & Billing"
+                    description="Subscription management and billing features will be available in a future release."
                 />
             )}
 
             {activeTab === "Reviews" && (
-                <ReviewsTab reviews={detailData?.reviews ?? []} />
+                <ComingSoon
+                    title="Reviews"
+                    description="Agency review management will be available in a future release."
+                />
             )}
 
             {activeTab === "Notes" && (
@@ -85,7 +86,10 @@ const AgencyDetailClient = ({
             )}
 
             {activeTab === "Audit" && (
-                <AuditTab auditLog={detailData?.auditLog ?? []} />
+                <ComingSoon
+                    title="Audit Log"
+                    description="Audit trail and activity logging will be available in a future release."
+                />
             )}
         </div>
     );
