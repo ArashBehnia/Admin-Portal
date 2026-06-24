@@ -9,6 +9,14 @@ interface UseAgentsProps {
     initialTotal: number;
 }
 
+interface AgentSummary {
+    total: number;
+    active: number;
+    inactive: number;
+    ftp_enabled: number;
+    active_listings: number;
+}
+
 const ROWS_PER_PAGE = 20;
 
 const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
@@ -17,6 +25,13 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
     const [totalCount, setTotalCount] = useState(initialTotal);
     const [isLoading, setIsLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [summary, setSummary] = useState<AgentSummary>({
+        total: initialTotal,
+        active: 0,
+        inactive: 0,
+        ftp_enabled: 0,
+        active_listings: 0,
+    });
 
     // ─── Search State ─────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +43,26 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     // ─── Derived / Computed ───────────────────────────────────────────
     const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null;
+
+    // ─── Fetch summary on mount ───────────────────────────────────────
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const res = await api.get("/api/agents/summary");
+                const data = res.data;
+                setSummary({
+                    total: data?.total ?? initialTotal,
+                    active: data?.active ?? 0,
+                    inactive: data?.inactive ?? 0,
+                    ftp_enabled: data?.ftp_enabled ?? 0,
+                    active_listings: data?.active_listings ?? 0,
+                });
+            } catch (err) {
+                console.error("Failed to load agents summary:", err);
+            }
+        };
+        fetchSummary();
+    }, [initialTotal]);
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
@@ -130,6 +165,7 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
         agents,
         selectedAgent,
         totalCount,
+        summary,
         isLoading: isLoading || isSearching,
 
         // Search
