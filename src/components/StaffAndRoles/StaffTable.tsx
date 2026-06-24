@@ -101,8 +101,8 @@ const StaffTable = ({
                 </div>
                 <div className="flex-1" />
                 <button
-                    onClick={onAddClick}
-                    className="flex items-center justify-center gap-1.5 bg-accent hover:bg-accent/90 text-white font-semibold text-xs py-2 px-4 rounded transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+                    disabled
+                    className="flex items-center justify-center gap-1.5 bg-accent/50 text-white/70 font-semibold text-xs py-2 px-4 rounded transition-colors shadow-sm cursor-not-allowed whitespace-nowrap shrink-0"
                 >
                     <Plus size={14} strokeWidth={2.5} />
                     Add staff

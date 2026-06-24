@@ -282,15 +282,15 @@ const EditStaffDrawer = ({
                                 <div className="flex gap-2.5 mt-1 select-none">
                                     <button
                                         type="button"
-                                        onClick={onMfaReset}
-                                        className="px-3 py-1.5 border border-border bg-white text-muted hover:text-text rounded text-xs font-bold hover:bg-page transition-colors cursor-pointer font-sans"
+                                        disabled
+                                        className="px-3 py-1.5 border border-border/50 bg-slate-50 text-muted/50 rounded text-xs font-bold cursor-not-allowed font-sans"
                                     >
                                         Reset MFA
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={onRevokeSession}
-                                        className="px-3 py-1.5 border border-border bg-white text-muted hover:text-text rounded text-xs font-bold hover:bg-page transition-colors cursor-pointer font-sans"
+                                        disabled
+                                        className="px-3 py-1.5 border border-border/50 bg-slate-50 text-muted/50 rounded text-xs font-bold cursor-not-allowed font-sans"
                                     >
                                         Revoke all sessions
                                     </button>
