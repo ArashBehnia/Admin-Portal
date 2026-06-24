@@ -3,6 +3,7 @@
 import { TABS, AgencyTab } from "@/actions/agenciesActions";
 
 const COMING_SOON_TABS: AgencyTab[] = [
+    "Listings",
     "Subscription & Billing",
     "Reviews",
     "Audit",

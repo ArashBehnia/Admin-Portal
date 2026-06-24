@@ -1,27 +1,39 @@
 import {
     ActivityEvent,
     Portal,
-    ONBOARDING_STEPS,
 } from "@/actions/agenciesActions";
 import { AgencyTab } from "@/actions/agenciesActions";
+import { AgencyOnboardingStepDto } from "@/types/agencyTypes";
+import type { NoteItem } from "@/hooks/useAgencyDetail";
 
 interface OverviewTabProps {
     activityTimeline: ActivityEvent[];
     distributionPortals: Portal[];
-    internalNotes: string;
+    notes: NoteItem[];
     crmProvider: string;
     feedLastSynced: string;
     onEditNotesClick: (tab: AgencyTab) => void;
+    onboardingSteps: AgencyOnboardingStepDto[];
+    onboardingCurrentStep: string;
 }
+
+const STEP_COLORS: Record<string, { bar: string; label: string }> = {
+    completed: { bar: "bg-green-500", label: "text-green-600" },
+    current: { bar: "bg-accent", label: "text-accent" },
+    pending: { bar: "bg-border", label: "text-muted" },
+};
 
 const OverviewTab = ({
     activityTimeline,
     distributionPortals,
-    internalNotes,
+    notes,
     crmProvider,
     feedLastSynced,
     onEditNotesClick,
+    onboardingSteps,
+    onboardingCurrentStep,
 }: OverviewTabProps) => {
+    const lastNote = notes.length > 0 ? notes[notes.length - 1] : null;
     return (
         <div className="flex flex-col gap-5">
             {/* Top Row: Onboarding + Activity Timeline */}
@@ -33,21 +45,24 @@ const OverviewTab = ({
                     </h2>
 
                     <div className="flex gap-1">
-                        {ONBOARDING_STEPS.map((step) => (
-                            <div
-                                key={step}
-                                className="flex-1 flex flex-col gap-1.5 relative"
-                            >
-                                <div className="h-1.5 w-full bg-green-500 rounded-full" />
-                                <span className="text-[9px] font-bold text-green-600">
-                                    {step}
-                                </span>
-                            </div>
-                        ))}
+                        {onboardingSteps.map((step, i) => {
+                            const colors = STEP_COLORS[step.status] ?? STEP_COLORS.pending;
+                            return (
+                                <div
+                                    key={step.key || `step-${i}`}
+                                    className="flex-1 flex flex-col gap-1.5 relative"
+                                >
+                                    <div className={`h-1.5 w-full rounded-full ${colors.bar}`} />
+                                    <span className={`text-[9px] font-bold ${colors.label}`}>
+                                        {step.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
                         <div className="flex-1 flex flex-col gap-1.5 relative">
                             <div className="h-1.5 w-full bg-accent rounded-full" />
                             <span className="text-[9px] font-bold text-accent">
-                                LIVE
+                                {onboardingCurrentStep || "LIVE"}
                             </span>
                         </div>
                     </div>
@@ -134,9 +149,9 @@ const OverviewTab = ({
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    {distributionPortals.map((portal) => (
+                    {distributionPortals.map((portal, i) => (
                         <div
-                            key={portal?.name}
+                            key={portal?.name || `portal-${i}`}
                             className="border border-border rounded p-3 flex flex-col gap-2.5"
                         >
                             <div className="flex items-center gap-2">
@@ -185,9 +200,15 @@ const OverviewTab = ({
                         Edit notes →
                     </button>
                 </div>
-                <p className="text-[12px] text-muted leading-relaxed">
-                    {internalNotes}
-                </p>
+                {lastNote ? (
+                    <p className="text-[12px] text-muted leading-relaxed">
+                        {lastNote.note}
+                    </p>
+                ) : (
+                    <p className="text-[12px] text-muted leading-relaxed">
+                        No internal notes yet.
+                    </p>
+                )}
             </div>
         </div>
     );

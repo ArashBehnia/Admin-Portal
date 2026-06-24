@@ -3,7 +3,12 @@ import type {
     AgencySummaryDto,
     AgencyListItemDto,
     AgencyOverviewDto,
+    AgencyDetailDto,
+    AgencyOnboardingDto,
+    AgencyActivityDto,
+    AgencyListingDistributionDto,
 } from "@/types/agencyTypes";
+import type { AgencyDetailData, ActivityEvent, Portal } from "@/actions/agenciesActions";
 
 function toArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) return value;
@@ -94,5 +99,273 @@ export async function fetchAgencyOverview(
         activeListings: toNumber(obj.activeListings),
         sales12m: toNumber(obj.sales12m),
         lastActivityAt: obj.lastActivityAt ? String(obj.lastActivityAt) : undefined,
+    };
+}
+
+export type AgencyNotes = {
+    note: string;
+    lastEditedBy: string | null;
+    lastEditedAt: string | null;
+};
+
+export async function fetchAgencyNotes(id: string): Promise<AgencyNotes> {
+    const raw = await backendFetch<unknown>(
+        `/api/admin/agencies/${id}/notes`,
+    );
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+    return {
+        note: String(obj.note ?? ""),
+        lastEditedBy: obj.lastEditedBy ? String(obj.lastEditedBy) : null,
+        lastEditedAt: obj.lastEditedAt ? String(obj.lastEditedAt) : null,
+    };
+}
+
+export async function saveAgencyNotes(
+    id: string,
+    note: string,
+): Promise<AgencyNotes> {
+    const raw = await backendFetch<unknown>(
+        `/api/admin/agencies/${id}/notes`,
+        {
+            method: "POST",
+            body: JSON.stringify({ note }),
+        },
+    );
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+    return {
+        note: String(obj.note ?? note),
+        lastEditedBy: obj.lastEditedBy ? String(obj.lastEditedBy) : null,
+        lastEditedAt: obj.lastActivityAt ? String(obj.lastActivityAt) : null,
+    };
+}
+
+// ─── Detail API Functions ──────────────────────────────────────────
+
+function mapActivityTypeToColor(type: string): string {
+    switch (type) {
+        case "success": return "bg-green-500";
+        case "warning": return "bg-orange-400";
+        case "error": return "bg-red-500";
+        default: return "bg-accent";
+    }
+}
+
+function mapActivityEvents(raw: unknown): ActivityEvent[] {
+    const obj = raw && typeof raw === "object" && !Array.isArray(raw)
+        ? raw as Record<string, unknown>
+        : {};
+    const events = toArray<{ title?: string; date?: string; type?: string }>(
+        obj.events ?? obj.data ?? raw,
+    );
+    return events.map((e) => ({
+        title: String(e.title ?? ""),
+        date: String(e.date ?? ""),
+        color: mapActivityTypeToColor(String(e.type ?? "info")),
+    }));
+}
+
+function mapPortals(raw: unknown): Portal[] {
+    const obj = raw && typeof raw === "object" && !Array.isArray(raw)
+        ? raw as Record<string, unknown>
+        : {};
+    const portals = toArray<{
+        name?: string; icon?: string; color?: string;
+        status?: string; listings?: string; active?: boolean;
+    }>(obj.portals ?? obj.data ?? raw);
+    return portals.map((p) => ({
+        name: String(p.name ?? ""),
+        icon: String(p.icon ?? ""),
+        color: String(p.color ?? "text-muted bg-page"),
+        status: String(p.status ?? "Not connected"),
+        listings: String(p.listings ?? "0 published"),
+        active: Boolean(p.active),
+    }));
+}
+
+function formatDate(iso?: string): string {
+    if (!iso) return "";
+    try {
+        const d = new Date(iso);
+        return d.toLocaleDateString("en-AU", { month: "short", year: "numeric" });
+    } catch {
+        return iso;
+    }
+}
+
+function mapOnboardingSteps(onboarding?: AgencyOnboardingDto) {
+    if (onboarding?.steps && onboarding.steps.length > 0) {
+        return onboarding.steps;
+    }
+    return [
+        { key: "APPLIED", label: "APPLIED", status: "completed" as const },
+        { key: "APPROVED", label: "APPROVED", status: "completed" as const },
+        { key: "CRM CONNECTED", label: "CRM CONNECTED", status: "completed" as const },
+        { key: "SYNCING", label: "SYNCING", status: "completed" as const },
+        { key: "VALIDATION", label: "VALIDATION", status: "completed" as const },
+    ];
+}
+
+export async function fetchAgencyDetail(id: string): Promise<AgencyDetailData> {
+    const raw = await backendFetch<unknown>(`/admin/agencies/${id}/detail`);
+    const dto = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as AgencyDetailDto
+        : null;
+
+    if (!dto) {
+        return fallbackDetailData(id);
+    }
+
+    const overview = dto.overview ?? {};
+    const onboardingSteps = mapOnboardingSteps(dto.onboarding);
+    return {
+        abn: String(overview.abn ?? ""),
+        memberSince: formatDate(overview.memberSince),
+        email: String(overview.email ?? ""),
+        phone: String(overview.phone ?? ""),
+        website: String(overview.website ?? ""),
+        crmProvider: "",
+        feedLastSynced: "",
+        activityTimeline: mapActivityEvents(dto.activity),
+        distributionPortals: mapPortals(dto.listingDistribution),
+        internalNotes: String(dto.notes?.note ?? ""),
+        auditLog: [],
+        reviews: [],
+        invoices: [],
+        listings: [],
+        agents: [],
+        onboardingSteps,
+        billing: dto.billing ?? { available: false, reason: "Subscription and billing models are not available in St1 yet." },
+    };
+}
+
+export async function fetchAgencyDetailOverview(id: string): Promise<AgencyDetailData> {
+    const raw = await backendFetch<unknown>(`/admin/agencies/${id}/overview`);
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+
+    return {
+        abn: String(obj.abn ?? ""),
+        memberSince: formatDate(obj.memberSince ? String(obj.memberSince) : undefined),
+        email: String(obj.email ?? ""),
+        phone: String(obj.phone ?? ""),
+        website: String(obj.website ?? ""),
+        crmProvider: String(obj.crmProvider ?? ""),
+        feedLastSynced: String(obj.feedLastSynced ?? ""),
+        activityTimeline: [],
+        distributionPortals: [],
+        internalNotes: "",
+        auditLog: [],
+        reviews: [],
+        invoices: [],
+        listings: [],
+        agents: [],
+        billing: { available: false, reason: "Subscription and billing models are not available in St1 yet." },
+    };
+}
+
+export async function fetchAgencyOnboarding(id: string): Promise<AgencyOnboardingDto> {
+    const raw = await backendFetch<unknown>(`/admin/agencies/${id}/onboarding`);
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+
+    const steps = toArray<{ key?: string; label?: string; status?: string; completedAt?: string }>(
+        obj.steps ?? obj.data ?? raw,
+    );
+
+    return {
+        currentStep: String(obj.currentStep ?? ""),
+        steps: steps.map((s) => ({
+            key: String(s.key ?? ""),
+            label: String(s.label ?? ""),
+            status: (s.status as "completed" | "current" | "pending") ?? "pending",
+            completedAt: s.completedAt ? String(s.completedAt) : undefined,
+        })),
+        appliedAt: obj.appliedAt ? String(obj.appliedAt) : undefined,
+        approvedAt: obj.approvedAt ? String(obj.approvedAt) : undefined,
+        crmConnectedAt: obj.crmConnectedAt ? String(obj.crmConnectedAt) : undefined,
+        syncingAt: obj.syncingAt ? String(obj.syncingAt) : undefined,
+        validatedAt: obj.validatedAt ? String(obj.validatedAt) : undefined,
+        liveAt: obj.liveAt ? String(obj.liveAt) : undefined,
+    };
+}
+
+export async function fetchAgencyActivity(
+    id: string,
+    limit = 20,
+): Promise<AgencyActivityDto> {
+    const params = new URLSearchParams({ limit: String(limit) });
+    const raw = await backendFetch<unknown>(
+        `/admin/agencies/${id}/activity?${params.toString()}`,
+    );
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+
+    const events = toArray<{ title?: string; date?: string; type?: string }>(
+        obj.events ?? obj.data ?? raw,
+    );
+
+    return {
+        events: events.map((e) => ({
+            title: String(e.title ?? ""),
+            date: String(e.date ?? ""),
+            type: (e.type as "info" | "success" | "warning" | "error") ?? "info",
+        })),
+        total: toNumber(obj.total) || events.length,
+    };
+}
+
+export async function fetchAgencyListingDistribution(
+    id: string,
+): Promise<AgencyListingDistributionDto> {
+    const raw = await backendFetch<unknown>(
+        `/admin/agencies/${id}/listing-distribution`,
+    );
+    const obj = (raw && typeof raw === "object" && !Array.isArray(raw))
+        ? raw as Record<string, unknown>
+        : {};
+
+    const portals = toArray<{
+        name?: string; icon?: string; color?: string;
+        status?: string; listings?: string; active?: boolean;
+    }>(obj.portals ?? obj.data ?? raw);
+
+    return {
+        portals: portals.map((p) => ({
+            name: String(p.name ?? ""),
+            icon: String(p.icon ?? ""),
+            color: String(p.color ?? "text-muted bg-page"),
+            status: String(p.status ?? "Not connected"),
+            listings: String(p.listings ?? "0 published"),
+            active: Boolean(p.active),
+        })),
+    };
+}
+
+function fallbackDetailData(id: string): AgencyDetailData {
+    void id;
+    return {
+        abn: "",
+        memberSince: "",
+        email: "",
+        phone: "",
+        website: "",
+        crmProvider: "",
+        feedLastSynced: "",
+        activityTimeline: [],
+        distributionPortals: [],
+        internalNotes: "",
+        auditLog: [],
+        reviews: [],
+        invoices: [],
+        listings: [],
+        agents: [],
+        billing: { available: false, reason: "Subscription and billing models are not available in St1 yet." },
     };
 }

@@ -2,6 +2,7 @@ import { AgentRow } from "@/actions/agenciesActions";
 
 interface AgentsTabProps {
     agents: AgentRow[];
+    isLoading?: boolean;
 }
 
 const STATUS_STYLES: Record<AgentRow["status"], { dot: string; text: string }> =
@@ -11,7 +12,7 @@ const STATUS_STYLES: Record<AgentRow["status"], { dot: string; text: string }> =
         Pending: { dot: "bg-orange-400", text: "text-orange-700" },
     };
 
-const AgentsTab = ({ agents }: AgentsTabProps) => {
+const AgentsTab = ({ agents, isLoading }: AgentsTabProps) => {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -25,6 +26,15 @@ const AgentsTab = ({ agents }: AgentsTabProps) => {
 
             <div className="bg-card border border-border rounded shadow-sm overflow-hidden">
                 <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12 text-[13px] text-muted">
+                            Loading agents...
+                        </div>
+                    ) : agents.length === 0 ? (
+                        <div className="flex items-center justify-center py-12 text-[13px] text-muted">
+                            No agents found for this agency.
+                        </div>
+                    ) : (
                     <table className="w-full text-left text-[13px] table-auto">
                         <thead>
                             <tr className="border-b border-border text-muted bg-card">
@@ -103,6 +113,7 @@ const AgentsTab = ({ agents }: AgentsTabProps) => {
                             })}
                         </tbody>
                     </table>
+                    )}
                 </div>
             </div>
         </div>

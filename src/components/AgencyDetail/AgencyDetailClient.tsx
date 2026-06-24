@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { Agency } from "@/actions/agenciesActions";
-import { AgencyDetailData } from "@/actions/agenciesActions";
+import { Agency, AgencyTab, AgencyDetailData } from "@/actions/agenciesActions";
 import useAgencyDetail from "@/hooks/useAgencyDetail";
 import AgencyHeader from "./AgencyHeader";
 import AgencyTabs from "./AgencyTabs";
@@ -14,16 +14,41 @@ import NotesTab from "./NotesTab";
 import ComingSoon from "./ComingSoon";
 
 interface AgencyDetailClientProps {
+    agencyId: string;
     agency: Agency;
     detailData: AgencyDetailData;
 }
 
 const AgencyDetailClient = ({
+    agencyId,
     agency,
     detailData,
 }: AgencyDetailClientProps) => {
-    const { activeTab, setActiveTab, notes, setNotes, getInitials } =
-        useAgencyDetail({ detailData });
+    const router = useRouter();
+    const {
+        activeTab,
+        setActiveTab,
+        detailData: currentDetailData,
+        onboardingSteps,
+        onboardingCurrentStep,
+        notes,
+        isNotesLoading,
+        isNotesSaving,
+        newNoteText,
+        setNewNoteText,
+        addNote,
+        getInitials,
+        agents,
+        isAgentsLoading,
+        fetchAgents,
+    } = useAgencyDetail({ agencyId, detailData });
+
+    const handleTabChange = (tab: AgencyTab) => {
+        setActiveTab(tab);
+        if (tab === "Agents" && agents.length === 0) {
+            fetchAgents();
+        }
+    };
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
@@ -41,36 +66,54 @@ const AgencyDetailClient = ({
 
             <AgencyHeader
                 agency={agency}
-                abn={detailData?.abn ?? ""}
-                memberSince={detailData?.memberSince ?? ""}
+                agencyId={agencyId}
+                abn={currentDetailData?.abn ?? ""}
+                memberSince={currentDetailData?.memberSince ?? ""}
                 initials={getInitials(agency?.name ?? "")}
+                editData={{
+                    name: agency?.name ?? "",
+                    email: currentDetailData?.email ?? "",
+                    phone: currentDetailData?.phone ?? "",
+                    website: currentDetailData?.website ?? "",
+                }}
+                onSuspendSuccess={() => router.refresh()}
+                onEditSuccess={() => router.refresh()}
             />
 
-            <AgencyTabs activeTab={activeTab} onChange={setActiveTab} />
+            <AgencyTabs activeTab={activeTab} onChange={handleTabChange} />
 
             {activeTab === "Overview" && (
                 <OverviewTab
-                    activityTimeline={detailData?.activityTimeline ?? []}
-                    distributionPortals={detailData?.distributionPortals ?? []}
-                    internalNotes={detailData?.internalNotes ?? ""}
-                    crmProvider={detailData?.crmProvider ?? ""}
-                    feedLastSynced={detailData?.feedLastSynced ?? ""}
+                    activityTimeline={currentDetailData?.activityTimeline ?? []}
+                    distributionPortals={currentDetailData?.distributionPortals ?? []}
+                    notes={notes}
+                    crmProvider={currentDetailData?.crmProvider ?? ""}
+                    feedLastSynced={currentDetailData?.feedLastSynced ?? ""}
                     onEditNotesClick={setActiveTab}
+                    onboardingSteps={onboardingSteps}
+                    onboardingCurrentStep={onboardingCurrentStep}
                 />
             )}
 
             {activeTab === "Agents" && (
-                <AgentsTab agents={detailData?.agents ?? []} />
+                <AgentsTab agents={agents} isLoading={isAgentsLoading} />
             )}
 
             {activeTab === "Listings" && (
-                <ListingsTab listings={detailData?.listings ?? []} />
+                (currentDetailData?.listings ?? []).length > 0 ? (
+                    <ListingsTab listings={currentDetailData?.listings ?? []} />
+                ) : (
+                    <ComingSoon
+                        title="Listings"
+                        description="Detailed listing data will be available when the listings integration is connected."
+                    />
+                )
             )}
 
             {activeTab === "Subscription & Billing" && (
                 <ComingSoon
                     title="Subscription & Billing"
-                    description="Subscription management and billing features will be available in a future release."
+                    description={currentDetailData?.billing?.reason ?? "Subscription management and billing features will be available in a future release."}
                 />
             )}
 
@@ -82,7 +125,14 @@ const AgencyDetailClient = ({
             )}
 
             {activeTab === "Notes" && (
-                <NotesTab notes={notes} onNotesChange={setNotes} />
+                <NotesTab
+                    notes={notes}
+                    isLoading={isNotesLoading}
+                    isSaving={isNotesSaving}
+                    newNoteText={newNoteText}
+                    onNewNoteChange={setNewNoteText}
+                    onAddNote={addNote}
+                />
             )}
 
             {activeTab === "Audit" && (

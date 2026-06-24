@@ -49,6 +49,85 @@ export type AgencyOverviewDto = {
     lastActivityAt?: string;
 };
 
+// ─── Detail API Response Types ─────────────────────────────────────
+
+export type AgencyOnboardingStepDto = {
+    key: string;
+    label: string;
+    status: "completed" | "current" | "pending";
+    completedAt?: string;
+};
+
+export type AgencyOnboardingDto = {
+    currentStep: string;
+    steps: AgencyOnboardingStepDto[];
+    appliedAt?: string;
+    approvedAt?: string;
+    crmConnectedAt?: string;
+    syncingAt?: string;
+    validatedAt?: string;
+    liveAt?: string;
+};
+
+export type AgencyActivityEventDto = {
+    title: string;
+    date: string;
+    type: "info" | "success" | "warning" | "error";
+};
+
+export type AgencyActivityDto = {
+    events: AgencyActivityEventDto[];
+    total: number;
+};
+
+export type AgencyPortalDistributionDto = {
+    name: string;
+    icon: string;
+    color: string;
+    status: string;
+    listings: string;
+    active: boolean;
+};
+
+export type AgencyListingDistributionDto = {
+    portals: AgencyPortalDistributionDto[];
+};
+
+export type AgencyDetailDto = {
+    overview: {
+        id: string;
+        name: string;
+        status: string;
+        email?: string;
+        phone?: string;
+        website?: string;
+        abn?: string;
+        totalStaff: number;
+        activeStaff: number;
+        totalListings: number;
+        activeListings: number;
+        sales12m: number;
+        memberSince?: string;
+        lastActivityAt?: string;
+        subscription?: string;
+        feedStatus?: string;
+        mrr?: string;
+        location?: string;
+    };
+    onboarding: AgencyOnboardingDto;
+    activity: AgencyActivityDto;
+    listingDistribution: AgencyListingDistributionDto;
+    notes: {
+        note: string;
+        lastEditedBy?: string;
+        lastEditedAt?: string;
+    };
+    billing: {
+        available: boolean;
+        reason?: string;
+    };
+};
+
 // ─── Frontend Types ──────────────────────────────────────────────────
 
 export type AgencyHighlight = "orange" | "red" | null;

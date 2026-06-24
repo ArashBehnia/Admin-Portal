@@ -6,7 +6,7 @@ import useAgencies from "@/hooks/useAgencies";
 import AgenciesStats from "./AgenciesStats";
 import AgenciesTable from "./AgenciesTable";
 import AgenciesPagination from "./AgenciesPagination";
-import SendInvitationModal from "./SendInvitationModal";
+import CreateAgencySidebar from "./CreateAgencySidebar";
 
 interface AgenciesPageClientProps {
     initialData: AgenciesData;
@@ -49,7 +49,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                     onClick={() => setIsModalOpen(true)}
                     className="bg-accent hover:bg-accent/90 text-white px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 transition-colors self-start shrink-0 cursor-pointer"
                 >
-                    <Plus className="w-4 h-4" /> Send invitation
+                    <Plus className="w-4 h-4" /> Create
                 </button>
             </div>
 
@@ -75,9 +75,10 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                 onPageChange={handlePageChange}
             />
 
-            <SendInvitationModal
+            <CreateAgencySidebar
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
+                onSuccess={() => window.location.reload()}
             />
         </div>
     );

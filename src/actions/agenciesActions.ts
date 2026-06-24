@@ -8,8 +8,11 @@ export type {
     AgencyFilter,
     AgencyListItemDto,
     AgencySummaryDto,
+    AgencyOnboardingStepDto,
 } from "../types/agencyTypes";
 export { AGENCY_FILTERS, ROWS_PER_PAGE } from "../types/agencyTypes";
+
+import type { AgencyOnboardingStepDto } from "../types/agencyTypes";
 
 // ─── Detail Types (no server deps) ──────────────────────────────────
 
@@ -74,6 +77,9 @@ export type AgentRow = {
 export type AgencyDetailData = {
     abn: string;
     memberSince: string;
+    email: string;
+    phone: string;
+    website: string;
     activityTimeline: ActivityEvent[];
     distributionPortals: Portal[];
     internalNotes: string;
@@ -84,6 +90,8 @@ export type AgencyDetailData = {
     agents: AgentRow[];
     crmProvider: string;
     feedLastSynced: string;
+    onboardingSteps?: AgencyOnboardingStepDto[];
+    billing?: { available: boolean; reason?: string };
 };
 
 export const TABS = [
@@ -111,6 +119,9 @@ export const fetchAgencyDetailData = async (): Promise<AgencyDetailData> => {
     return {
         abn: "51 824 753 556",
         memberSince: "Dec 2024",
+        email: "james@gatewayresidential.com.au",
+        phone: "+61412345678",
+        website: "https://gatewayresidential.com.au",
         crmProvider: "Box+Dice",
         feedLastSynced: "14 min ago",
         activityTimeline: [
@@ -166,5 +177,6 @@ export const fetchAgencyDetailData = async (): Promise<AgencyDetailData> => {
             { name: "Tom Baker", role: "Assistant", email: "tom@raywhitebondi.com.au", phone: "—", licence: "—", lastLogin: "Never", status: "Pending" },
             { name: "Priya Sharma", role: "Agent", email: "priya@raywhitebondi.com.au", phone: "+61 489 xxx xxx", licence: "LIC-NSW-36201", lastLogin: "Today 11:32am", status: "Active" },
         ],
+        billing: { available: false, reason: "Subscription and billing models are not available in St1 yet." },
     };
 };

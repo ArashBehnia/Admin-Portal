@@ -1,0 +1,19 @@
+Update Agency
+Endpoint:
+PUT /api/admin/agency?id={id}
+Alternative path-supported endpoint:
+PUT /api/admin/agency/{id}
+Use for:
+Edit agency profile
+Update email/phone/address/status/CRM fields
+Body:
+Same shape as create agency, but fields are optional for update.
+Change Small Agency Fields
+Endpoint:
+PUT /api/admin/agency/change?id={id}
+Use for:
+Small status or partial field updates from generic admin tables
+Example:
+{
+"status": "inactive"
+}
