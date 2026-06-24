@@ -1,32 +1,54 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
-import { Application, DrawerTab } from "@/actions/applicationsActions";
+import type { Application, DrawerTab, ApplicationTimeline } from "@/types/applicationTypes";
 import StatusBadge from "./StatusBadge";
 
 interface ApplicationDrawerProps {
     selectedApp: Application;
     activeDrawerTab: DrawerTab;
     notes: string;
+    noteMessage: { type: "success" | "error"; text: string } | null;
+    isSavingNote: boolean;
+    timeline: ApplicationTimeline;
+    isTimelineLoading: boolean;
     onTabChange: (tab: DrawerTab) => void;
     onClose: () => void;
     onNotesChange: (val: string) => void;
-    onApprove: (id: number) => void;
-    onReject: (id: number) => void;
-    onRequestInfo: (id: number) => void;
+    onApprove: (id: string) => void;
+    onReject: (id: string) => void;
+    onRequestInfo: (id: string) => void;
+    onSaveNote: (id: string, note: string) => void;
+    onLoadTimeline: (id: string) => void;
 }
 
 const ApplicationDrawer = ({
     selectedApp,
     activeDrawerTab,
     notes,
+    noteMessage,
+    isSavingNote,
+    timeline,
+    isTimelineLoading,
     onTabChange,
     onClose,
     onNotesChange,
     onApprove,
     onReject,
     onRequestInfo,
+    onSaveNote,
+    onLoadTimeline,
 }: ApplicationDrawerProps) => {
+    const timelineLoadedForApp = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (activeDrawerTab === "Notes" && timelineLoadedForApp.current !== selectedApp.id) {
+            timelineLoadedForApp.current = selectedApp.id;
+            onLoadTimeline(selectedApp.id);
+        }
+    }, [activeDrawerTab, onLoadTimeline, selectedApp.id]);
+
     return (
         <>
             {/* Backdrop */}
@@ -50,7 +72,7 @@ const ApplicationDrawer = ({
                     </h2>
                     <div className="text-[13px] text-muted flex flex-col gap-0.5 mb-3">
                         <span>{selectedApp.email}</span>
-                        <span>{selectedApp.phone ?? "+61 412 308 991"}</span>
+                        {selectedApp.phone && <span>{selectedApp.phone}</span>}
                     </div>
                     <div className="flex items-center gap-3 text-[12px]">
                         <StatusBadge status={selectedApp.status} />
@@ -220,9 +242,104 @@ const ApplicationDrawer = ({
                                 onChange={(e) => onNotesChange(e.target.value)}
                                 className="w-full h-[200px] bg-card border border-border rounded p-3 text-[14px] text-text focus:outline-none focus:ring-1 focus:ring-accent resize-none placeholder-muted"
                             />
-                            <button className="px-4 py-2 bg-accent text-white hover:bg-accent/90 rounded text-[14px] font-medium self-end transition-colors cursor-pointer">
-                                Save
+                            <button
+                                onClick={() => onSaveNote(selectedApp.id, notes)}
+                                disabled={isSavingNote || !notes.trim()}
+                                className="px-4 py-2 bg-accent text-white hover:bg-accent/90 rounded text-[14px] font-medium self-end transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {isSavingNote && (
+                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                )}
+                                {isSavingNote ? "Saving..." : "Save"}
                             </button>
+                            {noteMessage && (
+                                <p className={`text-[13px] font-medium ${noteMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                                    {noteMessage.text}
+                                </p>
+                            )}
+
+                            {/* Timeline */}
+                            <div className="flex flex-col gap-3 mt-4">
+                                <h4 className="text-[12px] font-bold text-muted uppercase tracking-wider">
+                                    Activity Timeline
+                                </h4>
+                                {isTimelineLoading ? (
+                                    <p className="text-[13px] text-muted">Loading timeline...</p>
+                                ) : timeline.length > 0 ? (
+                                    <div className="flex flex-col gap-3">
+                                        {[...timeline].sort((a, b) => {
+                                            const rawA = a as unknown as Record<string, unknown>;
+                                            const rawB = b as unknown as Record<string, unknown>;
+                                            const tsA = (rawA.timestamp ?? rawA.createdAt ?? rawA.date ?? "") as string;
+                                            const tsB = (rawB.timestamp ?? rawB.createdAt ?? rawB.date ?? "") as string;
+                                            return new Date(tsB).getTime() - new Date(tsA).getTime();
+                                        }).map((item) => {
+                                            const raw = item as unknown as Record<string, unknown>;
+                                            const action = (raw.action ?? raw.type ?? raw.event ?? raw.title ?? raw.actionType ?? "") as string;
+                                            const performedBy = (raw.performedBy ?? raw.user ?? raw.actor ?? raw.author ?? raw.performedByUser ?? raw.userName ?? "") as string;
+                                            const description = (raw.description ?? raw.message ?? raw.details ?? raw.text ?? raw.content ?? raw.note ?? "") as string;
+                                            const timestamp = (raw.timestamp ?? raw.createdAt ?? raw.date ?? raw.time ?? raw.occurredAt ?? "") as string;
+                                            const isNote = action.toLowerCase() === "note" || (raw.type as string)?.toLowerCase() === "note";
+                                            const displayAction = isNote ? "Note" : action;
+
+                                            const formatTimestamp = (ts: string): string => {
+                                                if (!ts) return "";
+                                                try {
+                                                    const date = new Date(ts);
+                                                    if (isNaN(date.getTime())) return ts;
+                                                    const now = Date.now();
+                                                    const diff = now - date.getTime();
+                                                    const mins = Math.floor(diff / 60000);
+                                                    if (mins < 1) return "Just now";
+                                                    if (mins < 60) return `${mins} min ago`;
+                                                    const hours = Math.floor(mins / 60);
+                                                    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+                                                    const days = Math.floor(hours / 24);
+                                                    if (days < 30) return `${days} day${days > 1 ? "s" : ""} ago`;
+                                                    return date.toLocaleDateString("en-AU", {
+                                                        day: "numeric",
+                                                        month: "short",
+                                                        year: "numeric",
+                                                    });
+                                                } catch {
+                                                    return ts;
+                                                }
+                                            };
+
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className="border-l-2 border-border pl-3 py-1"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[13px] font-medium text-text">
+                                                            {displayAction || "\u2014"}
+                                                        </span>
+                                                        {performedBy && (
+                                                            <span className="text-[11px] text-muted">
+                                                                by {performedBy}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {description && (
+                                                        <p className="text-[12px] text-muted mt-1">
+                                                            {description}
+                                                        </p>
+                                                    )}
+                                                    <span className="text-[11px] text-muted">
+                                                        {formatTimestamp(timestamp)}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-[13px] text-muted">No activity recorded yet.</p>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

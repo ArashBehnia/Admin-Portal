@@ -17,12 +17,12 @@ interface ApplicationsTableProps {
     filteredApplications: Application[];
     searchQuery: string;
     statusFilter: string;
-    selectedAppId?: number;
+    selectedAppId?: string;
     onSearchChange: (val: string) => void;
     onStatusFilterChange: (val: "All" | Application["status"]) => void;
     onReviewClick: (app: Application) => void;
-    onApprove: (id: number) => void;
-    onReject: (id: number) => void;
+    onApprove: (id: string) => void;
+    onReject: (id: string) => void;
 }
 
 const ApplicationsTable = ({
@@ -105,23 +105,23 @@ const ApplicationsTable = ({
                                         <td className="py-3 pl-4 pr-3 whitespace-nowrap">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-text">
-                                                    {app.name}
+                                                    {app.name || "\u2014"}
                                                 </span>
                                                 <span className="text-muted text-[12px]">
-                                                    {app.email}
+                                                    {app.email || "\u2014"}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="py-3 px-3 text-text whitespace-nowrap">
-                                            {app.agency}
+                                            {app.agency || "\u2014"}
                                         </td>
                                         <td className="py-3 px-3 whitespace-nowrap">
                                             <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-medium bg-page text-muted border border-border">
-                                                {app.crm}
+                                                {app.crm || "\u2014"}
                                             </span>
                                         </td>
                                         <td className="py-3 px-3 text-muted whitespace-nowrap">
-                                            {app.submitted}
+                                            {app.submitted || "\u2014"}
                                         </td>
                                         <td className="py-3 px-3 whitespace-nowrap">
                                             <StatusBadge status={app.status} />
