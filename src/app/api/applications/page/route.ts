@@ -32,7 +32,7 @@ export async function GET(request: Request) {
         const limit = searchParams.get("limit") ?? "20";
         const status = searchParams.get("status") ?? undefined;
 
-        console.log("[API /applications/page] GET request:", { offset, limit, status });
+        // console.log("[API /applications/page] GET request:", { offset, limit, status });
 
         const result = await fetchApplicationsPage(
             Number(offset),
@@ -40,23 +40,23 @@ export async function GET(request: Request) {
             status,
         );
 
-        console.log("[API /applications/page] raw result:", JSON.stringify(result).slice(0, 500));
+        // console.log("[API /applications/page] raw result:", JSON.stringify(result).slice(0, 500));
 
         const items = toArray(result.data);
         const total = findTotal(result) || items.length;
 
-        console.log("[API /applications/page] items count:", items.length, "total:", total);
-        if (items.length > 0 && items[0] && typeof items[0] === "object") {
-            const first = items[0] as Record<string, unknown>;
-            console.log("[API /applications/page] first item keys:", Object.keys(first));
-            console.log("[API /applications/page] first item:", JSON.stringify(items[0]).slice(0, 300));
-        }
+        // console.log("[API /applications/page] items count:", items.length, "total:", total);
+        // if (items.length > 0 && items[0] && typeof items[0] === "object") {
+        //     const first = items[0] as Record<string, unknown>;
+        //     console.log("[API /applications/page] first item keys:", Object.keys(first));
+        //     console.log("[API /applications/page] first item:", JSON.stringify(items[0]).slice(0, 300));
+        // }
 
         return NextResponse.json({ data: items, total, offset: Number(offset), limit: Number(limit) });
     } catch (error) {
         const message =
             error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /applications/page] error:", message);
+        // console.error("[API /applications/page] error:", message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }

@@ -9,9 +9,9 @@ function toNum(v: unknown): number {
 
 export async function GET() {
     try {
-        console.log("[API /applications/summary] GET request");
+        // console.log("[API /applications/summary] GET request");
         const raw = await fetchApplicationsSummary();
-        console.log("[API /applications/summary] raw response:", JSON.stringify(raw));
+        // console.log("[API /applications/summary] raw response:", JSON.stringify(raw));
         const data = {
             total: toNum(raw.total),
             pending: toNum(raw.pending),
@@ -19,12 +19,12 @@ export async function GET() {
             rejected: toNum(raw.rejected),
             newToday: toNum(raw.newToday),
         };
-        console.log("[API /applications/summary] mapped data:", JSON.stringify(data));
+        // console.log("[API /applications/summary] mapped data:", JSON.stringify(data));
         return NextResponse.json(data);
     } catch (error) {
         const message =
             error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /applications/summary] error:", message);
+        // console.error("[API /applications/summary] error:", message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }

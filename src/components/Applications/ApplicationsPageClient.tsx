@@ -5,6 +5,9 @@ import useApplications from "@/hooks/useApplications";
 import ApplicationStats from "@/components/Applications/ApplicationStats";
 import ApplicationsTable from "@/components/Applications/ApplicationsTable";
 import ApplicationDrawer from "@/components/Applications/ApplicationDrawer";
+import ApproveModal from "@/components/Applications/ApproveModal";
+import RejectModal from "@/components/Applications/RejectModal";
+import Toast from "@/components/Shared/Toast";
 
 function formatStatus(status: string): "Pending" | "Approved" | "Rejected" | "Awaiting info" {
     const s = status?.toLowerCase();
@@ -42,13 +45,17 @@ const ApplicationsPageClient = ({
 
     const mappedApplications = initialApplications.map((item) => {
         const raw = item as unknown as Record<string, unknown>;
-        console.log("[ApplicationsPageClient] raw item keys:", Object.keys(raw), "data:", JSON.stringify(raw).slice(0, 300));
-        const name = (raw.name ?? raw.applicantName ?? raw.fullName ?? raw.userName ?? raw.contactName ?? "") as string;
-        const email = (raw.email ?? raw.emailAddress ?? "") as string;
-        const agency = (raw.agency ?? raw.agencyName ?? raw.companyName ?? raw.organisation ?? "") as string;
-        const crm = (raw.crm ?? raw.crmPlatform ?? raw.crmType ?? raw.integrationType ?? "") as string;
-        const submittedAt = (raw.submittedAt ?? raw.createdAt ?? raw.createdDate ?? raw.applicationDate ?? raw.submittedDate ?? "") as string;
-        const phone = (raw.phone ?? raw.phoneNumber ?? raw.mobile ?? "") as string | undefined;
+        const nested = (raw.data ?? {}) as Record<string, unknown>;
+        const user = (raw.user ?? {}) as Record<string, unknown>;
+
+        const firstName = (nested.agentFirstName ?? user.firstName ?? "") as string;
+        const lastName = (nested.agentLastName ?? user.lastName ?? "") as string;
+        const name = `${firstName} ${lastName}`.trim();
+        const email = (nested.agentEmail ?? user.email ?? "") as string;
+        const agency = (nested.agencyLegalName ?? "") as string;
+        const crm = (nested.crmSelection ?? nested.crmName ?? "") as string;
+        const phone = (nested.agentPhone ?? user.mobile ?? user.phone ?? "") as string;
+        const submittedAt = (nested.clientSubmittedAt ?? raw.createdAt ?? "") as string;
 
         return {
             id: String(item.id ?? ""),
@@ -59,6 +66,7 @@ const ApplicationsPageClient = ({
             submitted: formatTimeAgo(submittedAt),
             status: formatStatus(item.status),
             phone,
+            rawData: raw,
         };
     });
 
@@ -70,19 +78,32 @@ const ApplicationsPageClient = ({
     };
 
     const {
-        filteredApplications,
+        applications,
+        totalCount,
         stats,
         searchQuery,
         setSearchQuery,
         statusFilter,
-        setStatusFilter,
+        handleStatusFilterChange,
+        currentPage,
+        handlePageChange,
+        isLoading,
         selectedApp,
         activeDrawerTab,
         setActiveDrawerTab,
         notes,
         setNotes,
-        noteMessage,
         isSavingNote,
+        toast,
+        setToast,
+        isApproving,
+        isRejecting,
+        approveModalApp,
+        confirmApprove,
+        closeApproveModal,
+        rejectModalApp,
+        confirmReject,
+        closeRejectModal,
         timeline,
         isTimelineLoading,
         openDrawer,
@@ -111,12 +132,16 @@ const ApplicationsPageClient = ({
             <ApplicationStats stats={stats} />
 
             <ApplicationsTable
-                filteredApplications={filteredApplications}
+                applications={applications}
+                totalCount={totalCount}
+                currentPage={currentPage}
                 searchQuery={searchQuery}
                 statusFilter={statusFilter}
                 selectedAppId={selectedApp?.id}
+                isLoading={isLoading}
                 onSearchChange={setSearchQuery}
-                onStatusFilterChange={setStatusFilter}
+                onStatusFilterChange={handleStatusFilterChange}
+                onPageChange={handlePageChange}
                 onReviewClick={openDrawer}
                 onApprove={handleApprove}
                 onReject={(id) => handleReject(id)}
@@ -127,8 +152,9 @@ const ApplicationsPageClient = ({
                     selectedApp={selectedApp}
                     activeDrawerTab={activeDrawerTab}
                     notes={notes}
-                    noteMessage={noteMessage}
                     isSavingNote={isSavingNote}
+                    isApproving={isApproving}
+                    isRejecting={isRejecting}
                     timeline={timeline}
                     isTimelineLoading={isTimelineLoading}
                     onTabChange={setActiveDrawerTab}
@@ -141,6 +167,32 @@ const ApplicationsPageClient = ({
                     onLoadTimeline={loadTimeline}
                 />
             )}
+
+            {approveModalApp && (
+                <ApproveModal
+                    app={approveModalApp}
+                    isApproving={isApproving}
+                    onConfirm={confirmApprove}
+                    onCancel={closeApproveModal}
+                />
+            )}
+
+            {rejectModalApp && (
+                <RejectModal
+                    app={rejectModalApp}
+                    isRejecting={isRejecting}
+                    onConfirm={confirmReject}
+                    onCancel={closeRejectModal}
+                />
+            )}
+
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(prev => ({ ...prev, visible: false }))}
+            />
         </div>
     );
 };

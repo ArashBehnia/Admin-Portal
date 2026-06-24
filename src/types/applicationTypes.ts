@@ -47,6 +47,7 @@ export type Application = {
     submitted: string;
     status: ApplicationStatus;
     phone?: string;
+    rawData?: Record<string, unknown>;
 };
 
 export type ApplicationStats = {

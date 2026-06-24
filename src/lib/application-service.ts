@@ -40,9 +40,9 @@ function findTotal(obj: unknown): number {
 }
 
 export async function fetchApplicationsSummary(): Promise<ApplicationSummaryDto> {
-    console.log("[application-service] fetchApplicationsSummary -> GET /admin/applications/summary");
+    // console.log("[application-service] fetchApplicationsSummary -> GET /admin/applications/summary");
     const raw = await backendFetch<unknown>("/admin/applications/summary");
-    console.log("[application-service] fetchApplicationsSummary raw:", JSON.stringify(raw));
+    // console.log("[application-service] fetchApplicationsSummary raw:", JSON.stringify(raw));
     const obj =
         raw && typeof raw === "object" && !Array.isArray(raw)
             ? (raw as Record<string, unknown>)
@@ -67,11 +67,11 @@ export async function fetchApplicationsPage(
     });
     if (status) params.set("status", status);
 
-    console.log("[application-service] fetchApplicationsPage -> GET /admin/agent-portal/page?", params.toString());
+    // console.log("[application-service] fetchApplicationsPage -> GET /admin/agent-portal/page?", params.toString());
     const raw = await backendFetch<unknown>(
         `/admin/agent-portal/page?${params.toString()}`,
     );
-    console.log("[application-service] fetchApplicationsPage raw:", JSON.stringify(raw).slice(0, 500));
+    // console.log("[application-service] fetchApplicationsPage raw:", JSON.stringify(raw).slice(0, 500));
 
     const items = toArray<ApplicationListItemDto>(raw);
     const total = findTotal(raw) || items.length;

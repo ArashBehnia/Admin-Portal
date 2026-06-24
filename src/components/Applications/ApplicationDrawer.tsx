@@ -9,8 +9,9 @@ interface ApplicationDrawerProps {
     selectedApp: Application;
     activeDrawerTab: DrawerTab;
     notes: string;
-    noteMessage: { type: "success" | "error"; text: string } | null;
     isSavingNote: boolean;
+    isApproving: boolean;
+    isRejecting: boolean;
     timeline: ApplicationTimeline;
     isTimelineLoading: boolean;
     onTabChange: (tab: DrawerTab) => void;
@@ -27,8 +28,9 @@ const ApplicationDrawer = ({
     selectedApp,
     activeDrawerTab,
     notes,
-    noteMessage,
     isSavingNote,
+    isApproving,
+    isRejecting,
     timeline,
     isTimelineLoading,
     onTabChange,
@@ -106,7 +108,9 @@ const ApplicationDrawer = ({
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-6 bg-card [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {/* Application Tab */}
-                    {activeDrawerTab === "Application" && (
+                    {activeDrawerTab === "Application" && (() => {
+                        const d = (selectedApp.rawData?.data ?? {}) as Record<string, unknown>;
+                        return (
                         <div className="flex flex-col gap-8">
                             <div className="flex flex-col gap-4">
                                 <h3 className="text-[12px] font-bold text-muted uppercase tracking-wider">
@@ -114,17 +118,13 @@ const ApplicationDrawer = ({
                                 </h3>
                                 <div className="flex flex-col gap-3 text-[14px]">
                                     {[
-                                        ["Legal name", selectedApp.agency],
-                                        [
-                                            "Agency email",
-                                            `admin@${selectedApp.agency.toLowerCase().replace(/\s/g, "")}.com.au`,
-                                        ],
+                                        ["Legal name", (d.agencyLegalName ?? selectedApp.agency) as string],
                                         [
                                             "Address",
-                                            "142 Campbell Parade, Bondi NSW 2026",
+                                            (d.agencyAddress ?? "\u2014") as string,
                                         ],
-                                        ["Licence number", "LIC-NSW-28441"],
-                                        ["ABN (optional)", "45 123 456 789"],
+                                        ["State", (d.state ?? "\u2014") as string],
+                                        ["Postcode", (d.postcode ?? "\u2014") as string],
                                     ].map(([label, value]) => (
                                         <div
                                             key={label}
@@ -134,16 +134,32 @@ const ApplicationDrawer = ({
                                                 {label}
                                             </span>
                                             <span className="text-text">
-                                                {value}
+                                                {value || "\u2014"}
                                             </span>
                                         </div>
                                     ))}
                                     <div className="grid grid-cols-[130px_1fr] gap-x-2 items-center">
                                         <span className="text-muted">CRM</span>
                                         <span className="inline-block px-2 py-0.5 rounded text-[12px] font-medium bg-page text-muted border border-border w-fit">
-                                            {selectedApp.crm}
+                                            {(d.crmSelection ?? selectedApp.crm) as string}
                                         </span>
                                     </div>
+                                    {[
+                                        ["Licence number", (d.licenceNumber ?? d.agencyLicence ?? d.licenseNumber ?? "\u2014") as string],
+                                        ["ABN (optional)", (d.abn ?? d.ABN ?? "\u2014") as string],
+                                    ].map(([label, value]) => (
+                                        <div
+                                            key={label}
+                                            className="grid grid-cols-[130px_1fr] gap-x-2"
+                                        >
+                                            <span className="text-muted">
+                                                {label}
+                                            </span>
+                                            <span className="text-text">
+                                                {value || "\u2014"}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -153,13 +169,13 @@ const ApplicationDrawer = ({
                                 </h3>
                                 <div className="flex flex-col gap-3 text-[14px]">
                                     {[
-                                        ["Name", selectedApp.name],
-                                        ["Email", selectedApp.email],
-                                        ["Licence", "LIC-NSW-28441"],
-                                        ["Interested in", "Residential sales"],
+                                        ["Name", (d.agentFullName ?? selectedApp.name) as string],
+                                        ["Email", (d.agentEmail ?? selectedApp.email) as string],
+                                        ["Phone", (d.agentPhone ?? selectedApp.phone ?? "\u2014") as string],
+                                        ["Interested in", (d.interest ?? "\u2014") as string],
                                         [
                                             "Message",
-                                            "We are a boutique agency looking to expand our digital presence. HomeBy looks like a great fit.",
+                                            (d.message ?? "\u2014") as string,
                                         ],
                                     ].map(([label, value]) => (
                                         <div
@@ -170,14 +186,15 @@ const ApplicationDrawer = ({
                                                 {label}
                                             </span>
                                             <span className="text-text">
-                                                {value}
+                                                {value || "\u2014"}
                                             </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {/* Verification Tab */}
                     {activeDrawerTab === "Verification" && (
@@ -255,11 +272,6 @@ const ApplicationDrawer = ({
                                 )}
                                 {isSavingNote ? "Saving..." : "Save"}
                             </button>
-                            {noteMessage && (
-                                <p className={`text-[13px] font-medium ${noteMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
-                                    {noteMessage.text}
-                                </p>
-                            )}
 
                             {/* Timeline */}
                             <div className="flex flex-col gap-3 mt-4">
@@ -348,21 +360,36 @@ const ApplicationDrawer = ({
                 <div className="p-6 bg-card border-t border-border flex flex-col gap-2 shrink-0">
                     <button
                         onClick={() => onApprove(selectedApp.id)}
-                        className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded text-[13px] font-medium transition-colors cursor-pointer"
+                        disabled={isApproving || isRejecting}
+                        className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Approve application
+                        {isApproving && (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                        )}
+                        {isApproving ? "Approving..." : "Approve application"}
                     </button>
                     <button
                         onClick={() => onRequestInfo(selectedApp.id)}
-                        className="w-full py-2.5 bg-card border border-border hover:bg-page text-text rounded text-[13px] font-medium transition-colors cursor-pointer"
+                        disabled={isApproving || isRejecting}
+                        className="w-full py-2.5 bg-card border border-border hover:bg-page text-text rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Request more information
                     </button>
                     <button
                         onClick={() => onReject(selectedApp.id)}
-                        className="w-full py-2.5 bg-card text-red-500 hover:text-red-700 rounded text-[13px] font-medium transition-colors cursor-pointer"
+                        disabled={isApproving || isRejecting}
+                        className="w-full py-2.5 bg-card text-red-500 hover:text-red-700 rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Reject application
+                        {isRejecting && (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                        )}
+                        {isRejecting ? "Rejecting..." : "Reject application"}
                     </button>
                 </div>
             </div>
