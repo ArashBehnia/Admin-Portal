@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     PropertyReport,
     PropertyReportsData,
-    ReportTypeFilter,
+    ReportTypeValue,
     ROWS_PER_PAGE,
 } from "@/types/propertyReportTypes";
 import api from "@/lib/axios";
@@ -40,6 +40,17 @@ type ApiPage = {
     total: number;
 };
 
+function getAvatarUrl(avatarUrl: string): string {
+    if (!avatarUrl) return "";
+    if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://"))
+        return avatarUrl;
+    const base =
+        process.env.NEXT_PUBLIC_STORAGE_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "";
+    return `${base}/${avatarUrl}`;
+}
+
 function mapReport(item: ApiReportItem): PropertyReport {
     return {
         id: item.id,
@@ -54,7 +65,7 @@ function mapReport(item: ApiReportItem): PropertyReport {
         carSpaces: item.property?.carSpaces ?? 0,
         reporterName: `${item.user?.firstName ?? ""} ${item.user?.lastName ?? ""}`.trim(),
         reporterEmail: item.user?.email ?? "",
-        reporterAvatar: item.user?.avatarUrl ?? "",
+        reporterAvatar: getAvatarUrl(item.user?.avatarUrl ?? ""),
         reporterRole: item.user?.role ?? "",
     };
 }
@@ -72,19 +83,30 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
     );
     const [totalCount, setTotalCount] = useState(initialData?.total ?? 0);
     const [isLoading, setIsLoading] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
 
     // ─── Pagination State ────────────────────────────────────────────
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
 
-    // ─── UI State ─────────────────────────────────────────────────────
+    // ─── Filter State ────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeFilter, setActiveFilter] = useState<ReportTypeFilter>("All");
+    const [reportType, setReportType] = useState<ReportTypeValue>("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (page: number, keywords?: string) => {
+        async (
+            page: number,
+            opts?: {
+                filter?: string;
+                type?: string;
+                createdAtGte?: string;
+                createdAtLte?: string;
+            },
+        ) => {
             setIsLoading(true);
             try {
                 const offset = (page - 1) * ROWS_PER_PAGE;
@@ -92,7 +114,12 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
                     offset: String(offset),
                     limit: String(ROWS_PER_PAGE),
                 });
-                if (keywords) params.set("keywords", keywords);
+                if (opts?.filter) params.set("filter", opts.filter);
+                if (opts?.type) params.set("type", opts.type);
+                if (opts?.createdAtGte)
+                    params.set("createdAtGte", opts.createdAtGte);
+                if (opts?.createdAtLte)
+                    params.set("createdAtLte", opts.createdAtLte);
 
                 const res = await api.get(
                     `/api/property-reports/page?${params.toString()}`,
@@ -120,55 +147,74 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
         [],
     );
 
+    // ─── Build current filter opts ───────────────────────────────────
+    const currentFilters = useCallback(
+        () => ({
+            filter: searchQuery || undefined,
+            type: reportType || undefined,
+            createdAtGte: startDate || undefined,
+            createdAtLte: endDate || undefined,
+        }),
+        [searchQuery, reportType, startDate, endDate],
+    );
+
     // ─── Page change handler ─────────────────────────────────────────
     const handlePageChange = useCallback(
         (page: number) => {
             setCurrentPage(page);
-            loadPage(page, searchQuery || undefined);
+            loadPage(page, currentFilters());
         },
-        [loadPage, searchQuery],
+        [loadPage, currentFilters],
     );
 
     // ─── Search with debounce ─────────────────────────────────────────
     useEffect(() => {
-        setCurrentPage(1);
-        if (!searchQuery) {
-            loadPage(1);
-            return;
-        }
-        setIsSearching(true);
-        const timer = setTimeout(() => {
-            loadPage(1, searchQuery).finally(() => setIsSearching(false));
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            setCurrentPage(1);
+            loadPage(1, currentFilters());
         }, 400);
-        return () => clearTimeout(timer);
-    }, [searchQuery, loadPage]);
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [searchQuery, reportType, startDate, endDate, loadPage, currentFilters]);
 
-    // ─── Derived / Computed (client-side type filter) ─────────────────
-    const filteredReports = reports.filter((report) => {
-        if (activeFilter === "All") return true;
-        const reportType = report.type.toLowerCase();
-        if (activeFilter === "Pest") return reportType === "pest";
-        if (activeFilter === "Building") return reportType === "building";
-        if (activeFilter === "Both") return reportType === "both";
-        return true;
-    });
+    // ─── Reset all filters ───────────────────────────────────────────
+    const resetFilters = useCallback(() => {
+        setSearchQuery("");
+        setReportType("");
+        setStartDate("");
+        setEndDate("");
+    }, []);
+
+    const hasActiveFilters = Boolean(
+        searchQuery || reportType || startDate || endDate,
+    );
 
     return {
         // Data
-        filteredReports,
+        reports,
         totalCount,
-        isLoading: isLoading || isSearching,
+        isLoading,
 
         // Pagination
         currentPage,
         totalPages,
         handlePageChange,
 
-        // UI State
+        // Filters
         searchQuery,
         setSearchQuery,
-        activeFilter,
-        setActiveFilter,
+        reportType,
+        setReportType,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        showFilters,
+        setShowFilters,
+        hasActiveFilters,
+        resetFilters,
     };
 };
 

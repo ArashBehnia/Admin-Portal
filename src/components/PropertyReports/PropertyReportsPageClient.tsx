@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { RefreshCw } from "lucide-react";
-import { PropertyReportsData } from "@/types/propertyReportTypes";
+import {
+    PropertyReport,
+    PropertyReportsData,
+} from "@/types/propertyReportTypes";
 import usePropertyReports from "@/hooks/usePropertyReports";
 import PropertyReportsTable from "./PropertyReportsTable";
 import PropertyReportsPagination from "./PropertyReportsPagination";
+import PropertyReportDrawer from "./PropertyReportDrawer";
 
 interface PropertyReportsPageClientProps {
     initialData: PropertyReportsData;
@@ -14,7 +19,7 @@ const PropertyReportsPageClient = ({
     initialData,
 }: PropertyReportsPageClientProps) => {
     const {
-        filteredReports,
+        reports,
         isLoading,
         currentPage,
         totalPages,
@@ -22,9 +27,20 @@ const PropertyReportsPageClient = ({
         handlePageChange,
         searchQuery,
         setSearchQuery,
-        activeFilter,
-        setActiveFilter,
+        reportType,
+        setReportType,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        showFilters,
+        setShowFilters,
+        hasActiveFilters,
+        resetFilters,
     } = usePropertyReports({ initialData });
+
+    const [selectedReport, setSelectedReport] =
+        useState<PropertyReport | null>(null);
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
@@ -49,12 +65,21 @@ const PropertyReportsPageClient = ({
             </div>
 
             <PropertyReportsTable
-                filteredReports={filteredReports}
+                reports={reports}
                 isLoading={isLoading}
                 searchQuery={searchQuery}
-                activeFilter={activeFilter}
+                reportType={reportType}
+                startDate={startDate}
+                endDate={endDate}
+                showFilters={showFilters}
+                hasActiveFilters={hasActiveFilters}
                 onSearchChange={setSearchQuery}
-                onFilterChange={setActiveFilter}
+                onReportTypeChange={setReportType}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onToggleFilters={() => setShowFilters(!showFilters)}
+                onResetFilters={resetFilters}
+                onViewReport={setSelectedReport}
             />
 
             <PropertyReportsPagination
@@ -63,6 +88,14 @@ const PropertyReportsPageClient = ({
                 totalCount={totalCount}
                 onPageChange={handlePageChange}
             />
+
+            {/* Report Detail Drawer */}
+            {selectedReport && (
+                <PropertyReportDrawer
+                    report={selectedReport}
+                    onClose={() => setSelectedReport(null)}
+                />
+            )}
         </div>
     );
 };

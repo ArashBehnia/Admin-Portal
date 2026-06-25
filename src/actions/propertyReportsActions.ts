@@ -26,10 +26,9 @@ function mapReport(item: PropertyReportListItemDto) {
 export const fetchPropertyReportsData = async (
     offset = 0,
     limit = 20,
-    keywords?: string,
 ): Promise<PropertyReportsData> => {
     try {
-        const page = await fetchPropertyReportsPage(offset, limit, keywords);
+        const page = await fetchPropertyReportsPage(offset, limit);
         const reports = (page.data ?? []).map(mapReport);
         return { reports, total: page.total };
     } catch (err) {

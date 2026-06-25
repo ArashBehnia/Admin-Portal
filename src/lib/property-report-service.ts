@@ -2,6 +2,7 @@ import { backendFetch } from "@/lib/api";
 import type {
     PropertyReportListItemDto,
     PropertyReportPageDto,
+    PropertyReportFilters,
 } from "@/types/propertyReportTypes";
 
 function toArray<T>(value: unknown): T[] {
@@ -31,13 +32,17 @@ function findTotal(obj: unknown): number {
 export async function fetchPropertyReportsPage(
     offset = 0,
     limit = 20,
-    keywords?: string,
+    filters?: PropertyReportFilters,
 ): Promise<PropertyReportPageDto> {
     const params = new URLSearchParams({
         offset: String(offset),
         limit: String(limit),
     });
-    if (keywords) params.set("keywords", keywords);
+
+    if (filters?.type) params.set("type", filters.type);
+    if (filters?.createdAtGte) params.set("createdAt.gte", filters.createdAtGte);
+    if (filters?.createdAtLte) params.set("createdAt.lte", filters.createdAtLte);
+    if (filters?.filter) params.set("filter", filters.filter);
 
     const raw = await backendFetch<unknown>(
         `/admin/property-reports/page?${params.toString()}`,

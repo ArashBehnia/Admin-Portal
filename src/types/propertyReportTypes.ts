@@ -60,12 +60,19 @@ export type PropertyReportsData = {
     total: number;
 };
 
+export type PropertyReportFilters = {
+    type?: string;
+    createdAtGte?: string;
+    createdAtLte?: string;
+    filter?: string;
+};
+
 export const ROWS_PER_PAGE = 20;
 
-export const REPORT_TYPE_FILTERS = [
-    "All",
-    "Pest",
-    "Building",
-    "Both",
+export const REPORT_TYPE_OPTIONS = [
+    { value: "", label: "All types" },
+    { value: "pest", label: "Pest" },
+    { value: "building", label: "Building" },
+    { value: "both", label: "Both" },
 ] as const;
-export type ReportTypeFilter = (typeof REPORT_TYPE_FILTERS)[number];
+export type ReportTypeValue = (typeof REPORT_TYPE_OPTIONS)[number]["value"];
