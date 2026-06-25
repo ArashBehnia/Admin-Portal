@@ -671,30 +671,47 @@ const useStaffAndRoles = ({
         if (isPermsModalOpen && localPermissions.length === 0) {
             api.get("/api/staff/permissions")
                 .then((res) => {
-                    const data = Array.isArray(res.data) ? res.data : [];
+                    let rawData: unknown = res.data;
+                    if (rawData && typeof rawData === "object" && !Array.isArray(rawData)) {
+                        const obj = rawData as Record<string, unknown>;
+                        if (Array.isArray(obj.permissionMatrixAvailable)) {
+                            rawData = obj.permissionMatrixAvailable;
+                        } else if (Array.isArray(obj.data)) {
+                            rawData = obj.data;
+                        }
+                    }
+                    const data = Array.isArray(rawData) ? rawData : [];
+
+                    const slugs = rolesList.map((r) => r.slug);
+                    const KNOWN_ROLE_KEYS = ["superadmin", "admin", "agency", "agent", "support", "user", "reviewer", "content_editor", "content editor"];
+
                     const mapped = data.map((cat: Record<string, unknown>) => ({
-                        category: String(cat.category ?? "Unknown"),
-                        permissions: Array.isArray(cat.permissions)
+                        category: String(cat.category ?? cat.categoryName ?? cat.name ?? "Unknown"),
+                        permissions: Array.isArray(cat.permissions ?? cat.capabilities ?? cat.items)
                             ? (
-                                  cat.permissions as Record<string, unknown>[]
-                              ).map((p) => ({
-                                  id: String(p.id ?? ""),
-                                  name: String(p.name ?? ""),
-                                  superadmin: String(
-                                      p.superadmin ?? p.Superadmin ?? "—",
-                                  ),
-                                  admin: String(p.admin ?? p.Admin ?? "—"),
-                                  support: String(
-                                      p.support ?? p.Support ?? "—",
-                                  ),
-                              }))
+                                  (cat.permissions ?? cat.capabilities ?? cat.items) as Record<string, unknown>[]
+                              ).map((p) => {
+                                  const roles: Record<string, string> = {};
+                                  const keysToUse = slugs.length > 0 ? slugs : KNOWN_ROLE_KEYS;
+                                  for (const key of keysToUse) {
+                                      const camelKey = key.replace(/[\s_-]+/g, "");
+                                      const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
+                                      const val = p[key] ?? p[camelKey] ?? p[pascalKey];
+                                      roles[key] = val !== undefined && val !== null ? String(val) : "—";
+                                  }
+                                  return {
+                                      id: String(p.id ?? ""),
+                                      name: String(p.name ?? p.label ?? p.permission ?? p.capability ?? "Unknown"),
+                                      roles,
+                                  };
+                              })
                             : [],
                     }));
                     setLocalPermissions(mapped);
                 })
                 .catch(() => {});
         }
-    }, [isPermsModalOpen, localPermissions.length]);
+    }, [isPermsModalOpen, localPermissions.length, rolesList]);
 
     // ─── Pagination ───────────────────────────────────────────────────
     const setPage = (page: number) => {

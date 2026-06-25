@@ -339,18 +339,17 @@ const EditStaffDrawer = ({
                                 <table className="w-full text-left text-xs border-collapse">
                                     <thead>
                                         <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
-                                            <th className="px-3 py-2.5">
+                                            <th className="px-3 py-2.5 sticky left-0 bg-page z-10">
                                                 Permission
                                             </th>
-                                            <th className="px-2 py-2.5 text-center">
-                                                Superadmin
-                                            </th>
-                                            <th className="px-2 py-2.5 text-center">
-                                                Admin
-                                            </th>
-                                            <th className="px-2 py-2.5 text-center">
-                                                Support
-                                            </th>
+                                            {rolesList.map((role) => (
+                                                <th
+                                                    key={role.slug}
+                                                    className={`px-2 py-2.5 text-center whitespace-nowrap ${formRole === role.slug ? 'font-bold text-text bg-accent/5' : ''}`}
+                                                >
+                                                    {role.name}
+                                                </th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/60">
@@ -358,7 +357,7 @@ const EditStaffDrawer = ({
                                             <Fragment key={`${category.category}-${catIdx}`}>
                                                 <tr className="bg-page/40 text-[11px] text-accent font-bold select-none">
                                                     <td
-                                                        colSpan={4}
+                                                        colSpan={rolesList.length + 1}
                                                         className="px-3 py-1.5 uppercase tracking-wide"
                                                     >
                                                         {category.category}
@@ -370,41 +369,34 @@ const EditStaffDrawer = ({
                                                             key={`${perm.id || perm.name}-${permIdx}`}
                                                             className="hover:bg-page/20"
                                                         >
-                                                            <td className="px-3 py-2 text-muted font-medium">
+                                                            <td className="px-3 py-2 text-muted font-medium sticky left-0 bg-card z-10">
                                                                 {perm.name}
                                                             </td>
-                                                            {[
-                                                                perm.superadmin,
-                                                                perm.admin,
-                                                                perm.support,
-                                                            ].map((v, i) => (
-                                                                <td
-                                                                    key={i}
-                                                                    className="px-2 py-2 text-center"
-                                                                >
-                                                                    {v ===
-                                                                    "✓" ? (
-                                                                        <Check
-                                                                            size={
-                                                                                14
-                                                                            }
-                                                                            className="text-green-600 inline-block"
-                                                                            strokeWidth={
-                                                                                3
-                                                                            }
-                                                                        />
-                                                                    ) : v ===
-                                                                      "read" ? (
-                                                                        <span className="text-text font-bold text-[11px]">
-                                                                            read
-                                                                        </span>
-                                                                    ) : (
-                                                                        <span className="text-muted">
-                                                                            —
-                                                                        </span>
-                                                                    )}
-                                                                </td>
-                                                            ))}
+                                                            {rolesList.map((role) => {
+                                                                const val = perm.roles?.[role.slug] ?? '—';
+                                                                return (
+                                                                    <td
+                                                                        key={role.slug}
+                                                                        className={`px-2 py-2 text-center ${formRole === role.slug ? 'bg-accent/5' : ''}`}
+                                                                    >
+                                                                        {val === '✓' ? (
+                                                                            <Check
+                                                                                size={14}
+                                                                                className="text-green-600 inline-block"
+                                                                                strokeWidth={3}
+                                                                            />
+                                                                        ) : val === 'read' ? (
+                                                                            <span className="text-text font-bold text-[11px]">
+                                                                                read
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="text-muted">
+                                                                                —
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                );
+                                                            })}
                                                         </tr>
                                                     ),
                                                 )}

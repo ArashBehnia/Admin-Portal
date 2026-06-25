@@ -168,6 +168,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
                 isOpen={isPermsModalOpen}
                 selectedRole={selectedRoleForPerms}
                 localPermissions={localPermissions}
+                rolesList={rolesList}
                 onClose={() => setIsPermsModalOpen(false)}
             />
 

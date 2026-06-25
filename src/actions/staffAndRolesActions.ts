@@ -40,9 +40,7 @@ export interface PermissionCategory {
     permissions: {
         id: string;
         name: string;
-        superadmin: string;
-        admin: string;
-        support: string;
+        roles: Record<string, string>;
     }[];
 }
 
@@ -143,26 +141,38 @@ function formatCapabilityName(capability: string): string {
         .join(" ");
 }
 
-function mapPermissionsFromDto(raw: unknown): PermissionCategory[] {
+const KNOWN_ROLE_KEYS = ["superadmin", "admin", "agency", "agent", "support", "user", "reviewer", "content_editor", "content editor"];
+
+function extractRolesFromPermission(perm: Record<string, unknown>, roleSlugs: string[]): Record<string, string> {
+    const roles: Record<string, string> = {};
+    for (const slug of roleSlugs) {
+        const camelKey = slug.replace(/[\s_-]+/g, "");
+        const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
+        const val = perm[slug] ?? perm[camelKey] ?? perm[pascalKey];
+        roles[slug] = val !== undefined && val !== null ? String(val) : "—";
+    }
+    if (roleSlugs.length === 0) {
+        for (const key of KNOWN_ROLE_KEYS) {
+            const camelKey = key.replace(/[\s_]+/g, "");
+            const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
+            roles[key] = String(perm[key] ?? perm[camelKey] ?? perm[pascalKey] ?? "—");
+        }
+    }
+    return roles;
+}
+
+function mapPermissionsFromDto(raw: unknown, roleSlugs: string[] = []): PermissionCategory[] {
     if (!Array.isArray(raw)) {
         if (raw && typeof raw === "object") {
             const obj = raw as Record<string, unknown>;
-            if (Array.isArray(obj.data)) return mapPermissionsFromDto(obj.data);
+            if (Array.isArray(obj.data)) return mapPermissionsFromDto(obj.data, roleSlugs);
+            if (Array.isArray(obj.permissionMatrixAvailable)) {
+                return mapPermissionsFromDto(obj.permissionMatrixAvailable, roleSlugs);
+            }
             if (Array.isArray(obj.roles)) {
                 const matrix = obj.permissionMatrixAvailable as Record<string, unknown>[] | undefined;
                 if (matrix) {
-                    return matrix.map((cat) => ({
-                        category: String(cat.category ?? "Unknown"),
-                        permissions: Array.isArray(cat.permissions)
-                            ? (cat.permissions as Record<string, unknown>[]).map((p) => ({
-                                id: String(p.id ?? ""),
-                                name: String(p.name ?? ""),
-                                superadmin: String(p.superadmin ?? p.Superadmin ?? "—"),
-                                admin: String(p.admin ?? p.Admin ?? "—"),
-                                support: String(p.support ?? p.Support ?? "—"),
-                            }))
-                            : [],
-                    }));
+                    return mapPermissionsFromDto(matrix, roleSlugs);
                 }
             }
         }
@@ -170,14 +180,12 @@ function mapPermissionsFromDto(raw: unknown): PermissionCategory[] {
     }
 
     return (raw as Record<string, unknown>[]).map((cat) => ({
-        category: String(cat.category ?? "Unknown"),
-        permissions: Array.isArray(cat.permissions)
-            ? (cat.permissions as Record<string, unknown>[]).map((p) => ({
+        category: String(cat.category ?? cat.categoryName ?? cat.name ?? "Unknown"),
+        permissions: Array.isArray(cat.permissions ?? cat.capabilities ?? cat.items)
+            ? ((cat.permissions ?? cat.capabilities ?? cat.items) as Record<string, unknown>[]).map((p) => ({
                 id: String(p.id ?? ""),
-                name: String(p.name ?? ""),
-                superadmin: String(p.superadmin ?? p.Superadmin ?? "—"),
-                admin: String(p.admin ?? p.Admin ?? "—"),
-                support: String(p.support ?? p.Support ?? "—"),
+                name: String(p.name ?? p.label ?? p.permission ?? p.capability ?? "Unknown"),
+                roles: extractRolesFromPermission(p, roleSlugs),
             }))
             : [],
     }));

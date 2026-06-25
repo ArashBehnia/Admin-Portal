@@ -24,7 +24,7 @@ import {
     Eye,
     X,
     File,
-    ChevronRight
+    Upload
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { User } from "@/lib/auth";
@@ -114,7 +114,7 @@ const sidebarConfig: SidebarGroupType[] = [
             },
             // { title: "Audit Log", icon: History, path: "/audit-log" },
             { title: "Property Reports", icon: File, path: "/property-reports" },
-            { title: "Ftp Requests", icon: ChevronRight, path: "/ftp-requests" },
+            { title: "Ftp Requests", icon: Upload, path: "/ftp-requests" },
             { title: "Blocked IPs", icon: Ban, path: "/blocked-ips" },
             // {
             //     title: "System Health",

@@ -180,8 +180,13 @@ export async function fetchRoles(): Promise<Record<string, unknown>[]> {
 
 // ─── Permissions ─────────────────────────────────────────────────────
 
-export async function fetchPermissions(): Promise<Record<string, unknown>[]> {
+export async function fetchPermissions(): Promise<Record<string, unknown> | Record<string, unknown>[]> {
     const raw = await backendFetch<unknown>("/admin/permissions");
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+        const obj = raw as Record<string, unknown>;
+        if (Array.isArray(obj.permissionMatrixAvailable)) return obj;
+        if (Array.isArray(obj.data)) return obj.data as Record<string, unknown>[];
+    }
     return toArray<Record<string, unknown>>(raw);
 }
 
