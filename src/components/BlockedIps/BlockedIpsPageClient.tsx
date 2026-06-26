@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { RefreshCw } from "lucide-react";
 import {
-    BlockedIp,
     BlockedIpsData,
 } from "@/types/blockedIpTypes";
 import useBlockedIps from "@/hooks/useBlockedIps";
+import api from "@/lib/axios";
+import Toast from "@/components/Shared/Toast";
+import type { ToastState } from "@/hooks/useStaffAndRoles";
 import BlockedIpsTable from "./BlockedIpsTable";
 import BlockedIpsPagination from "./BlockedIpsPagination";
+import CreateBlockPanel from "./CreateBlockPanel";
+import ConfirmBlockModal from "./ConfirmBlockModal";
 
 interface BlockedIpsPageClientProps {
     initialData: BlockedIpsData;
@@ -34,7 +38,88 @@ const BlockedIpsPageClient = ({
         setShowFilters,
         hasActiveFilters,
         resetFilters,
+        refresh,
     } = useBlockedIps({ initialData });
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [pendingPayload, setPendingPayload] = useState<Record<string, unknown> | null>(null);
+    const [toast, setToast] = useState<ToastState>({
+        visible: false,
+        title: "",
+        message: "",
+        type: "success",
+    });
+    const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showToast = useCallback(
+        (title: string, message: string, type: ToastState["type"] = "success") => {
+            if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+            setToast({ visible: true, title, message, type });
+            toastTimerRef.current = setTimeout(
+                () => setToast((prev) => ({ ...prev, visible: false })),
+                3000,
+            );
+        },
+        [],
+    );
+
+    const handleCreateClick = () => {
+        setIsPanelOpen(true);
+    };
+
+    const handlePanelSubmit = (payload: Record<string, unknown>) => {
+        setPendingPayload(payload);
+        setShowConfirm(true);
+    };
+
+    const handleConfirmBlock = async () => {
+        if (!pendingPayload) return;
+
+        try {
+            const res = await api.post("/api/blocked-ips/block", pendingPayload);
+
+            if (res.data?.success) {
+                setShowConfirm(false);
+                setPendingPayload(null);
+                setIsPanelOpen(false);
+                showToast(
+                    "IP Blocked",
+                    `${pendingPayload.ip} has been added to the blocklist.`,
+                    "success",
+                );
+                refresh();
+            } else {
+                showToast(
+                    "Block Failed",
+                    res.data?.error ?? "Failed to block IP.",
+                    "error",
+                );
+            }
+        } catch (err: unknown) {
+            let message = "Failed to block IP.";
+            if (
+                err &&
+                typeof err === "object" &&
+                "response" in err
+            ) {
+                const axiosErr = err as { response?: { data?: { error?: string } } };
+                message = axiosErr.response?.data?.error ?? message;
+            } else if (err instanceof Error) {
+                message = err.message;
+            }
+            showToast("Block Failed", message, "error");
+        }
+    };
+
+    const handleConfirmCancel = () => {
+        setShowConfirm(false);
+        setPendingPayload(null);
+    };
+
+    const handlePanelClose = () => {
+        setIsPanelOpen(false);
+    };
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
@@ -71,6 +156,7 @@ const BlockedIpsPageClient = ({
                 onReasonChange={setReason}
                 onToggleFilters={() => setShowFilters(!showFilters)}
                 onResetFilters={resetFilters}
+                onCreateClick={handleCreateClick}
             />
 
             <BlockedIpsPagination
@@ -78,6 +164,30 @@ const BlockedIpsPageClient = ({
                 totalPages={totalPages}
                 totalCount={totalCount}
                 onPageChange={handlePageChange}
+            />
+
+            {/* Create Block Panel */}
+            <CreateBlockPanel
+                isOpen={isPanelOpen}
+                onClose={handlePanelClose}
+                onSubmit={handlePanelSubmit}
+            />
+
+            {/* Confirm Block Modal */}
+            <ConfirmBlockModal
+                isOpen={showConfirm}
+                ip={String(pendingPayload?.ip ?? "")}
+                onCancel={handleConfirmCancel}
+                onConfirm={handleConfirmBlock}
+            />
+
+            {/* Toast */}
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
             />
         </div>
     );

@@ -42,6 +42,17 @@ export type BlockedIpFilters = {
     filter?: string;
 };
 
+export type CreateBlockPayload = {
+    ip: string;
+    ttlSeconds?: number | null;
+    reason: string;
+};
+
+export type CreateBlockResponse = {
+    blocked: boolean;
+    key: string;
+};
+
 export const ROWS_PER_PAGE = 20;
 
 export const STRATEGY_OPTIONS = [

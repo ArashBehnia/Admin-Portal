@@ -152,6 +152,11 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         setReason("");
     }, []);
 
+    // ─── Refresh current page ───────────────────────────────────────
+    const refresh = useCallback(() => {
+        loadPage(currentPage, currentFilters());
+    }, [loadPage, currentPage, currentFilters]);
+
     const hasActiveFilters = Boolean(searchQuery || strategy || reason);
 
     return {
@@ -176,6 +181,9 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         setShowFilters,
         hasActiveFilters,
         resetFilters,
+
+        // Actions
+        refresh,
     };
 };
 

@@ -3,6 +3,8 @@ import type {
     BlockedIpListItemDto,
     BlockedIpPageDto,
     BlockedIpFilters,
+    CreateBlockPayload,
+    CreateBlockResponse,
 } from "@/types/blockedIpTypes";
 
 function toArray<T>(value: unknown): T[] {
@@ -52,4 +54,24 @@ export async function fetchBlockedIpsPage(
     const total = findTotal(raw) || items.length;
 
     return { data: items, total, page: 1, limit };
+}
+
+export async function createBlock(
+    payload: CreateBlockPayload,
+): Promise<CreateBlockResponse> {
+    const body: Record<string, unknown> = {
+        ip: payload.ip,
+        reason: payload.reason,
+    };
+    if (payload.ttlSeconds != null && payload.ttlSeconds !== undefined) {
+        body.ttlSeconds = payload.ttlSeconds;
+    }
+
+    return backendFetch<CreateBlockResponse>(
+        "/admin/security/ip-blocklist/block",
+        {
+            method: "POST",
+            body: JSON.stringify(body),
+        },
+    );
 }

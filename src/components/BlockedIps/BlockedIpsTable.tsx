@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, SlidersHorizontal, X, Trash2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, Trash2, Plus } from "lucide-react";
 import {
     BlockedIp,
     STRATEGY_OPTIONS,
@@ -22,6 +22,7 @@ interface BlockedIpsTableProps {
     onReasonChange: (val: ReasonValue) => void;
     onToggleFilters: () => void;
     onResetFilters: () => void;
+    onCreateClick: () => void;
 }
 
 function StrategyBadge({ strategy }: { strategy: string }) {
@@ -104,6 +105,7 @@ const BlockedIpsTable = ({
     onReasonChange,
     onToggleFilters,
     onResetFilters,
+    onCreateClick,
 }: BlockedIpsTableProps) => {
     return (
         <div className="flex flex-col gap-4">
@@ -144,6 +146,13 @@ const BlockedIpsTable = ({
                         {hasActiveFilters && !showFilters && (
                             <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                         )}
+                    </button>
+                    <button
+                        onClick={onCreateClick}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/90 text-white rounded text-[12px] font-medium whitespace-nowrap transition-colors cursor-pointer"
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                        Create
                     </button>
                 </div>
             </div>
