@@ -102,7 +102,7 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (status?: string, page?: number) => {
+        async (status?: string, page?: number, filter?: string) => {
             setIsLoading(true);
             const p = page ?? 1;
             const offset = (p - 1) * 10;
@@ -112,6 +112,7 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
                     limit: "10",
                 });
                 if (status && status !== "All") params.set("status", status.toLowerCase());
+                if (filter) params.set("filter", filter);
 
                 // console.log("[useApplications] loadPage -> GET /api/applications/summary + /api/applications/page?" + params.toString());
 
@@ -156,8 +157,10 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         [],
     );
 
-    // ─── Search with debounce ─────────────────────────────────────────
     const isInitialMount = useRef(true);
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
+
     useEffect(() => {
         if (isInitialMount.current) {
             isInitialMount.current = false;
@@ -165,7 +168,7 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         }
         setCurrentPage(1);
         const timer = setTimeout(() => {
-            loadPage(statusFilter, 1);
+            loadPage(statusFilter, 1, searchQuery);
         }, searchQuery ? 400 : 0);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage, statusFilter]);
@@ -174,13 +177,13 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
     const handleStatusFilterChange = useCallback((val: "All" | Application["status"]) => {
         setStatusFilter(val);
         setCurrentPage(1);
-        loadPage(val, 1);
+        loadPage(val, 1, searchQueryRef.current);
     }, [loadPage]);
 
     // ─── Page change ────────────────────────────────────────────────
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
-        loadPage(statusFilter, page);
+        loadPage(statusFilter, page, searchQueryRef.current);
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [loadPage, statusFilter]);
 

@@ -89,19 +89,28 @@ const ApplicationDrawer = ({
                     <div className="flex gap-6">
                         {(
                             ["Application", "Verification", "Notes"] as const
-                        ).map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => onTabChange(tab)}
-                                className={`py-3 text-[14px] font-medium border-b-2 transition-colors ${
-                                    activeDrawerTab === tab
-                                        ? "border-accent text-text"
-                                        : "border-transparent text-muted hover:text-text"
-                                }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                        ).map((tab) => {
+                            const isVerification = tab === "Verification";
+                            return (
+                                <button
+                                    key={tab}
+                                    onClick={() => !isVerification && onTabChange(tab)}
+                                    disabled={isVerification}
+                                    className={`py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                                        isVerification
+                                            ? "cursor-not-allowed opacity-50"
+                                            : "cursor-pointer"
+                                    } ${
+                                        activeDrawerTab === tab
+                                            ? "border-accent text-text"
+                                            : "border-transparent text-muted hover:text-text"
+                                    }`}
+                                    title={isVerification ? "Coming soon" : undefined}
+                                >
+                                    {tab}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -373,10 +382,11 @@ const ApplicationDrawer = ({
                     </button>
                     <button
                         onClick={() => onRequestInfo(selectedApp.id)}
-                        disabled={isApproving || isRejecting}
-                        className="w-full py-2.5 bg-card border border-border hover:bg-page text-text rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={true}
+                        className="w-full py-2.5 bg-card border border-border hover:bg-page text-muted rounded text-[13px] font-medium transition-colors cursor-not-allowed opacity-50"
+                        title="Coming soon"
                     >
-                        Request more information
+                        Request more information (coming soon)
                     </button>
                     <button
                         onClick={() => onReject(selectedApp.id)}

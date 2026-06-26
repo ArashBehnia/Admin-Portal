@@ -60,12 +60,14 @@ export async function fetchApplicationsPage(
     offset = 0,
     limit = 20,
     status?: string,
+    filter?: string,
 ): Promise<{ data: ApplicationListItemDto[]; total: number }> {
     const params = new URLSearchParams({
         offset: String(offset),
         limit: String(limit),
     });
     if (status) params.set("status", status);
+    if (filter) params.set("filter", filter);
 
     // console.log("[application-service] fetchApplicationsPage -> GET /admin/agent-portal/page?", params.toString());
     const raw = await backendFetch<unknown>(

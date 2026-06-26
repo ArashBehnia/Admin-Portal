@@ -192,7 +192,7 @@ const useStaffAndRoles = ({
                     offset: String(offset),
                     limit: String(PAGE_SIZE),
                 });
-                if (keywords) params.set("keywords", keywords);
+                if (keywords) params.set("filter", keywords);
                 if (role && role !== "All") params.set("role", role);
 
                 const res = await api.get(

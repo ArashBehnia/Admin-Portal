@@ -6,13 +6,13 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const offset = searchParams.get("offset") ?? "0";
         const limit = searchParams.get("limit") ?? "20";
-        const keywords = searchParams.get("keywords") ?? undefined;
+        const filter = searchParams.get("filter") ?? undefined;
         const role = searchParams.get("role") ?? undefined;
 
         const pageResult = await fetchStaffPage(
             Number(offset),
             Number(limit),
-            keywords,
+            filter,
             role,
         );
 

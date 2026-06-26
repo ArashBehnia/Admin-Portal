@@ -123,7 +123,7 @@ const EditStaffDrawer = ({
                             <button
                                 key={tab}
                                 onClick={() => onTabChange(tab)}
-                                className={`pb-3 pt-2 text-sm font-semibold border-b-2 transition-all ${
+                                className={`pb-3 pt-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                                     activeDrawerTab === tab
                                         ? "border-accent text-accent"
                                         : "border-transparent text-muted hover:text-text"

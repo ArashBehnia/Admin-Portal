@@ -40,14 +40,14 @@ function findTotal(obj: unknown): number {
 export async function fetchStaffPage(
     offset = 0,
     limit = 20,
-    keywords?: string,
+    filter?: string,
     role?: string,
 ): Promise<{ data: Record<string, unknown>[]; total: number }> {
     const params = new URLSearchParams({
         offset: String(offset),
         limit: String(limit),
     });
-    if (keywords) params.set("keywords", keywords);
+    if (filter) params.set("filter", filter);
     if (role && role !== "All") params.set("role", role);
     params.set("type", "staff");
 

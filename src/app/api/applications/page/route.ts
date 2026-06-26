@@ -31,13 +31,15 @@ export async function GET(request: Request) {
         const offset = searchParams.get("offset") ?? "0";
         const limit = searchParams.get("limit") ?? "20";
         const status = searchParams.get("status") ?? undefined;
+        const filter = searchParams.get("filter") ?? undefined;
 
-        // console.log("[API /applications/page] GET request:", { offset, limit, status });
+        // console.log("[API /applications/page] GET request:", { offset, limit, status, filter });
 
         const result = await fetchApplicationsPage(
             Number(offset),
             Number(limit),
             status,
+            filter,
         );
 
         // console.log("[API /applications/page] raw result:", JSON.stringify(result).slice(0, 500));
