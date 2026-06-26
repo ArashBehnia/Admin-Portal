@@ -38,7 +38,7 @@ const BlockedIpsPageClient = ({
         setShowFilters,
         hasActiveFilters,
         resetFilters,
-        refresh,
+        refreshClean,
     } = useBlockedIps({ initialData });
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -80,15 +80,26 @@ const BlockedIpsPageClient = ({
             const res = await api.post("/api/blocked-ips/block", pendingPayload);
 
             if (res.data?.success) {
+                const data = res.data.data;
                 setShowConfirm(false);
                 setPendingPayload(null);
                 setIsPanelOpen(false);
-                showToast(
-                    "IP Blocked",
-                    `${pendingPayload.ip} has been added to the blocklist.`,
-                    "success",
-                );
-                refresh();
+
+                if (data?.blocked === false) {
+                    showToast(
+                        "Already Blocked",
+                        `${pendingPayload.ip} is already in the blocklist.`,
+                        "info",
+                    );
+                } else {
+                    showToast(
+                        "IP Blocked",
+                        `${pendingPayload.ip} has been added to the blocklist.`,
+                        "success",
+                    );
+                }
+
+                refreshClean();
             } else {
                 showToast(
                     "Block Failed",

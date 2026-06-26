@@ -36,8 +36,9 @@ export async function fetchBlockedIpsPage(
     limit = 20,
     filters?: BlockedIpFilters,
 ): Promise<BlockedIpPageDto> {
+    const offset = (page - 1) * limit;
     const params = new URLSearchParams({
-        page: String(page),
+        offset: String(offset),
         limit: String(limit),
     });
 
@@ -48,12 +49,10 @@ export async function fetchBlockedIpsPage(
     const raw = await backendFetch<unknown>(
         `/admin/security/ip-blocklist/page?${params.toString()}`,
     );
-    // console.log("raw", raw);
     const items = toArray<BlockedIpListItemDto>(raw);
-    // console.log("items", items);
     const total = findTotal(raw) || items.length;
 
-    return { data: items, total, page: 1, limit };
+    return { data: items, total, page, limit };
 }
 
 export async function createBlock(

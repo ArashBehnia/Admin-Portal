@@ -80,9 +80,10 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         ) => {
             setIsLoading(true);
             try {
+                const offset = (page - 1) * ROWS_PER_PAGE;
                 const params = new URLSearchParams({
                     limit: String(ROWS_PER_PAGE),
-                    page: String(page),
+                    offset: String(offset),
                 });
                 if (opts?.filter) params.set("filter", opts.filter);
                 if (opts?.strategy) params.set("strategy", opts.strategy);
@@ -157,6 +158,15 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         loadPage(currentPage, currentFilters());
     }, [loadPage, currentPage, currentFilters]);
 
+    // ─── Refresh with no filters (after create/delete) ─────────────
+    const refreshClean = useCallback(() => {
+        setSearchQuery("");
+        setStrategy("");
+        setReason("");
+        setCurrentPage(1);
+        loadPage(1, {});
+    }, [loadPage]);
+
     const hasActiveFilters = Boolean(searchQuery || strategy || reason);
 
     return {
@@ -184,6 +194,7 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
 
         // Actions
         refresh,
+        refreshClean,
     };
 };
 

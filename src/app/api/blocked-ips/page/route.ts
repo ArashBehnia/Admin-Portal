@@ -5,8 +5,9 @@ import type { BlockedIpFilters } from "@/types/blockedIpTypes";
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const limit = searchParams.get("limit") ?? "20";
-        const page = searchParams.get("page") ?? "1";
+        const limit = Number(searchParams.get("limit") ?? "20");
+        const offset = Number(searchParams.get("offset") ?? "0");
+        const page = Math.floor(offset / limit) + 1;
 
         const filters: BlockedIpFilters = {};
         const strategy = searchParams.get("strategy");
@@ -18,8 +19,8 @@ export async function GET(request: Request) {
         if (filter) filters.filter = filter;
 
         const result = await fetchBlockedIpsPage(
-            Number(page),
-            Number(limit),
+            page,
+            limit,
             Object.keys(filters).length > 0 ? filters : undefined,
         );
 
