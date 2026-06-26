@@ -2,7 +2,8 @@
 
 import { Fragment } from "react";
 import { X, AlertTriangle, Loader2, Check } from "lucide-react";
-import { StaffMember, RoleItem, PermissionCategory } from "@/actions/staffAndRolesActions";
+import { StaffMember, RoleItem } from "@/actions/staffAndRolesActions";
+import { PERMISSION_MATRIX, buildPermissionCategories } from "@/types/permissionTypes";
 
 interface EditStaffDrawerProps {
     isOpen: boolean;
@@ -20,7 +21,6 @@ interface EditStaffDrawerProps {
     formMfa: "Enabled" | "Not set up";
     formError: string;
     isSubmitting: boolean;
-    permissions: PermissionCategory[];
     staffActivity: Record<string, unknown>[];
     isActivityLoading: boolean;
     onFirstNameChange: (v: string) => void;
@@ -49,7 +49,6 @@ const EditStaffDrawer = ({
     formMfa,
     formError,
     isSubmitting,
-    permissions,
     staffActivity,
     isActivityLoading,
     onFirstNameChange,
@@ -80,7 +79,7 @@ const EditStaffDrawer = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-6 border-b border-border flex justify-between items-start">
+                <div className="p-6 border-b border-border flex justify-between items-start shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-lg bg-purple-50 text-purple-700 font-bold text-lg flex items-center justify-center select-none shrink-0 border border-purple-200">
                             {initials}
@@ -117,7 +116,7 @@ const EditStaffDrawer = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-6 border-b border-border px-6 mt-1 bg-page/10">
+                <div className="flex gap-6 border-b border-border px-6 mt-1 bg-page/10 shrink-0">
                     {(["Profile", "Permissions", "Activity"] as const).map(
                         (tab) => (
                             <button
@@ -135,13 +134,16 @@ const EditStaffDrawer = ({
                     )}
                 </div>
 
+                {/* Tab Panels — fills remaining height and scrolls */}
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+
                 {/* Profile Tab */}
                 {activeDrawerTab === "Profile" && (
                     <form
                         onSubmit={onSubmit}
-                        className="flex-1 flex flex-col justify-between overflow-hidden"
+                        className="flex-1 flex flex-col justify-between overflow-hidden min-h-0"
                     >
-                        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+                        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 min-h-0">
                             {formError && (
                                 <div className="bg-red-50 border border-red-200 text-danger p-3 rounded flex items-start gap-2 text-xs font-semibold">
                                     <AlertTriangle
@@ -323,8 +325,11 @@ const EditStaffDrawer = ({
                 )}
 
                 {/* Permissions Tab */}
-                {activeDrawerTab === "Permissions" && (
-                    <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+                {activeDrawerTab === "Permissions" && (() => {
+                    const roleSlugs = rolesList.map((r) => r.slug);
+                    const categories = buildPermissionCategories(PERMISSION_MATRIX, roleSlugs);
+                    return (
+                    <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 min-h-0">
                         <div>
                             <h4 className="font-bold text-[15px] text-text font-sans">
                                 Access permissions
@@ -334,95 +339,71 @@ const EditStaffDrawer = ({
                                 customised per user in this version.
                             </p>
                         </div>
-                        {permissions.length > 0 ? (
-                            <div className="border border-border rounded overflow-hidden shadow-sm">
-                                <table className="w-full text-left text-xs border-collapse">
-                                    <thead>
-                                        <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
-                                            <th className="px-3 py-2.5 sticky left-0 bg-page z-10">
-                                                Permission
+                        <div className="border border-border rounded shadow-sm">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr className="bg-page border-b border-border text-muted font-bold text-[10px] uppercase tracking-wider select-none">
+                                        <th className="px-3 py-2.5 sticky left-0 bg-page z-10">
+                                            Permission
+                                        </th>
+                                        {rolesList.map((role) => (
+                                            <th
+                                                key={role.slug}
+                                                className={`px-2 py-2.5 text-center whitespace-nowrap ${formRole === role.slug ? 'font-bold text-text bg-accent/5' : ''}`}
+                                            >
+                                                {role.name}
                                             </th>
-                                            {rolesList.map((role) => (
-                                                <th
-                                                    key={role.slug}
-                                                    className={`px-2 py-2.5 text-center whitespace-nowrap ${formRole === role.slug ? 'font-bold text-text bg-accent/5' : ''}`}
-                                                >
-                                                    {role.name}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/60">
-                                        {permissions.map((category, catIdx) => (
-                                            <Fragment key={`${category.category}-${catIdx}`}>
-                                                <tr className="bg-page/40 text-[11px] text-accent font-bold select-none">
-                                                    <td
-                                                        colSpan={rolesList.length + 1}
-                                                        className="px-3 py-1.5 uppercase tracking-wide"
-                                                    >
-                                                        {category.category}
-                                                    </td>
-                                                </tr>
-                                                {category.permissions.map(
-                                                    (perm, permIdx) => (
-                                                        <tr
-                                                            key={`${perm.id || perm.name}-${permIdx}`}
-                                                            className="hover:bg-page/20"
-                                                        >
-                                                            <td className="px-3 py-2 text-muted font-medium sticky left-0 bg-card z-10">
-                                                                {perm.name}
-                                                            </td>
-                                                            {rolesList.map((role) => {
-                                                                const val = perm.roles?.[role.slug] ?? '—';
-                                                                return (
-                                                                    <td
-                                                                        key={role.slug}
-                                                                        className={`px-2 py-2 text-center ${formRole === role.slug ? 'bg-accent/5' : ''}`}
-                                                                    >
-                                                                        {val === '✓' ? (
-                                                                            <Check
-                                                                                size={14}
-                                                                                className="text-green-600 inline-block"
-                                                                                strokeWidth={3}
-                                                                            />
-                                                                        ) : val === 'read' ? (
-                                                                            <span className="text-text font-bold text-[11px]">
-                                                                                read
-                                                                            </span>
-                                                                        ) : (
-                                                                            <span className="text-muted">
-                                                                                —
-                                                                            </span>
-                                                                        )}
-                                                                    </td>
-                                                                );
-                                                            })}
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </Fragment>
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 gap-2">
-                                <Loader2 className="h-5 w-5 text-accent animate-spin" />
-                                <span className="text-xs text-muted">
-                                    Loading permissions...
-                                </span>
-                            </div>
-                        )}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/60">
+                                    {categories.map((perm) => (
+                                        <tr
+                                            key={perm.id}
+                                            className="hover:bg-page/20"
+                                        >
+                                            <td className="px-3 py-2 text-muted font-medium sticky left-0 bg-card z-10">
+                                                {perm.name}
+                                            </td>
+                                            {rolesList.map((role) => {
+                                                const val = perm.roles?.[role.slug] ?? '✗';
+                                                return (
+                                                    <td
+                                                        key={role.slug}
+                                                        className={`px-2 py-2 text-center ${formRole === role.slug ? 'bg-accent/5' : ''}`}
+                                                    >
+                                                        {val === '✓' ? (
+                                                            <Check
+                                                                size={14}
+                                                                className="text-green-600 inline-block"
+                                                                strokeWidth={3}
+                                                            />
+                                                        ) : (
+                                                            <X
+                                                                size={14}
+                                                                className="text-red-400 inline-block"
+                                                                strokeWidth={2.5}
+                                                            />
+                                                        )}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         <p className="text-[12px] text-muted leading-tight font-medium font-sans bg-page/35 border border-border/80 rounded p-2 select-none">
                             Role permissions are managed in code. Contact your
                             developer to modify role definitions.
                         </p>
                     </div>
-                )}
+                    );
+                })()}
 
                 {/* Activity Tab */}
                 {activeDrawerTab === "Activity" && (
-                    <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+                    <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 min-h-0">
                         <h4 className="font-bold text-[16px] text-text font-sans">
                             Recent activity
                         </h4>
@@ -513,6 +494,7 @@ const EditStaffDrawer = ({
                         )}
                     </div>
                 )}
+                </div>{/* end tab panels wrapper */}
             </div>
         </div>
     );

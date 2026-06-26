@@ -1,28 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { Fragment } from 'react';
 import { X, Check } from 'lucide-react';
+import { PERMISSION_MATRIX, buildPermissionCategories } from '@/types/permissionTypes';
 
 interface PermissionsModalProps {
     isOpen: boolean;
     selectedRole: string;
-    localPermissions: any[];
     rolesList: { slug: string; name: string }[];
     onClose: () => void;
 }
 
-function formatRoleName(role: string): string {
-    return role
-        .split(/[\s_]+/)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-}
-
-const PermissionsModal = ({ isOpen, selectedRole, localPermissions, rolesList, onClose }: PermissionsModalProps) => {
+const PermissionsModal = ({ isOpen, selectedRole, rolesList, onClose }: PermissionsModalProps) => {
     if (!isOpen) return null;
 
-    const colSpan = rolesList.length + 1;
+    const roleSlugs = rolesList.map((r) => r.slug);
+    const categories = buildPermissionCategories(PERMISSION_MATRIX, roleSlugs);
 
     return (
         <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4 select-none animate-fade-in cursor-pointer" onClick={onClose}>
@@ -54,36 +46,25 @@ const PermissionsModal = ({ isOpen, selectedRole, localPermissions, rolesList, o
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/60">
-                                {localPermissions.map((category: any) => (
-                                    <Fragment key={category.category}>
-                                        <tr className="bg-[#F8FAFC] select-none">
-                                            <td colSpan={colSpan} className="px-4 py-2.5 uppercase tracking-wider text-slate-400/90 font-bold text-[10px]">
-                                                {category.category}
-                                            </td>
-                                        </tr>
-                                        {category.permissions.map((perm: any) => (
-                                            <tr key={perm.id} className="hover:bg-page/10 transition-colors">
-                                                <td className="px-4 py-3 text-slate-700 font-medium text-[13px] sticky left-0 bg-card z-10">{perm.name}</td>
-                                                {rolesList.map((role) => {
-                                                    const val = perm.roles?.[role.slug] ?? '—';
-                                                    return (
-                                                        <td
-                                                            key={role.slug}
-                                                            className={`px-4 py-3 text-center ${selectedRole.toLowerCase() === role.slug ? 'bg-page/10' : ''}`}
-                                                        >
-                                                            {val === '✓' ? (
-                                                                <Check size={15} className="text-green-600 inline-block" strokeWidth={3} />
-                                                            ) : val === 'read' ? (
-                                                                <span className="text-muted font-bold text-[12px]">read</span>
-                                                            ) : (
-                                                                <span className="text-muted/40 font-semibold">—</span>
-                                                            )}
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        ))}
-                                    </Fragment>
+                                {categories.map((perm) => (
+                                    <tr key={perm.id} className="hover:bg-page/10 transition-colors">
+                                        <td className="px-4 py-3 text-slate-700 font-medium text-[13px] sticky left-0 bg-card z-10">{perm.name}</td>
+                                        {rolesList.map((role) => {
+                                            const val = perm.roles?.[role.slug] ?? '✗';
+                                            return (
+                                                <td
+                                                    key={role.slug}
+                                                    className={`px-4 py-3 text-center ${selectedRole.toLowerCase() === role.slug ? 'bg-page/10' : ''}`}
+                                                >
+                                                    {val === '✓' ? (
+                                                        <Check size={15} className="text-green-600 inline-block" strokeWidth={3} />
+                                                    ) : (
+                                                        <X size={15} className="text-red-400 inline-block" strokeWidth={2.5} />
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
                                 ))}
                             </tbody>
                         </table>

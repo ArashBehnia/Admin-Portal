@@ -146,16 +146,31 @@ const KNOWN_ROLE_KEYS = ["superadmin", "admin", "agency", "agent", "support", "u
 function extractRolesFromPermission(perm: Record<string, unknown>, roleSlugs: string[]): Record<string, string> {
     const roles: Record<string, string> = {};
     for (const slug of roleSlugs) {
-        const camelKey = slug.replace(/[\s_-]+/g, "");
-        const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
-        const val = perm[slug] ?? perm[camelKey] ?? perm[pascalKey];
-        roles[slug] = val !== undefined && val !== null ? String(val) : "—";
+        const lower = slug.toLowerCase();
+        const camel = lower.replace(/[\s_-]+/g, "");
+        const pascal = camel.charAt(0).toUpperCase() + camel.slice(1);
+        const val = perm[lower] ?? perm[slug] ?? perm[camel] ?? perm[pascal];
+        if (val === true || val === "true" || val === "✓") {
+            roles[slug] = "✓";
+        } else if (val === "read") {
+            roles[slug] = "read";
+        } else {
+            roles[slug] = "✗";
+        }
     }
     if (roleSlugs.length === 0) {
         for (const key of KNOWN_ROLE_KEYS) {
-            const camelKey = key.replace(/[\s_]+/g, "");
-            const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
-            roles[key] = String(perm[key] ?? perm[camelKey] ?? perm[pascalKey] ?? "—");
+            const lower = key.toLowerCase();
+            const camel = lower.replace(/[\s_]+/g, "");
+            const pascal = camel.charAt(0).toUpperCase() + camel.slice(1);
+            const val = perm[lower] ?? perm[key] ?? perm[camel] ?? perm[pascal];
+            if (val === true || val === "true" || val === "✓") {
+                roles[key] = "✓";
+            } else if (val === "read") {
+                roles[key] = "read";
+            } else {
+                roles[key] = "✗";
+            }
         }
     }
     return roles;
@@ -179,15 +194,67 @@ function mapPermissionsFromDto(raw: unknown, roleSlugs: string[] = []): Permissi
         return [];
     }
 
-    return (raw as Record<string, unknown>[]).map((cat) => ({
-        category: String(cat.category ?? cat.categoryName ?? cat.name ?? "Unknown"),
-        permissions: Array.isArray(cat.permissions ?? cat.capabilities ?? cat.items)
-            ? ((cat.permissions ?? cat.capabilities ?? cat.items) as Record<string, unknown>[]).map((p) => ({
-                id: String(p.id ?? ""),
-                name: String(p.name ?? p.label ?? p.permission ?? p.capability ?? "Unknown"),
-                roles: extractRolesFromPermission(p, roleSlugs),
-            }))
-            : [],
+    const data = raw as Record<string, unknown>[];
+    if (data.length === 0) return [];
+
+    const firstItem = data[0];
+    const isCategorized =
+        "category" in firstItem || "categoryName" in firstItem ||
+        ("permissions" in firstItem || "capabilities" in firstItem || "items" in firstItem);
+
+    if (isCategorized) {
+        return data.map((cat) => ({
+            category: String(cat.category ?? cat.categoryName ?? cat.name ?? "Unknown"),
+            permissions: Array.isArray(cat.permissions ?? cat.capabilities ?? cat.items)
+                ? ((cat.permissions ?? cat.capabilities ?? cat.items) as Record<string, unknown>[]).map((p) => ({
+                    id: String(p.id ?? p.key ?? ""),
+                    name: String(p.name ?? p.label ?? p.permission ?? p.capability ?? "Unknown"),
+                    roles: extractRolesFromPermission(p, roleSlugs),
+                }))
+                : [],
+        }));
+    }
+
+    const KNOWN_ROLE_KEYS = ["superadmin", "admin", "agency", "agent", "support", "user", "reviewer", "content_editor", "content editor"];
+    const keysToUse = roleSlugs.length > 0 ? roleSlugs : KNOWN_ROLE_KEYS;
+
+    const permsByRole: Record<string, { id: string; name: string; roles: Record<string, string> }[]> = {};
+
+    for (const perm of data) {
+        const permName = String(perm.name ?? perm.label ?? perm.key ?? perm.permission ?? "Unknown");
+        const permId = String(perm.id ?? perm.key ?? permName);
+
+        const roleKey = keysToUse
+            .filter((k) => {
+                const camelKey = k.replace(/[\s_-]+/g, "");
+                const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
+                const val = perm[k] ?? perm[camelKey] ?? perm[pascalKey];
+                return val === true || val === "true" || val === "✓";
+            })
+            .sort()
+            .join(":") || "none";
+
+        if (!permsByRole[roleKey]) permsByRole[roleKey] = [];
+        permsByRole[roleKey].push({
+            id: permId,
+            name: permName,
+            roles: extractRolesFromPermission(perm, keysToUse),
+        });
+    }
+
+    const categoryMap: Record<string, string> = {
+        "admin": "Admin",
+        "admin:agency:agent": "Agency & Agent",
+        "agency:agent": "Agency & Agent",
+        "agency": "Agency",
+        "agent": "Agent",
+        "user": "User",
+        "none": "Unknown",
+    };
+
+    return Object.entries(permsByRole).map(([roleKey, perms]) => ({
+        category: categoryMap[roleKey] ?? roleKey,
+        permissions: perms,
     }));
 }
 

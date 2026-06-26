@@ -1,7 +1,7 @@
 'use client';
 
 import Toast from '@/components/Shared/Toast';
-import { StaffMember, StaffSummary, RoleItem, PermissionCategory } from '@/actions/staffAndRolesActions';
+import { StaffMember, StaffSummary, RoleItem } from '@/actions/staffAndRolesActions';
 import useStaffAndRoles from '@/hooks/useStaffAndRoles';
 import StaffStats from './StaffStats';
 import StaffTabs from './StaffTabs';
@@ -15,13 +15,12 @@ import PermissionsModal from './PermissionsModal';
 interface StaffPageClientProps {
     initialStaff: StaffMember[];
     initialRoles: RoleItem[];
-    initialPermissions: PermissionCategory[];
     initialSummary: StaffSummary;
 }
 
-const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initialSummary }: StaffPageClientProps) => {
+const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPageClientProps) => {
     const {
-        filteredStaff, rolesList, localPermissions, stats,
+        filteredStaff, rolesList, stats,
         staffActivity, isActivityLoading,
         isLoading,
         currentPage, totalPages, totalItems, setPage,
@@ -51,7 +50,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
         handleAddStaff, handleVerifyOtpAndCreate, handleEditStaff,
         handleMfaReset, handleRevokeConfirm,
         openEditModal, handleOpenAddModal, handleOpenPermsModal,
-    } = useStaffAndRoles({ initialStaff, initialRoles, initialPermissions, initialSummary });
+    } = useStaffAndRoles({ initialStaff, initialRoles, initialSummary });
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-16 px-1 lg:px-4">
@@ -135,7 +134,6 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
                 formMfa={formMfa}
                 formError={formError}
                 isSubmitting={isSubmitting}
-                permissions={localPermissions}
                 staffActivity={staffActivity}
                 isActivityLoading={isActivityLoading}
                 onFirstNameChange={setFormFirstName}
@@ -167,7 +165,6 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialPermissions, initi
             <PermissionsModal
                 isOpen={isPermsModalOpen}
                 selectedRole={selectedRoleForPerms}
-                localPermissions={localPermissions}
                 rolesList={rolesList}
                 onClose={() => setIsPermsModalOpen(false)}
             />

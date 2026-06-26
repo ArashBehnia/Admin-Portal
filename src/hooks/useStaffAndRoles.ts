@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
     StaffMember,
     StaffSummary,
-    PermissionCategory,
     RoleItem,
 } from "@/actions/staffAndRolesActions";
 import api from "@/lib/axios";
@@ -20,20 +19,16 @@ export type MainTab = "Staff" | "Roles";
 interface UseStaffAndRolesProps {
     initialStaff: StaffMember[];
     initialRoles: RoleItem[];
-    initialPermissions: PermissionCategory[];
     initialSummary: StaffSummary;
 }
 
 const useStaffAndRoles = ({
     initialStaff,
     initialRoles,
-    initialPermissions,
     initialSummary,
 }: UseStaffAndRolesProps) => {
     // ─── Data State ───────────────────────────────────────────────────
     const [localStaff, setLocalStaff] = useState<StaffMember[]>(initialStaff);
-    const [localPermissions, setLocalPermissions] =
-        useState<PermissionCategory[]>(initialPermissions);
     const [rolesList, setRolesList] = useState<RoleItem[]>(initialRoles);
     const [summary, setSummary] = useState<StaffSummary>(initialSummary);
     const [isLoading, setIsLoading] = useState(false);
@@ -110,12 +105,6 @@ const useStaffAndRoles = ({
     });
 
     // ─── Effects ──────────────────────────────────────────────────────
-    useEffect(() => {
-        if (initialPermissions.length > 0 && localPermissions.length === 0) {
-            setLocalPermissions(JSON.parse(JSON.stringify(initialPermissions)));
-        }
-    }, [initialPermissions, localPermissions.length]);
-
     useEffect(() => {
         if (!toast.visible) return;
         const timer = setTimeout(
@@ -667,52 +656,6 @@ const useStaffAndRoles = ({
         }
     }, [activeTab, rolesList.length]);
 
-    useEffect(() => {
-        if (isPermsModalOpen && localPermissions.length === 0) {
-            api.get("/api/staff/permissions")
-                .then((res) => {
-                    let rawData: unknown = res.data;
-                    if (rawData && typeof rawData === "object" && !Array.isArray(rawData)) {
-                        const obj = rawData as Record<string, unknown>;
-                        if (Array.isArray(obj.permissionMatrixAvailable)) {
-                            rawData = obj.permissionMatrixAvailable;
-                        } else if (Array.isArray(obj.data)) {
-                            rawData = obj.data;
-                        }
-                    }
-                    const data = Array.isArray(rawData) ? rawData : [];
-
-                    const slugs = rolesList.map((r) => r.slug);
-                    const KNOWN_ROLE_KEYS = ["superadmin", "admin", "agency", "agent", "support", "user", "reviewer", "content_editor", "content editor"];
-
-                    const mapped = data.map((cat: Record<string, unknown>) => ({
-                        category: String(cat.category ?? cat.categoryName ?? cat.name ?? "Unknown"),
-                        permissions: Array.isArray(cat.permissions ?? cat.capabilities ?? cat.items)
-                            ? (
-                                  (cat.permissions ?? cat.capabilities ?? cat.items) as Record<string, unknown>[]
-                              ).map((p) => {
-                                  const roles: Record<string, string> = {};
-                                  const keysToUse = slugs.length > 0 ? slugs : KNOWN_ROLE_KEYS;
-                                  for (const key of keysToUse) {
-                                      const camelKey = key.replace(/[\s_-]+/g, "");
-                                      const pascalKey = camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
-                                      const val = p[key] ?? p[camelKey] ?? p[pascalKey];
-                                      roles[key] = val !== undefined && val !== null ? String(val) : "—";
-                                  }
-                                  return {
-                                      id: String(p.id ?? ""),
-                                      name: String(p.name ?? p.label ?? p.permission ?? p.capability ?? "Unknown"),
-                                      roles,
-                                  };
-                              })
-                            : [],
-                    }));
-                    setLocalPermissions(mapped);
-                })
-                .catch(() => {});
-        }
-    }, [isPermsModalOpen, localPermissions.length, rolesList]);
-
     // ─── Pagination ───────────────────────────────────────────────────
     const setPage = (page: number) => {
         if (page < 1 || page > totalPages) return;
@@ -724,7 +667,6 @@ const useStaffAndRoles = ({
         // Data
         localStaff,
         rolesList,
-        localPermissions,
         filteredStaff,
         stats,
         staffActivity,
