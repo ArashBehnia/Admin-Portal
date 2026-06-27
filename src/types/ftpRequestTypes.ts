@@ -1,26 +1,20 @@
 // ─── API Response Types ──────────────────────────────────────────────
 
-export type FtpRequestAgencyDto = {
-    id: string;
-    name: string;
-};
-
-export type FtpRequestAgentDto = {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-};
-
 export type FtpRequestListItemDto = {
     id: string;
-    agency: FtpRequestAgencyDto;
-    agent: FtpRequestAgentDto;
-    email: string;
-    allowedIp: string;
-    ftpUsername: string;
+    agencyId: string;
+    agencyName: string;
+    agencyStaffId: string;
+    agentName: string;
+    agentEmail: string;
+    requestedIp: string;
     status: string;
-    requestedAt: string;
+    adminMessage: string | null;
+    ftpUsername: string | null;
+    createdAt: string;
+    updatedAt: string;
+    approvedAt: string | null;
+    rejectedAt: string | null;
 };
 
 export type FtpRequestPageDto = {
@@ -37,7 +31,6 @@ export type FtpRequest = {
     agencyName: string;
     agentName: string;
     agentEmail: string;
-    email: string;
     allowedIp: string;
     ftpUsername: string;
     status: string;

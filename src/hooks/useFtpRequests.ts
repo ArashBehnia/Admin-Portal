@@ -15,59 +15,43 @@ interface UseFtpRequestsProps {
 
 type ApiFtpRequestItem = {
     id: string;
-    agency: { id: string; name: string };
-    agent: { id: string; firstName: string; lastName: string; email: string };
-    email: string;
-    allowedIp: string;
-    ftpUsername: string;
+    agencyName: string;
+    agentName: string;
+    agentEmail: string;
+    requestedIp: string;
     status: string;
-    requestedAt: string;
-};
-
-type ApiPage = {
-    data: ApiFtpRequestItem[];
-    total: number;
+    ftpUsername: string | null;
+    createdAt: string;
 };
 
 function mapRequest(item: ApiFtpRequestItem): FtpRequest {
     return {
         id: item.id,
-        agencyName: item.agency?.name ?? "",
-        agentName: `${item.agent?.firstName ?? ""} ${item.agent?.lastName ?? ""}`.trim(),
-        agentEmail: item.agent?.email ?? "",
-        email: item.email ?? "",
-        allowedIp: item.allowedIp ?? "",
+        agencyName: item.agencyName ?? "",
+        agentName: item.agentName ?? "",
+        agentEmail: item.agentEmail ?? "",
+        allowedIp: item.requestedIp ?? "",
         ftpUsername: item.ftpUsername ?? "",
         status: item.status ?? "",
-        requestedAt: item.requestedAt ?? "",
+        requestedAt: item.createdAt ?? "",
     };
 }
 
-function mapPageData(page: ApiPage): FtpRequestsData {
-    const items = Array.isArray(page.data) ? page.data : [];
-    const requests = items.map(mapRequest);
-    return { requests, total: page.total };
-}
-
 const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
-    // ─── Data ─────────────────────────────────────────────────────────
     const [requests, setRequests] = useState<FtpRequest[]>(
         initialData?.requests ?? [],
     );
     const [totalCount, setTotalCount] = useState(initialData?.total ?? 0);
     const [isLoading, setIsLoading] = useState(false);
-
-    // ─── Pagination State ────────────────────────────────────────────
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
 
-    // ─── Filter State ────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
     const [status, setStatus] = useState<StatusValue>("");
     const [showFilters, setShowFilters] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isInitialMount = useRef(true);
 
-    // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
         async (
             page: number,
@@ -78,9 +62,11 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         ) => {
             setIsLoading(true);
             try {
+                const offset = (page - 1) * ROWS_PER_PAGE;
                 const params = new URLSearchParams({
-                    page: String(page),
                     limit: String(ROWS_PER_PAGE),
+                    offset: String(offset),
+                    sortOrder: "1",
                 });
                 if (opts?.filter) params.set("filter", opts.filter);
                 if (opts?.status) params.set("status", opts.status);
@@ -89,19 +75,25 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
                     `/api/ftp-requests/page?${params.toString()}`,
                 );
 
-                const rawPage = res.data?.data ?? res.data;
-                const pageData: ApiPage = {
-                    data: Array.isArray(rawPage?.data)
-                        ? rawPage.data
-                        : Array.isArray(rawPage)
-                          ? rawPage
-                          : [],
-                    total: rawPage?.total ?? 0,
-                };
-                const result = mapPageData(pageData);
+                const resData = res.data;
+                let items: ApiFtpRequestItem[] = [];
+                let total = 0;
 
-                setRequests(result.requests);
-                setTotalCount(result.total);
+                if (Array.isArray(resData)) {
+                    items = resData;
+                    total = items.length;
+                } else if (resData && typeof resData === "object") {
+                    items = Array.isArray(resData.data)
+                        ? resData.data
+                        : [];
+                    total =
+                        typeof resData.total === "number"
+                            ? resData.total
+                            : items.length;
+                }
+
+                setRequests(items.map(mapRequest));
+                setTotalCount(total);
             } catch (err) {
                 console.error("Failed to load FTP requests:", err);
             } finally {
@@ -111,7 +103,6 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         [],
     );
 
-    // ─── Build current filter opts ───────────────────────────────────
     const currentFilters = useCallback(
         () => ({
             filter: searchQuery || undefined,
@@ -120,7 +111,6 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         [searchQuery, status],
     );
 
-    // ─── Page change handler ─────────────────────────────────────────
     const handlePageChange = useCallback(
         (page: number) => {
             setCurrentPage(page);
@@ -129,19 +119,24 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         [loadPage, currentFilters],
     );
 
-    // ─── Search with debounce ─────────────────────────────────────────
     useEffect(() => {
         if (debounceRef.current) clearTimeout(debounceRef.current);
+
         debounceRef.current = setTimeout(() => {
+            if (isInitialMount.current) {
+                isInitialMount.current = false;
+                const hasFilters = searchQuery || status;
+                if (!hasFilters) return;
+            }
             setCurrentPage(1);
             loadPage(1, currentFilters());
         }, 400);
+
         return () => {
             if (debounceRef.current) clearTimeout(debounceRef.current);
         };
     }, [searchQuery, status, loadPage, currentFilters]);
 
-    // ─── Reset all filters ───────────────────────────────────────────
     const resetFilters = useCallback(() => {
         setSearchQuery("");
         setStatus("");
@@ -150,17 +145,12 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
     const hasActiveFilters = Boolean(searchQuery || status);
 
     return {
-        // Data
         requests,
         totalCount,
         isLoading,
-
-        // Pagination
         currentPage,
         totalPages,
         handlePageChange,
-
-        // Filters
         searchQuery,
         setSearchQuery,
         status,

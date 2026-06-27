@@ -207,7 +207,7 @@ const FtpRequestsTable = ({
                                             </div>
                                         </td>
                                         <td className="py-2.5 px-4 text-text">
-                                            {req.email || "—"}
+                                            {req.agentEmail || "—"}
                                         </td>
                                         <td className="py-2.5 px-4 text-text font-mono text-[11px]">
                                             {req.allowedIp || "—"}

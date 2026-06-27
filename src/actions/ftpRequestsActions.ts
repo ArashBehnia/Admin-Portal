@@ -7,14 +7,13 @@ import type {
 function mapRequest(item: FtpRequestListItemDto) {
     return {
         id: item.id,
-        agencyName: item.agency?.name ?? "",
-        agentName: `${item.agent?.firstName ?? ""} ${item.agent?.lastName ?? ""}`.trim(),
-        agentEmail: item.agent?.email ?? "",
-        email: item.email ?? "",
-        allowedIp: item.allowedIp ?? "",
+        agencyName: item.agencyName ?? "",
+        agentName: item.agentName ?? "",
+        agentEmail: item.agentEmail ?? "",
+        allowedIp: item.requestedIp ?? "",
         ftpUsername: item.ftpUsername ?? "",
         status: item.status ?? "",
-        requestedAt: item.requestedAt ?? "",
+        requestedAt: item.createdAt ?? "",
     };
 }
 

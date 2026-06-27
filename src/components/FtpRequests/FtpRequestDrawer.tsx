@@ -171,10 +171,10 @@ const FtpRequestDrawer = ({
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <span className="text-[13px] text-muted">
-                                    Email
+                                    Agent Email
                                 </span>
                                 <span className="text-[13px] font-medium text-text">
-                                    {request.email || "—"}
+                                    {request.agentEmail || "—"}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between pt-2 border-t border-border/40">
