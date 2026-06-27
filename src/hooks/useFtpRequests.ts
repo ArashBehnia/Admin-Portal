@@ -154,11 +154,18 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         async (id: string) => {
             setIsLoading(true);
             try {
-                await api.post(`/api/admin/agency-staff-ftp-requests/${id}/approve`);
+                const res = await api.post(`/api/ftp-requests/${id}/approve`);
+                const updated = res.data;
                 setRequests((prev) =>
                     prev.map((r) =>
                         r.id === id
-                            ? { ...r, status: "approved", approvedAt: new Date().toISOString() }
+                            ? {
+                                  ...r,
+                                  status: updated.status ?? "approved",
+                                  approvedAt: updated.approvedAt ?? null,
+                                  rejectedAt: updated.rejectedAt ?? null,
+                                  adminMessage: updated.adminMessage ?? r.adminMessage,
+                              }
                             : r,
                     ),
                 );
@@ -176,11 +183,18 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         async (id: string, reason: string) => {
             setIsLoading(true);
             try {
-                await api.post(`/api/admin/agency-staff-ftp-requests/${id}/reject`, { reason });
+                const res = await api.post(`/api/ftp-requests/${id}/reject`, { reason });
+                const updated = res.data;
                 setRequests((prev) =>
                     prev.map((r) =>
                         r.id === id
-                            ? { ...r, status: "rejected", adminMessage: reason, rejectedAt: new Date().toISOString() }
+                            ? {
+                                  ...r,
+                                  status: updated.status ?? "rejected",
+                                  adminMessage: updated.adminMessage ?? reason,
+                                  rejectedAt: updated.rejectedAt ?? null,
+                                  approvedAt: updated.approvedAt ?? null,
+                              }
                             : r,
                     ),
                 );
