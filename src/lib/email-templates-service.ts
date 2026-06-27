@@ -53,6 +53,7 @@ function normalizeTemplate(raw: Record<string, unknown>): Template {
         subject: toStr(raw.subject ?? raw.title ?? ""),
         body: toStr(raw.body ?? raw.content ?? raw.html ?? raw.text ?? ""),
         country: toStr(raw.country ?? "Australia"),
+        countryName: toStr(raw.countryName ?? raw.country_name ?? ""),
         language: toStr(raw.language ?? "English"),
         smsProvider: toStr(raw.smsProvider ?? raw.sms_provider ?? "Twilio") as "Twilio" | "GAMA",
     };

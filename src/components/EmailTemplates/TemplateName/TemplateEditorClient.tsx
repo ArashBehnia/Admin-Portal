@@ -273,19 +273,25 @@ const TemplateEditorClient = ({
                 {CHANNEL_TABS.map((tab) => {
                     const tabKey = tab === "Push Notification" ? "Push" : tab;
                     const isActive = activeTab === tabKey;
+                    const tabColor =
+                        tabKey === "Email"
+                            ? { active: "text-accent", bar: "bg-accent" }
+                            : tabKey === "SMS"
+                              ? { active: "text-success", bar: "bg-success" }
+                              : { active: "text-purple-600", bar: "bg-purple-600" };
                     return (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tabKey as any)}
                             className={`px-5 py-3 text-sm font-medium transition-all relative cursor-pointer ${
                                 isActive
-                                    ? "text-accent font-semibold"
+                                    ? `${tabColor.active} font-semibold`
                                     : "text-muted hover:text-text"
                             }`}
                         >
                             {tab}
                             {isActive && (
-                                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
+                                <div className={`absolute bottom-0 left-0 right-0 h-[2px] ${tabColor.bar}`} />
                             )}
                         </button>
                     );
@@ -299,7 +305,6 @@ const TemplateEditorClient = ({
                         activeTab={activeTab}
                         templateName={templateName}
                         currentTemplate={currentTemplate}
-                        fromName={fromName}
                         fromEmail={fromEmail}
                         subject={subject}
                         country={country}
@@ -308,8 +313,6 @@ const TemplateEditorClient = ({
                         bodyText={bodyText}
                         textareaRef={textareaRef}
                         availableVariables={AVAILABLE_VARIABLES}
-                        getCategoryStyles={getCategoryStyles}
-                        onFromNameChange={setFromName}
                         onFromEmailChange={setFromEmail}
                         onSubjectChange={setSubject}
                         onCountryChange={setCountry}

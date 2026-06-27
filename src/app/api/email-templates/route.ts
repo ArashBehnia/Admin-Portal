@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchEmailTemplatesPage, createTemplate } from "@/lib/email-templates-service";
+import { fetchEmailTemplatesPage } from "@/lib/email-templates-service";
+import { backendFetch } from "@/lib/api";
 
 export async function GET() {
     try {
@@ -19,7 +20,10 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         console.log("[API /email-templates] POST request body:", JSON.stringify(body, null, 2));
-        const data = await createTemplate(body);
+        const data = await backendFetch("/admin/template", {
+            method: "POST",
+            body: JSON.stringify(body),
+        });
         console.log("[API /email-templates] POST response:", JSON.stringify(data, null, 2));
         return NextResponse.json(data, { status: 201 });
     } catch (error) {

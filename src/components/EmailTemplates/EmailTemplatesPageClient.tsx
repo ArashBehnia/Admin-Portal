@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, Plus } from "lucide-react";
 import useEmailTemplates from "@/hooks/useEmailTemplates";
 import EmailTemplatesStats from "./EmailTemplatesStats";
 import EmailTemplatesTable from "./EmailTemplatesTable";
@@ -16,7 +17,6 @@ const EmailTemplatesPageClient = () => {
         setSearchQuery,
         selectedCategory,
         setSelectedCategory,
-        getCategoryStyles,
     } = useEmailTemplates();
 
     useEffect(() => {
@@ -45,13 +45,22 @@ const EmailTemplatesPageClient = () => {
                             templates. Changes take effect immediately without a deploy.
                         </p>
                     </div>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
-                        title="Refresh"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2 self-start shrink-0">
+                        <Link
+                            href="/email-templates/new"
+                            className="flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-md text-sm font-semibold transition-all shadow-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create
+                        </Link>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
+                            title="Refresh"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-12 text-center">
                     <p className="text-danger font-medium">
@@ -75,13 +84,22 @@ const EmailTemplatesPageClient = () => {
                         templates. Changes take effect immediately without a deploy.
                     </p>
                 </div>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
-                    title="Refresh"
-                >
-                    <RefreshCw className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 self-start shrink-0">
+                    <Link
+                        href="/email-templates/new"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-md text-sm font-semibold transition-all shadow-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create
+                    </Link>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
+                        title="Refresh"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
             <div className="flex flex-col gap-5">
@@ -97,7 +115,6 @@ const EmailTemplatesPageClient = () => {
                             selectedCategory={selectedCategory}
                             onSearchChange={setSearchQuery}
                             onCategoryChange={setSelectedCategory}
-                            getCategoryStyles={getCategoryStyles}
                         />
                     </>
                 )}

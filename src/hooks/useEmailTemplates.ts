@@ -57,7 +57,7 @@ const useEmailTemplates = () => {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] =
-        useState<CategoryFilter>("All categories");
+        useState<CategoryFilter>("All types");
 
     const stats = {
         total: templates.length,
@@ -71,7 +71,7 @@ const useEmailTemplates = () => {
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase());
             const matchesCategory =
-                selectedCategory === "All categories" ||
+                selectedCategory === "All types" ||
                 t.category.toLowerCase() === selectedCategory.toLowerCase();
             return matchesSearch && matchesCategory;
         });

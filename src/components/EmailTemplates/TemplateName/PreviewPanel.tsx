@@ -12,6 +12,7 @@ interface PreviewPanelProps {
     compiledBody: React.ReactNode;
     onPreviewModeChange: (mode: PreviewMode) => void;
     onSendTestClick: () => void;
+    disabled?: boolean;
 }
 
 const PreviewPanel = ({
@@ -23,6 +24,7 @@ const PreviewPanel = ({
     compiledBody,
     onPreviewModeChange,
     onSendTestClick,
+    disabled = false,
 }: PreviewPanelProps) => {
     return (
         <div className="lg:col-span-5 flex flex-col gap-4">
@@ -59,7 +61,8 @@ const PreviewPanel = ({
                     <button
                         type="button"
                         onClick={onSendTestClick}
-                        className="px-4 py-2 border border-border bg-card hover:bg-page hover:text-text rounded-md text-xs font-semibold font-sans text-muted transition-colors cursor-pointer shadow-sm"
+                        disabled={disabled}
+                        className="px-4 py-2 border border-border bg-card hover:bg-page hover:text-text rounded-md text-xs font-semibold font-sans text-muted transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:text-muted"
                     >
                         Send test email
                     </button>

@@ -1,10 +1,7 @@
 export type TemplateCategory =
-    | "Auth"
-    | "Account"
-    | "Agency"
-    | "Reviews"
-    | "Billing"
-    | "System";
+    | "email"
+    | "sms"
+    | "push";
 export type TemplateChannel = "Email" | "SMS";
 export type TemplateStatus = "Active" | "Draft";
 
@@ -21,18 +18,16 @@ export type Template = {
     subject: string;
     body: string;
     country: string;
+    countryName: string;
     language: string;
     smsProvider: "Twilio" | "GAMA";
 };
 
 export const CATEGORIES = [
-    "All categories",
-    "Auth",
-    "Account",
-    "Agency",
-    "Reviews",
-    "Billing",
-    "System",
+    "All types",
+    "email",
+    "sms",
+    "push",
 ] as const;
 
 export type CategoryFilter = (typeof CATEGORIES)[number];

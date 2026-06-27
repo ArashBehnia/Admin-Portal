@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Search, Trash2 } from "lucide-react";
 import {
     Template,
-    TemplateCategory,
     CategoryFilter,
     CATEGORIES,
 } from "@/actions/emailTemplatesActions";
+import Toast from "@/components/Shared/Toast";
+import type { ToastState } from "@/hooks/useTemplateEditor";
 
 function formatRelativeTime(value: string): string {
     if (!value) return "–";
@@ -40,7 +43,6 @@ interface EmailTemplatesTableProps {
     selectedCategory: CategoryFilter;
     onSearchChange: (val: string) => void;
     onCategoryChange: (val: CategoryFilter) => void;
-    getCategoryStyles: (category: TemplateCategory) => string;
 }
 
 const EmailTemplatesTable = ({
@@ -49,8 +51,51 @@ const EmailTemplatesTable = ({
     selectedCategory,
     onSearchChange,
     onCategoryChange,
-    getCategoryStyles,
 }: EmailTemplatesTableProps) => {
+    const queryClient = useQueryClient();
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [toast, setToast] = useState<ToastState>({
+        title: "",
+        message: "",
+        type: "success",
+        visible: false,
+    });
+
+    const showToast = (
+        title: string,
+        message: string,
+        type: ToastState["type"] = "success",
+    ) => {
+        setToast({ title, message, type, visible: true });
+    };
+
+    const handleDelete = async (template: Template) => {
+        if (!confirm(`Delete template "${template.name}"? This cannot be undone.`)) {
+            return;
+        }
+
+        setDeletingId(template.id);
+        try {
+            const res = await fetch(`/api/email-templates/${encodeURIComponent(template.id)}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                const errorBody = await res.json().catch(() => ({}));
+                throw new Error(errorBody.error || `Delete failed: ${res.status}`);
+            }
+
+            showToast("Template Deleted", `"${template.name}" has been deleted.`);
+            await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Failed to delete template";
+            showToast("Delete Failed", message, "error");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6">
             {/* Search + Category Filter */}
@@ -83,84 +128,82 @@ const EmailTemplatesTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse text-[12px]">
                         <thead>
-                            <tr className="border-b border-border/80 bg-page/50 text-[11px] text-muted font-bold tracking-wider uppercase">
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4 w-12">#</th>
                                 <th className="px-6 py-4">Template name</th>
-                                <th className="px-6 py-4">Category</th>
-                                <th className="px-6 py-4">Channel</th>
+                                <th className="px-6 py-4">Type</th>
+                                <th className="px-6 py-4">Provider</th>
+                                <th className="px-6 py-4">Language</th>
+                                <th className="px-6 py-4">Country</th>
                                 <th className="px-6 py-4">Last modified</th>
-                                <th className="px-6 py-4">Modified by</th>
-                                <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
                             {filteredTemplates.length > 0 ? (
-                                filteredTemplates.map((template) => (
+                                filteredTemplates.map((template, index) => (
                                     <tr
                                         key={template.id}
                                         className="hover:bg-page/40 transition-colors text-sm text-text"
                                     >
+                                        <td className="px-6 py-4 text-muted font-medium">
+                                            {index + 1}
+                                        </td>
                                         <td className="px-6 py-4 font-semibold text-text">
                                             {template.name}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span
-                                                className={`px-2 py-0.5 rounded text-xs font-semibold ${getCategoryStyles(template.category)}`}
+                                                className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                                    template.category.toLowerCase() === "email"
+                                                        ? "bg-accent/10 text-accent"
+                                                        : template.category.toLowerCase() === "sms"
+                                                          ? "bg-success/15 text-success"
+                                                          : "bg-purple-50 text-purple-600"
+                                                }`}
                                             >
                                                 {template.category}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-1.5">
-                                                {template.channels.map(
-                                                    (chan) => (
-                                                        <span
-                                                            key={chan}
-                                                            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                                                                chan === "Email"
-                                                                    ? "bg-accent/10 text-accent"
-                                                                    : "bg-success/15 text-success"
-                                                            }`}
-                                                        >
-                                                            {chan}
-                                                        </span>
-                                                    ),
-                                                )}
-                                            </div>
+                                        <td className="px-6 py-4 text-muted">
+                                            {template.smsProvider || "–"}
+                                        </td>
+                                        <td className="px-6 py-4 text-muted">
+                                            {template.language || "–"}
+                                        </td>
+                                        <td className="px-6 py-4 text-muted">
+                                            {template.countryName || template.country || "–"}
                                         </td>
                                         <td className="px-6 py-4 text-muted">
                                             {formatRelativeTime(template.lastModified)}
                                         </td>
-                                        <td className="px-6 py-4 text-muted font-medium">
-                                            {template.modifiedBy || "–"}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded ${
-                                                    template.status === "Active"
-                                                        ? "bg-success/10 text-success"
-                                                        : "bg-warning/10 text-warning"
-                                                }`}
-                                            >
-                                                {template.status}
-                                            </span>
-                                        </td>
                                         <td className="px-6 py-4 text-right select-none">
-                                            <Link
-                                                href={`/email-templates/${template.name}`}
-                                                className="text-accent hover:underline text-sm font-semibold transition-colors"
-                                            >
-                                                Edit
-                                            </Link>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/email-templates/${template.name}`}
+                                                    className="text-accent hover:underline text-sm font-semibold transition-colors"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(template)}
+                                                    disabled={deletingId === template.id}
+                                                    className="p-1 text-danger/60 hover:text-danger transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    title="Delete template"
+                                                >
+                                                    <Trash2 size={14} strokeWidth={2} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={8}
                                         className="px-6 py-12 text-center text-sm text-muted"
                                     >
                                         No templates match your search criteria.
@@ -171,6 +214,14 @@ const EmailTemplatesTable = ({
                     </table>
                 </div>
             </div>
+
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+            />
         </div>
     );
 };
