@@ -58,7 +58,7 @@ const ApplicationsTable = ({
                         placeholder="Search applicant name, agency, email..."
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 text-[13px] bg-card border border-border rounded focus:outline-none focus:ring-1 focus:ring-accent text-text placeholder-muted"
+                        className="w-full pl-9 pr-4 py-2 text-[12px] bg-card border border-border rounded focus:outline-none focus:ring-1 focus:ring-accent text-text placeholder-muted"
                     />
                 </div>
                 <div className="flex items-center gap-1 flex-wrap">
@@ -66,7 +66,7 @@ const ApplicationsTable = ({
                         <button
                             key={filter}
                             onClick={() => onStatusFilterChange(filter as any)}
-                            className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all duration-150 cursor-pointer border ${
+                            className={`px-4 py-1.5 text-[12px] font-medium rounded-md transition-all duration-150 cursor-pointer border ${
                                 statusFilter === filter
                                     ? "bg-text text-card border-text"
                                     : "bg-card text-muted border-border hover:bg-page hover:text-text"
@@ -81,7 +81,7 @@ const ApplicationsTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse text-[12px]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Applicant</th>

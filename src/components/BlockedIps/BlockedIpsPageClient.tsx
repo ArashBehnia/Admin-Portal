@@ -137,10 +137,10 @@ const BlockedIpsPageClient = ({
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-[20px] font-bold text-text leading-snug">
+                    <h1 className="text-[18px] sm:text-[20px] font-bold text-text leading-snug">
                         Blocked IPs &amp; user restrictions
                     </h1>
-                    <p className="text-[13px] text-muted mt-0.5">
+                    <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
                         Temporary and manual restrictions. Removing an entry
                         immediately allows that IP or user again.
                     </p>

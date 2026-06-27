@@ -33,23 +33,23 @@ const AgenciesStats = ({ stats }: AgenciesStatsProps) => {
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
             {cards.map(({ label, value, dot, warning }) => (
                 <div
                     key={label}
-                    className={`bg-card border border-border rounded shadow-sm p-4 flex flex-col gap-1.5 ${
+                    className={`bg-card border border-border rounded p-3 sm:p-4 flex flex-col gap-1.5 shadow-sm ${
                         warning ? "border-l-[3px] border-l-red-500" : ""
                     }`}
                 >
                     <div className="flex items-center gap-1.5">
                         {dot && (
                             <div
-                                className={`w-1.5 h-1.5 rounded-full ${dot} shrink-0`}
+                                className={`w-2 h-2 rounded-full ${dot} shrink-0`}
                             />
                         )}
-                        <span className="text-[12px] text-muted">{label}</span>
+                        <span className="text-muted text-[11px] sm:text-[12px]">{label}</span>
                     </div>
-                    <span className="text-[24px] font-bold text-text">
+                    <span className="text-[22px] sm:text-[26px] font-bold text-text leading-none">
                         {value}
                     </span>
                 </div>

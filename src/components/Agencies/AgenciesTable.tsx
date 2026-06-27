@@ -55,7 +55,7 @@ const AgenciesTable = ({
                         placeholder="Search agency name, ABN, contact email..."
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-9 pr-3 py-1.5 border border-border rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-muted bg-card text-text shadow-sm"
+                        className="w-full pl-9 pr-3 py-1.5 border border-border rounded text-[12px] focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-muted bg-card text-text shadow-sm"
                     />
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden">
@@ -78,7 +78,7 @@ const AgenciesTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse text-[12px]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Agency</th>

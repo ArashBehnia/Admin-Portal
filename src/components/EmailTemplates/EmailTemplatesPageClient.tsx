@@ -37,10 +37,10 @@ const EmailTemplatesPageClient = () => {
             <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-[20px] font-bold text-text leading-snug">
+                        <h1 className="text-[18px] sm:text-[20px] font-bold text-text leading-snug">
                             Email Templates
                         </h1>
-                        <p className="text-[13px] text-muted mt-0.5">
+                        <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
                             Manage all transactional email, SMS and push notification
                             templates. Changes take effect immediately without a deploy.
                         </p>
@@ -67,10 +67,10 @@ const EmailTemplatesPageClient = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-[20px] font-bold text-text leading-snug">
+                    <h1 className="text-[18px] sm:text-[20px] font-bold text-text leading-snug">
                         Email Templates
                     </h1>
-                    <p className="text-[13px] text-muted mt-0.5">
+                    <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
                         Manage all transactional email, SMS and push notification
                         templates. Changes take effect immediately without a deploy.
                     </p>
@@ -136,9 +136,9 @@ function EmailTemplatesSkeleton() {
             {/* Table skeleton */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-border/80 bg-page/50 text-[11px] text-muted font-bold tracking-wider uppercase">
+                        <table className="w-full text-left border-collapse text-[12px]">
+                            <thead>
+                                <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] font-bold tracking-wider uppercase">
                                 <th className="px-6 py-4">Template name</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Channel</th>

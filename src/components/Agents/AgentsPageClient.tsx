@@ -33,8 +33,8 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-[20px] font-bold text-text leading-snug">Agents</h1>
-                    <p className="text-[13px] text-muted mt-0.5">
+                    <h1 className="text-[18px] sm:text-[20px] font-bold text-text leading-snug">Agents</h1>
+                    <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
                         Search and manage all agents across all agencies.
                     </p>
                 </div>

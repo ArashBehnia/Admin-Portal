@@ -34,7 +34,7 @@ const AgentsTable = ({
                     placeholder="Search by name, email, licence number or agency..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="pl-9 pr-4 py-2 w-full bg-card border border-border rounded-md text-sm text-text placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-colors"
+                    className="pl-9 pr-4 py-2 w-full bg-card border border-border rounded-md text-[12px] text-text placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-colors"
                 />
             </div>
 
@@ -47,7 +47,7 @@ const AgentsTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse text-[12px]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Name</th>
