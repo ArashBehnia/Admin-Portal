@@ -3,6 +3,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import useTemplateEditor from "@/hooks/useTemplateEditor";
 import Toast from "@/components/Shared/Toast";
@@ -10,6 +11,21 @@ import EditorForm from "./EditorForm";
 import PreviewPanel from "./PreviewPanel";
 import VersionHistory from "./VersionHistory";
 import TestEmailModal from "./TestEmailModal";
+import ConfirmModal from "./ConfirmModal";
+
+const TEMPLATE_NAME_MAP: Record<string, string> = {
+    otp: "OTP",
+    signup: "Sign Up",
+    verify: "Verify",
+    welcome: "Welcome",
+    agent_portal_welcome: "Agent Portal Welcome",
+    forgot_password: "Forgot Password",
+    two_fa: "Two-Factor Authentication",
+};
+
+function formatTemplateName(name: string): string {
+    return TEMPLATE_NAME_MAP[name] || name;
+}
 
 interface TemplateEditorClientProps {
     templateName: string;
@@ -18,6 +34,7 @@ interface TemplateEditorClientProps {
 const TemplateEditorClient = ({
     templateName,
 }: TemplateEditorClientProps) => {
+    const router = useRouter();
     const {
         currentTemplate,
         isLoadingTemplate,
@@ -29,8 +46,8 @@ const TemplateEditorClient = ({
         setIsHistoryOpen,
         isTestEmailModalOpen,
         setIsTestEmailModalOpen,
-        isActiveStatus,
-        setIsActiveStatus,
+        isConfirmModalOpen,
+        setIsConfirmModalOpen,
         fromName,
         setFromName,
         fromEmail,
@@ -58,6 +75,7 @@ const TemplateEditorClient = ({
         handleInsertVariable,
         handleRestoreVersion,
         handleSaveTemplate,
+        handleConfirmSave,
         handleSendTest,
     } = useTemplateEditor({ templateName });
 
@@ -202,6 +220,12 @@ const TemplateEditorClient = ({
         );
     }
 
+    const handleTemplateNameChange = (newName: string) => {
+        if (newName && newName !== templateName) {
+            router.push(`/email-templates/${newName}`);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
             {/* Breadcrumb */}
@@ -215,47 +239,17 @@ const TemplateEditorClient = ({
                         Email Templates
                     </Link>
                     <span>&gt;</span>
-                    <span className="text-text font-medium">{templateName}</span>
+                    <span className="text-text font-medium">{formatTemplateName(templateName)}</span>
                 </div>
             </div>
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-[20px] font-bold text-text leading-snug">
-                    Edit template — {templateName}
+                    Edit template — {formatTemplateName(templateName)}
                 </h1>
 
                 <div className="flex items-center gap-4 select-none self-end sm:self-auto">
-                    {/* Status Toggle */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted font-semibold">
-                            Status
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => setIsActiveStatus(!isActiveStatus)}
-                            disabled={isSaving}
-                            className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer flex items-center disabled:opacity-50 ${
-                                isActiveStatus ? "bg-success" : "bg-border"
-                            }`}
-                        >
-                            <span
-                                className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
-                                    isActiveStatus
-                                        ? "translate-x-5"
-                                        : "translate-x-0"
-                                }`}
-                            />
-                        </button>
-                        <span
-                            className={`text-xs font-semibold ${
-                                isActiveStatus ? "text-success" : "text-muted"
-                            }`}
-                        >
-                            {isActiveStatus ? "Active" : "Inactive"}
-                        </span>
-                    </div>
-
                     {/* Save Button */}
                     <button
                         type="button"
@@ -313,6 +307,7 @@ const TemplateEditorClient = ({
                         bodyText={bodyText}
                         textareaRef={textareaRef}
                         availableVariables={AVAILABLE_VARIABLES}
+                        onTemplateNameChange={handleTemplateNameChange}
                         onFromEmailChange={setFromEmail}
                         onSubjectChange={setSubject}
                         onCountryChange={setCountry}
@@ -333,6 +328,7 @@ const TemplateEditorClient = ({
                         compiledBody={compileTemplate(bodyText)}
                         onPreviewModeChange={setPreviewMode}
                         onSendTestClick={() => setIsTestEmailModalOpen(true)}
+                        disabled
                     />
                 </div>
             </div>
@@ -351,6 +347,16 @@ const TemplateEditorClient = ({
                 onClose={() => setIsTestEmailModalOpen(false)}
                 onEmailChange={setTestEmailAddress}
                 onSend={handleSendTest}
+            />
+
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                title="Save Changes"
+                message="Are you sure you want to save the changes to this template?"
+                confirmLabel="Yes"
+                cancelLabel="No"
+                onConfirm={handleConfirmSave}
+                onCancel={() => setIsConfirmModalOpen(false)}
             />
 
             <Toast

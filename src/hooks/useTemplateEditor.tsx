@@ -80,7 +80,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const [previewMode, setPreviewMode] = useState<PreviewMode>("Desktop");
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-    const [isActiveStatus, setIsActiveStatus] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const initializedRef = useRef(false);
 
     // ─── Form State (initialized from backend) ────────────────────
@@ -119,15 +119,8 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
             setBodyText(currentTemplate.body || DEFAULT_BODY);
             setCountry(currentTemplate.country || "Australia");
             setLanguage(currentTemplate.language || "English");
-            setSmsProvider(currentTemplate.smsProvider || "Twilio");
+            setSmsProvider((currentTemplate.smsProvider as "Twilio" | "GAMA") || "Twilio");
             initializedRef.current = true;
-        }
-    }, [currentTemplate]);
-
-    // Always sync status from backend (reflects save changes)
-    useEffect(() => {
-        if (currentTemplate) {
-            setIsActiveStatus(currentTemplate.status === "Active");
         }
     }, [currentTemplate]);
 
@@ -208,18 +201,12 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
 
     const getCategoryStyles = (category: string) => {
         switch (category) {
-            case "Auth":
+            case "email":
                 return "bg-blue-50 text-blue-700";
-            case "Account":
-                return "bg-emerald-50 text-emerald-700";
-            case "Agency":
+            case "sms":
+                return "bg-green-50 text-green-700";
+            case "push":
                 return "bg-purple-50 text-purple-700";
-            case "Reviews":
-                return "bg-orange-50 text-orange-700";
-            case "Billing":
-                return "bg-amber-50 text-amber-700";
-            case "System":
-                return "bg-slate-50 text-slate-700";
             default:
                 return "bg-slate-50 text-slate-700";
         }
@@ -263,25 +250,41 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
 
     const handleSaveTemplate = () => {
         if (!currentTemplate?.id) {
-            console.warn("[useTemplateEditor] save called but no template id available");
             showToast("Save Failed", "Template ID not found. Please reload and try again.", "error");
             return;
         }
-        const payload: Record<string, unknown> = {
-            id: currentTemplate.id,
-            name: templateName,
-            category: currentTemplate.category,
-            channels: currentTemplate.channels,
-            status: isActiveStatus ? "Active" : "Draft",
-            fromName,
-            fromEmail,
-            subject,
-            body: bodyText,
-            country,
-            language,
-            smsProvider,
+        setIsConfirmModalOpen(true);
+    };
+
+    const handleConfirmSave = async () => {
+        setIsConfirmModalOpen(false);
+
+        if (!currentTemplate?.id) {
+            showToast("Save Failed", "Template ID not found. Please reload and try again.", "error");
+            return;
+        }
+
+        const typeMap: Record<string, string> = {
+            Email: "email",
+            SMS: "sms",
+            Push: "push",
         };
-        console.log("[useTemplateEditor] handleSaveTemplate payload:", JSON.stringify(payload, null, 2));
+
+        const langMap: Record<string, string> = {
+            English: "en",
+        };
+
+        const payload = {
+            type: typeMap[activeTab] || "email",
+            name: templateName,
+            provider: currentTemplate.smsProvider?.toLowerCase() || "twilio",
+            country: country,
+            from: fromEmail,
+            subject: subject,
+            content: bodyText,
+            lang: langMap[language] || "en",
+        };
+
         saveMutation.mutate(payload);
     };
 
@@ -308,8 +311,8 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
         setIsHistoryOpen,
         isTestEmailModalOpen,
         setIsTestEmailModalOpen,
-        isActiveStatus,
-        setIsActiveStatus,
+        isConfirmModalOpen,
+        setIsConfirmModalOpen,
 
         // Form
         fromName,
@@ -352,6 +355,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
         handleInsertVariable,
         handleRestoreVersion,
         handleSaveTemplate,
+        handleConfirmSave,
         handleSendTest,
     };
 };

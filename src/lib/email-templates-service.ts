@@ -154,19 +154,15 @@ export async function createTemplate(template: Partial<Template>): Promise<Templ
     return result;
 }
 
-// ─── POST: Update template (ID in body, not URL) ───────────────
+// ─── PUT: Update template ─────────────────────────────────────
 export async function updateTemplate(id: string, data: Record<string, unknown>): Promise<Template> {
-    const endpoint = "/admin/template";
-    const serialized = serializeTemplate({ ...data, id });
-    console.log("[email-templates-service] updateTemplate serialized:", JSON.stringify(serialized, null, 2));
-    logApiData("POST", endpoint, serialized);
+    const endpoint = `/admin/template/${encodeURIComponent(id)}`;
+    logApiData("PUT", endpoint, data);
     const raw = await backendFetch<Record<string, unknown>>(endpoint, {
-        method: "POST",
-        body: JSON.stringify(serialized),
+        method: "PUT",
+        body: JSON.stringify(data),
     });
-    console.log("[email-templates-service] updateTemplate raw:", JSON.stringify(raw, null, 2));
     const result = normalizeTemplate(toObject(raw));
-    console.log("[email-templates-service] updateTemplate normalized:", JSON.stringify(result, null, 2));
     return result;
 }
 

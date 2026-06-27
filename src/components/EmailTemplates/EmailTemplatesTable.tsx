@@ -37,6 +37,20 @@ function formatRelativeTime(value: string): string {
     return `${diffYear} year${diffYear === 1 ? "" : "s"} ago`;
 }
 
+const TEMPLATE_NAME_MAP: Record<string, string> = {
+    otp: "OTP",
+    signup: "Sign Up",
+    verify: "Verify",
+    welcome: "Welcome",
+    agent_portal_welcome: "Agent Portal Welcome",
+    forgot_password: "Forgot Password",
+    two_fa: "Two-Factor Authentication",
+};
+
+function formatTemplateName(name: string): string {
+    return TEMPLATE_NAME_MAP[name] || name;
+}
+
 interface EmailTemplatesTableProps {
     filteredTemplates: Template[];
     searchQuery: string;
@@ -70,7 +84,8 @@ const EmailTemplatesTable = ({
     };
 
     const handleDelete = async (template: Template) => {
-        if (!confirm(`Delete template "${template.name}"? This cannot be undone.`)) {
+        const displayName = formatTemplateName(template.name);
+        if (!confirm(`Delete template "${displayName}"? This cannot be undone.`)) {
             return;
         }
 
@@ -85,7 +100,7 @@ const EmailTemplatesTable = ({
                 throw new Error(errorBody.error || `Delete failed: ${res.status}`);
             }
 
-            showToast("Template Deleted", `"${template.name}" has been deleted.`);
+            showToast("Template Deleted", `"${displayName}" has been deleted.`);
             await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
         } catch (error) {
             const message =
@@ -152,7 +167,7 @@ const EmailTemplatesTable = ({
                                             {index + 1}
                                         </td>
                                         <td className="px-6 py-4 font-semibold text-text">
-                                            {template.name}
+                                            {formatTemplateName(template.name)}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span

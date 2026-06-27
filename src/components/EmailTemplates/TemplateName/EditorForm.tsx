@@ -65,7 +65,7 @@ const EditorForm = ({
             {/* Template name */}
             <div className="flex flex-col gap-1.5">
                 <label className={LABEL_CLASS}>Template name</label>
-                {isCreating ? (
+                {(isCreating || onTemplateNameChange) ? (
                     <div className="relative w-full">
                         <select
                             value={templateName}
@@ -73,13 +73,13 @@ const EditorForm = ({
                             className={`${SELECT_CLASS} pr-10`}
                         >
                             <option value="">Select template name</option>
-                            <option value="otp">otp</option>
-                            <option value="signup">signup</option>
-                            <option value="verify">verify</option>
-                            <option value="welcome">welcome</option>
-                            <option value="agent_portal_welcome">agent_portal_welcome</option>
-                            <option value="forgot_password">forgot_password</option>
-                            <option value="two_fa">two_fa</option>
+                            <option value="otp">OTP</option>
+                            <option value="signup">Sign Up</option>
+                            <option value="verify">Verify</option>
+                            <option value="welcome">Welcome</option>
+                            <option value="agent_portal_welcome">Agent Portal Welcome</option>
+                            <option value="forgot_password">Forgot Password</option>
+                            <option value="two_fa">Two-Factor Authentication</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

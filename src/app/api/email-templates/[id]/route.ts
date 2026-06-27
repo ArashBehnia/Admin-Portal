@@ -6,8 +6,8 @@ interface RouteParams {
 }
 
 async function findTemplate(identifier: string) {
-    // If it looks like an ID (no spaces, alphanumeric), try by ID first
-    if (/^[a-zA-Z0-9_-]+$/.test(identifier) && !identifier.includes(" ")) {
+    // If it looks like a UUID, try by ID first
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier)) {
         const byId = await fetchEmailTemplateById(identifier);
         if (byId) return byId;
     }

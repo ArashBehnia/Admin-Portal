@@ -9,7 +9,7 @@ export type Template = {
     id: string;
     name: string;
     category: TemplateCategory;
-    channels: TemplateChannel[];
+    channels: string[];
     lastModified: string;
     modifiedBy: string;
     status: TemplateStatus;
@@ -18,9 +18,9 @@ export type Template = {
     subject: string;
     body: string;
     country: string;
-    countryName: string;
+    countryName?: string;
     language: string;
-    smsProvider: "Twilio" | "GAMA";
+    smsProvider: string;
 };
 
 export const CATEGORIES = [
@@ -37,7 +37,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "1",
             name: "signup",
-            category: "Auth",
+            category: "email",
             channels: ["Email"],
             lastModified: "2 days ago",
             modifiedBy: "Arash",
@@ -53,7 +53,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "2",
             name: "otp",
-            category: "Auth",
+            category: "email",
             channels: ["Email", "SMS"],
             lastModified: "2 days ago",
             modifiedBy: "Arash",
@@ -69,7 +69,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "3",
             name: "verify",
-            category: "Auth",
+            category: "email",
             channels: ["Email"],
             lastModified: "2 days ago",
             modifiedBy: "Hirad",
@@ -85,7 +85,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "4",
             name: "password-reset",
-            category: "Auth",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 week ago",
             modifiedBy: "Arash",
@@ -101,7 +101,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "5",
             name: "welcome-user",
-            category: "Account",
+            category: "email",
             channels: ["Email"],
             lastModified: "3 days ago",
             modifiedBy: "Arash",
@@ -117,7 +117,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "6",
             name: "account-suspended",
-            category: "Account",
+            category: "email",
             channels: ["Email"],
             lastModified: "2 weeks ago",
             modifiedBy: "Sarah Chen",
@@ -133,7 +133,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "7",
             name: "agency-approved",
-            category: "Agency",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 day ago",
             modifiedBy: "Arash",
@@ -149,7 +149,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "8",
             name: "agency-rejected",
-            category: "Agency",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 week ago",
             modifiedBy: "Arash",
@@ -165,7 +165,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "9",
             name: "agent-welcome",
-            category: "Agency",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 day ago",
             modifiedBy: "Arash",
@@ -181,7 +181,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "10",
             name: "review-approved",
-            category: "Reviews",
+            category: "email",
             channels: ["Email"],
             lastModified: "3 weeks ago",
             modifiedBy: "Sarah Chen",
@@ -197,7 +197,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "11",
             name: "review-rejected",
-            category: "Reviews",
+            category: "email",
             channels: ["Email"],
             lastModified: "3 weeks ago",
             modifiedBy: "Sarah Chen",
@@ -213,7 +213,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "12",
             name: "invoice-generated",
-            category: "Billing",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 month ago",
             modifiedBy: "Hirad",
@@ -229,7 +229,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "13",
             name: "payment-failed",
-            category: "Billing",
+            category: "email",
             channels: ["Email"],
             lastModified: "1 month ago",
             modifiedBy: "Hirad",
@@ -245,7 +245,7 @@ export const fetchEmailTemplates = async (): Promise<Template[]> => {
         {
             id: "14",
             name: "feed-failure-alert",
-            category: "System",
+            category: "email",
             channels: ["Email"],
             lastModified: "2 weeks ago",
             modifiedBy: "Hirad",
