@@ -79,39 +79,33 @@ const ApplicationsTable = ({
             </div>
 
             {/* Table */}
-            <div className="bg-card border border-border rounded shadow-sm overflow-hidden">
-                <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    <table className="w-full text-left text-[13px] table-auto">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border text-muted bg-card">
-                                <th className="font-medium py-3 pl-4 pr-3">
-                                    Applicant
-                                </th>
-                                <th className="font-medium py-3 px-3">
-                                    Agency
-                                </th>
-                                <th className="font-medium py-3 px-3">CRM</th>
-                                <th className="font-medium py-3 px-3">
-                                    Submitted
-                                </th>
-                                <th className="font-medium py-3 px-3">
-                                    Status
-                                </th>
-                                <th className="font-medium py-3 pl-3 pr-4 text-right">
-                                    Actions
-                                </th>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                <th className="px-6 py-4">Applicant</th>
+                                <th className="px-6 py-4">Agency</th>
+                                <th className="px-6 py-4">CRM</th>
+                                <th className="px-6 py-4">Submitted</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="py-16 text-center text-sm text-muted"
-                                    >
-                                        Loading...
-                                    </td>
-                                </tr>
+                                <>
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <tr key={i} className="border-b border-border/60 last:border-0">
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-32" /><div className="h-3 bg-border/60 rounded animate-pulse w-24 mt-1" /></td>
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-28" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-16 ml-auto" /></td>
+                                        </tr>
+                                    ))}
+                                </>
                             ) : applications.length > 0 ? (
                                 applications.map((app) => (
                                     <tr

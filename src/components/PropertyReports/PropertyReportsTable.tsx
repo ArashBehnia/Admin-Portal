@@ -193,41 +193,22 @@ const PropertyReportsTable = ({
             )}
 
             {/* Table */}
-            <div className="bg-card rounded border border-border shadow-sm w-full overflow-hidden">
-                <div className="overflow-x-auto min-h-[300px]">
-                    <table className="w-full text-left text-[12px] whitespace-nowrap">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border bg-card text-muted">
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Property
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Reporter
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Report type
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Message
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Created at
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase text-right">
-                                    Actions
-                                </th>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                <th className="px-6 py-4">Property</th>
+                                <th className="px-6 py-4">Reporter</th>
+                                <th className="px-6 py-4">Report type</th>
+                                <th className="px-6 py-4">Message</th>
+                                <th className="px-6 py-4">Created at</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="py-10 text-center text-muted"
-                                    >
-                                        Loading…
-                                    </td>
-                                </tr>
+                                <TableSkeleton colSpan={6} />
                             ) : reports.length === 0 ? (
                                 <tr>
                                     <td
@@ -314,5 +295,21 @@ const PropertyReportsTable = ({
         </div>
     );
 };
+
+function TableSkeleton({ colSpan }: { colSpan: number }) {
+    return (
+        <>
+            {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-b border-border/60 last:border-0">
+                    {Array.from({ length: colSpan }).map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                            <div className="h-4 bg-border/60 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                        </td>
+                    ))}
+                </tr>
+            ))}
+        </>
+    );
+}
 
 export default PropertyReportsTable;

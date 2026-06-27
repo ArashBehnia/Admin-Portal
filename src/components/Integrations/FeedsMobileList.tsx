@@ -17,8 +17,33 @@ const FeedsMobileList = ({
 }: FeedsMobileListProps) => {
     if (isLoading)
         return (
-            <div className="flex md:hidden py-10 text-center text-muted text-[13px] justify-center">
-                Loading…
+            <div className="flex md:hidden flex-col gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-card rounded border border-border shadow-sm p-3 flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                            <div className="h-4 bg-border/60 rounded animate-pulse w-32" />
+                            <div className="h-5 bg-border/60 rounded animate-pulse w-16" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="h-3 bg-border/60 rounded animate-pulse w-16" />
+                            <div className="h-5 bg-border/60 rounded animate-pulse w-14" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-1">
+                                <div className="h-2 bg-border/60 rounded animate-pulse w-12" />
+                                <div className="h-3 bg-border/60 rounded animate-pulse w-16" />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <div className="h-2 bg-border/60 rounded animate-pulse w-16" />
+                                <div className="h-3 bg-border/60 rounded animate-pulse w-8" />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <div className="h-2 bg-border/60 rounded animate-pulse w-14" />
+                                <div className="h-3 bg-border/60 rounded animate-pulse w-8" />
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         );
 

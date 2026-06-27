@@ -76,46 +76,39 @@ const AgenciesTable = ({
             </div>
 
             {/* Table */}
-            <div className="bg-card rounded border border-border shadow-sm w-full overflow-hidden">
-                <div className="overflow-x-auto min-h-[400px]">
-                    <table className="w-full text-left text-[12px] whitespace-nowrap">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border bg-card text-muted">
-                                <th className="font-medium py-3 px-4">
-                                    Agency
-                                </th>
-                                <th className="font-medium py-3 px-3">
-                                    Subscription
-                                </th>
-                                <th className="font-medium py-3 px-3">
-                                    Onboarding
-                                </th>
-                                <th className="font-medium py-3 px-3 text-right">
-                                    Listings
-                                </th>
-                                <th className="font-medium py-3 px-3 text-right">
-                                    Agents
-                                </th>
-                                <th className="font-medium py-3 px-3">Feed</th>
-                                <th className="font-medium py-3 px-3 text-right">
-                                    MRR
-                                </th>
-                                <th className="font-medium py-3 px-4 text-left">
-                                    Last activity
-                                </th>
-                                <th className="font-medium py-3 px-4 text-right"></th>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                <th className="px-6 py-4">Agency</th>
+                                <th className="px-6 py-4">Subscription</th>
+                                <th className="px-6 py-4">Onboarding</th>
+                                <th className="px-6 py-4 text-right">Listings</th>
+                                <th className="px-6 py-4 text-right">Agents</th>
+                                <th className="px-6 py-4">Feed</th>
+                                <th className="px-6 py-4 text-right">MRR</th>
+                                <th className="px-6 py-4">Last activity</th>
+                                <th className="px-6 py-4 text-right"></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={9}
-                                        className="py-10 text-center text-muted"
-                                    >
-                                        Loading…
-                                    </td>
-                                </tr>
+                                <>
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <tr key={i} className="border-b border-border/60 last:border-0">
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-32" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-20" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-8 ml-auto" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-8 ml-auto" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-20" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-14 ml-auto" /></td>
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-12 ml-auto" /></td>
+                                        </tr>
+                                    ))}
+                                </>
                             ) : filteredAgencies.length === 0 ? (
                                 <tr>
                                     <td

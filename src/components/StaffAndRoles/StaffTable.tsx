@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Plus, Loader2, MoreHorizontal } from "lucide-react";
+import { Search, Plus, MoreHorizontal } from "lucide-react";
 import { StaffMember } from "@/actions/staffAndRolesActions";
 import StaffPagination from "./StaffPagination";
 
@@ -111,11 +111,33 @@ const StaffTable = ({
 
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-3">
-                        <Loader2 className="h-8 w-8 text-accent animate-spin" />
-                        <span className="text-sm text-muted">
-                            Retrieving administrative database...
-                        </span>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                    <th className="px-6 py-4">Staff Member</th>
+                                    <th className="px-6 py-4">Role</th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4">MFA</th>
+                                    <th className="px-6 py-4 hidden lg:table-cell">Last Login</th>
+                                    <th className="px-6 py-4 hidden xl:table-cell">Added</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border/60">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <tr key={i} className="border-b border-border/60 last:border-0">
+                                        <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-32" /><div className="h-3 bg-border/60 rounded animate-pulse w-24 mt-1" /></td>
+                                        <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                        <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
+                                        <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
+                                        <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
+                                        <td className="px-6 py-4 hidden xl:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-16" /></td>
+                                        <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-12 ml-auto" /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 ) : isError ? (
                     <div className="bg-red-50 border border-red-200 text-danger rounded-lg p-6 text-sm text-center m-6">

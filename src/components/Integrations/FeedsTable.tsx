@@ -31,41 +31,37 @@ const FeedsTable = ({
                     <col style={{ width: "19%" }} />
                 </colgroup>
                 <thead>
-                    <tr className="border-b border-border bg-page/50 text-muted">
-                        <th className="font-medium py-2.5 px-3">Agency</th>
-                        <th className="font-medium py-2.5 px-2">CRM</th>
-                        <th className="font-medium py-2.5 px-2">Method</th>
-                        <th className="font-medium py-2.5 px-2">Status</th>
-                        <th className="font-medium py-2.5 px-2 leading-tight">
-                            Last sync
-                        </th>
-                        <th className="font-medium py-2.5 px-2 text-center leading-tight">
-                            Listings
-                            <br />
-                            (24h)
-                        </th>
-                        <th className="font-medium py-2.5 px-2 text-center leading-tight">
-                            Errors
-                            <br />
-                            (24h)
-                        </th>
-                        <th className="font-medium py-2.5 px-2">Distrib.</th>
-                        <th className="font-medium py-2.5 px-2">Onboarding</th>
-                        <th className="font-medium py-2.5 px-3 text-right">
-                            Actions
-                        </th>
+                    <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                        <th className="px-6 py-4">Agency</th>
+                        <th className="px-6 py-4">CRM</th>
+                        <th className="px-6 py-4">Method</th>
+                        <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4">Last sync</th>
+                        <th className="px-6 py-4 text-center">Listings (24h)</th>
+                        <th className="px-6 py-4 text-center">Errors (24h)</th>
+                        <th className="px-6 py-4">Distrib.</th>
+                        <th className="px-6 py-4">Onboarding</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/60">
                     {isLoading ? (
-                        <tr>
-                            <td
-                                colSpan={10}
-                                className="py-10 text-center text-muted"
-                            >
-                                Loading…
-                            </td>
-                        </tr>
+                        <>
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <tr key={i} className="border-b border-border/60 last:border-0">
+                                    <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-28" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-16" /></td>
+                                    <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
+                                    <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
+                                    <td className="px-6 py-4 text-center"><div className="h-4 bg-border/60 rounded animate-pulse w-8 mx-auto" /></td>
+                                    <td className="px-6 py-4 text-center"><div className="h-4 bg-border/60 rounded animate-pulse w-8 mx-auto" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-16" /></td>
+                                    <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                    <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-20 ml-auto" /></td>
+                                </tr>
+                            ))}
+                        </>
                     ) : paginatedFeeds.length === 0 ? (
                         <tr>
                             <td

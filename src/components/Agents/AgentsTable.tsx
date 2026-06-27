@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Loader2 } from "lucide-react";
+import { Search } from "lucide-react";
 import { Agent } from "@/types/agentTypes";
 
 interface AgentsTableProps {
@@ -49,7 +49,7 @@ const AgentsTable = ({
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border/80 bg-page/50 text-[13px] text-muted font-semibold">
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Name</th>
                                 <th className="px-6 py-4 hidden md:table-cell">
                                     Agency
@@ -70,22 +70,18 @@ const AgentsTable = ({
                         </thead>
                         <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-6 py-12 text-center"
-                                    >
-                                        <div className="flex items-center justify-center gap-2 text-muted">
-                                            <Loader2
-                                                className="animate-spin"
-                                                size={18}
-                                            />
-                                            <span className="text-sm">
-                                                Loading agents...
-                                            </span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <>
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <tr key={i} className="border-b border-border/60 last:border-0">
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-32" /></td>
+                                            <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-24" /></td>
+                                            <td className="px-6 py-4 hidden md:table-cell"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
+                                            <td className="px-6 py-4 hidden lg:table-cell"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
+                                            <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-12 ml-auto" /></td>
+                                        </tr>
+                                    ))}
+                                </>
                             ) : filteredAgents.length > 0 ? (
                                 filteredAgents.map((agent) => (
                                     <tr

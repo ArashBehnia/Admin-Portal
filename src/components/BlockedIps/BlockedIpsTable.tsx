@@ -239,44 +239,23 @@ const BlockedIpsTable = ({
             )}
 
             {/* Table */}
-            <div className="bg-card rounded border border-border shadow-sm w-full overflow-hidden">
-                <div className="overflow-x-auto min-h-[300px]">
-                    <table className="w-full text-left text-[12px] whitespace-nowrap">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border bg-card text-muted">
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    IP / User
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Strategy
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Reason
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Blocked at
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    TTL
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Meta
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase text-right">
-                                    Actions
-                                </th>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                <th className="px-6 py-4">IP / User</th>
+                                <th className="px-6 py-4">Strategy</th>
+                                <th className="px-6 py-4">Reason</th>
+                                <th className="px-6 py-4">Blocked at</th>
+                                <th className="px-6 py-4">TTL</th>
+                                <th className="px-6 py-4">Meta</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="py-10 text-center text-muted"
-                                    >
-                                        Loading…
-                                    </td>
-                                </tr>
+                                <TableSkeleton colSpan={7} />
                             ) : entries.length === 0 ? (
                                 <tr>
                                     <td
@@ -332,5 +311,21 @@ const BlockedIpsTable = ({
         </div>
     );
 };
+
+function TableSkeleton({ colSpan }: { colSpan: number }) {
+    return (
+        <>
+            {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-b border-border/60 last:border-0">
+                    {Array.from({ length: colSpan }).map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                            <div className="h-4 bg-border/60 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                        </td>
+                    ))}
+                </tr>
+            ))}
+        </>
+    );
+}
 
 export default BlockedIpsTable;

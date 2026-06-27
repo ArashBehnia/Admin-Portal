@@ -161,47 +161,24 @@ const FtpRequestsTable = ({
             )}
 
             {/* Table */}
-            <div className="bg-card rounded border border-border shadow-sm w-full overflow-hidden">
-                <div className="overflow-x-auto min-h-[300px]">
-                    <table className="w-full text-left text-[12px] whitespace-nowrap">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-border bg-card text-muted">
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Agency
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Agent
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Email
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Allowed IP
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    FTP Username
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Status
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase">
-                                    Requested At
-                                </th>
-                                <th className="font-semibold py-3 px-4 uppercase text-right">
-                                    Actions
-                                </th>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
+                                <th className="px-6 py-4">Agency</th>
+                                <th className="px-6 py-4">Agent</th>
+                                <th className="px-6 py-4">Email</th>
+                                <th className="px-6 py-4">Allowed IP</th>
+                                <th className="px-6 py-4">FTP Username</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Requested At</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="py-10 text-center text-muted"
-                                    >
-                                        Loading…
-                                    </td>
-                                </tr>
+                                <TableSkeleton colSpan={8} />
                             ) : requests.length === 0 ? (
                                 <tr>
                                     <td
@@ -265,5 +242,21 @@ const FtpRequestsTable = ({
         </div>
     );
 };
+
+function TableSkeleton({ colSpan }: { colSpan: number }) {
+    return (
+        <>
+            {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-b border-border/60 last:border-0">
+                    {Array.from({ length: colSpan }).map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                            <div className="h-4 bg-border/60 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                        </td>
+                    ))}
+                </tr>
+            ))}
+        </>
+    );
+}
 
 export default FtpRequestsTable;
