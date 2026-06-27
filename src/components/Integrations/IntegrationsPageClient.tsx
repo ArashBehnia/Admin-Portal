@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, RefreshCw } from "lucide-react";
 import { IntegrationsData, STATUS_FILTERS, StatusFilter } from "@/types/integrationTypes";
 import useIntegrations from "@/hooks/useIntegrations";
 import FeedStats from "./FeedStats";
@@ -63,6 +63,13 @@ const IntegrationsPageClient = ({
                         className="bg-accent/50 text-white/70 px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 whitespace-nowrap cursor-not-allowed"
                     >
                         <Plus className="w-3.5 h-3.5" />+ Add integration
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
+                        title="Refresh"
+                    >
+                        <RefreshCw className="w-4 h-4" />
                     </button>
                 </div>
             </div>

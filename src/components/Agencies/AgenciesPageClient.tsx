@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { AgenciesData } from "@/types/agencyTypes";
 import useAgencies from "@/hooks/useAgencies";
 import AgenciesStats from "./AgenciesStats";
@@ -45,12 +45,21 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                         connections.
                     </p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-accent hover:bg-accent/90 text-white px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 transition-colors self-start shrink-0 cursor-pointer"
-                >
-                    <Plus className="w-4 h-4" /> Create
-                </button>
+                <div className="flex items-center gap-2 self-start shrink-0">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-accent hover:bg-accent/90 text-white px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                        <Plus className="w-4 h-4" /> Create
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
+                        title="Refresh"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
             <AgenciesStats stats={stats} />

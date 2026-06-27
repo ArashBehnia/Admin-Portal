@@ -1,5 +1,6 @@
 'use client';
 
+import { RefreshCw } from 'lucide-react';
 import Toast from '@/components/Shared/Toast';
 import { StaffMember, StaffSummary, RoleItem } from '@/actions/staffAndRolesActions';
 import useStaffAndRoles from '@/hooks/useStaffAndRoles';
@@ -54,9 +55,19 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
-            <div>
-                <h1 className="text-[20px] font-bold text-text leading-snug">Staff & Roles</h1>
-                <p className="text-[13px] text-muted mt-0.5">Manage HomeBy internal staff accounts and access levels.</p>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-[20px] font-bold text-text leading-snug">Staff & Roles</h1>
+                    <p className="text-[13px] text-muted mt-0.5">Manage HomeBy internal staff accounts and access levels.</p>
+                </div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                    title="Refresh"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             <StaffStats stats={stats} isLoading={isLoading} />

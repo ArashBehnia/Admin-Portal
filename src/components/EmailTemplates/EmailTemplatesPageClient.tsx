@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { RefreshCw } from "lucide-react";
 import useEmailTemplates from "@/hooks/useEmailTemplates";
 import EmailTemplatesStats from "./EmailTemplatesStats";
 import EmailTemplatesTable from "./EmailTemplatesTable";
@@ -34,14 +35,23 @@ const EmailTemplatesPageClient = () => {
     if (isError) {
         return (
             <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
-                <div>
-                    <h1 className="text-[20px] font-bold text-text leading-snug">
-                        Email Templates
-                    </h1>
-                    <p className="text-[13px] text-muted mt-0.5">
-                        Manage all transactional email, SMS and push notification
-                        templates. Changes take effect immediately without a deploy.
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-[20px] font-bold text-text leading-snug">
+                            Email Templates
+                        </h1>
+                        <p className="text-[13px] text-muted mt-0.5">
+                            Manage all transactional email, SMS and push notification
+                            templates. Changes take effect immediately without a deploy.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                        title="Refresh"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-12 text-center">
                     <p className="text-danger font-medium">
@@ -54,14 +64,24 @@ const EmailTemplatesPageClient = () => {
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
-            <div>
-                <h1 className="text-[20px] font-bold text-text leading-snug">
-                    Email Templates
-                </h1>
-                <p className="text-[13px] text-muted mt-0.5">
-                    Manage all transactional email, SMS and push notification
-                    templates. Changes take effect immediately without a deploy.
-                </p>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-[20px] font-bold text-text leading-snug">
+                        Email Templates
+                    </h1>
+                    <p className="text-[13px] text-muted mt-0.5">
+                        Manage all transactional email, SMS and push notification
+                        templates. Changes take effect immediately without a deploy.
+                    </p>
+                </div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                    title="Refresh"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             <div className="flex flex-col gap-5">

@@ -1,5 +1,6 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
 import type { ApplicationListItemDto, ApplicationSummaryDto } from "@/types/applicationTypes";
 import useApplications from "@/hooks/useApplications";
 import ApplicationStats from "@/components/Applications/ApplicationStats";
@@ -119,14 +120,24 @@ const ApplicationsPageClient = ({
     });
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-content mx-auto">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-[20px] font-bold text-text leading-tight">
-                    Applications
-                </h1>
-                <p className="text-[13px] text-muted">
-                    Review and process incoming agent registration requests.
-                </p>
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-[20px] font-bold text-text leading-snug">
+                        Applications
+                    </h1>
+                    <p className="text-[13px] text-muted mt-0.5">
+                        Review and process incoming agent registration requests.
+                    </p>
+                </div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                    title="Refresh"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             <ApplicationStats stats={stats} />
