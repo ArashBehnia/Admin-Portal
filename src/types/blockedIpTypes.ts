@@ -23,6 +23,7 @@ export type BlockedIpPageDto = {
 
 export type BlockedIp = {
     id: string;
+    key: string;
     ipOrUser: string;
     strategy: string;
     reason: string;
@@ -51,6 +52,21 @@ export type CreateBlockPayload = {
 export type CreateBlockResponse = {
     blocked: boolean;
     key: string;
+};
+
+export type RemoveBlockPayload = {
+    ip: string;
+    identity: string;
+    strategy: string;
+    reason: string;
+    blockedAt: string;
+    meta: unknown;
+    ttlSeconds: number | null;
+    key: string;
+};
+
+export type RemoveBlockResponse = {
+    removed: boolean;
 };
 
 export const ROWS_PER_PAGE = 20;

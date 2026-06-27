@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { RefreshCw } from "lucide-react";
 import {
+    BlockedIp,
     BlockedIpsData,
 } from "@/types/blockedIpTypes";
 import useBlockedIps from "@/hooks/useBlockedIps";
@@ -13,6 +14,7 @@ import BlockedIpsTable from "./BlockedIpsTable";
 import BlockedIpsPagination from "./BlockedIpsPagination";
 import CreateBlockPanel from "./CreateBlockPanel";
 import ConfirmBlockModal from "./ConfirmBlockModal";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
 interface BlockedIpsPageClientProps {
     initialData: BlockedIpsData;
@@ -44,6 +46,8 @@ const BlockedIpsPageClient = ({
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [pendingPayload, setPendingPayload] = useState<Record<string, unknown> | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [selectedEntry, setSelectedEntry] = useState<BlockedIp | null>(null);
     const [toast, setToast] = useState<ToastState>({
         visible: false,
         title: "",
@@ -128,6 +132,63 @@ const BlockedIpsPageClient = ({
         setPendingPayload(null);
     };
 
+    const handleDeleteClick = (entry: BlockedIp) => {
+        setSelectedEntry(entry);
+        setShowDeleteConfirm(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteConfirm(false);
+        setSelectedEntry(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedEntry) return;
+
+        try {
+            const res = await api.post("/api/blocked-ips/remove", {
+                ip: selectedEntry.ipOrUser,
+                identity: selectedEntry.ipOrUser,
+                strategy: selectedEntry.strategy,
+                reason: selectedEntry.reason,
+                blockedAt: selectedEntry.blockedAt,
+                meta: selectedEntry.meta,
+                ttlSeconds: selectedEntry.ttl ? Number(selectedEntry.ttl) : null,
+                key: selectedEntry.key,
+            });
+
+            if (res.data?.success) {
+                setShowDeleteConfirm(false);
+                setSelectedEntry(null);
+                showToast(
+                    "IP Removed",
+                    `${selectedEntry.ipOrUser} has been removed from the blocklist.`,
+                    "success",
+                );
+                refreshClean();
+            } else {
+                showToast(
+                    "Remove Failed",
+                    res.data?.error ?? "Failed to remove blocked IP.",
+                    "error",
+                );
+            }
+        } catch (err: unknown) {
+            let message = "Failed to remove blocked IP.";
+            if (
+                err &&
+                typeof err === "object" &&
+                "response" in err
+            ) {
+                const axiosErr = err as { response?: { data?: { error?: string } } };
+                message = axiosErr.response?.data?.error ?? message;
+            } else if (err instanceof Error) {
+                message = err.message;
+            }
+            showToast("Remove Failed", message, "error");
+        }
+    };
+
     const handlePanelClose = () => {
         setIsPanelOpen(false);
     };
@@ -168,6 +229,7 @@ const BlockedIpsPageClient = ({
                 onToggleFilters={() => setShowFilters(!showFilters)}
                 onResetFilters={resetFilters}
                 onCreateClick={handleCreateClick}
+                onDelete={handleDeleteClick}
             />
 
             <BlockedIpsPagination
@@ -190,6 +252,14 @@ const BlockedIpsPageClient = ({
                 ip={String(pendingPayload?.ip ?? "")}
                 onCancel={handleConfirmCancel}
                 onConfirm={handleConfirmBlock}
+            />
+
+            {/* Confirm Delete Modal */}
+            <ConfirmDeleteModal
+                isOpen={showDeleteConfirm}
+                ip={selectedEntry?.ipOrUser ?? ""}
+                onCancel={handleDeleteCancel}
+                onConfirm={handleConfirmDelete}
             />
 
             {/* Toast */}

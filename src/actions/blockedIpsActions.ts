@@ -7,6 +7,7 @@ import type {
 function mapEntry(item: BlockedIpListItemDto) {
     return {
         id: item.key || "",
+        key: item.key || "",
         ipOrUser: item.ip || item.identity || "",
         strategy: item.strategy ?? "",
         reason: item.reason ?? "",

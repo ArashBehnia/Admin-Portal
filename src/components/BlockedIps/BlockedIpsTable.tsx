@@ -23,6 +23,7 @@ interface BlockedIpsTableProps {
     onToggleFilters: () => void;
     onResetFilters: () => void;
     onCreateClick: () => void;
+    onDelete: (entry: BlockedIp) => void;
 }
 
 function StrategyBadge({ strategy }: { strategy: string }) {
@@ -80,6 +81,17 @@ function ReasonBadge({ reason }: { reason: string }) {
     );
 }
 
+function formatTtl(seconds: string): string {
+    const total = Number(seconds);
+    if (!total || total <= 0) return "";
+
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+
+    return `${hours} hour${hours !== 1 ? "s" : ""} ${minutes} min${minutes !== 1 ? "s" : ""} ${secs} sec${secs !== 1 ? "s" : ""}`;
+}
+
 function formatDate(iso: string): string {
     if (!iso) return "—";
     const date = new Date(iso);
@@ -106,6 +118,7 @@ const BlockedIpsTable = ({
     onToggleFilters,
     onResetFilters,
     onCreateClick,
+    onDelete,
 }: BlockedIpsTableProps) => {
     return (
         <div className="flex flex-col gap-4">
@@ -288,13 +301,14 @@ const BlockedIpsTable = ({
                                             {formatDate(entry.blockedAt)}
                                         </td>
                                         <td className="py-2.5 px-3 text-text">
-                                            {entry.ttl || "No expiry"}
+                                            {entry.ttl ? formatTtl(entry.ttl) : "No expiry"}
                                         </td>
                                         <td className="py-2.5 px-3 text-text font-mono text-[10px] max-w-[200px] truncate">
                                             {entry.meta ? (typeof entry.meta === 'object' ? JSON.stringify(entry.meta) : entry.meta) : "—"}
                                         </td>
                                         <td className="py-2.5 px-4 text-right">
                                             <button
+                                                onClick={() => onDelete(entry)}
                                                 className="text-red-500 hover:text-red-700 hover:underline font-medium flex items-center gap-1 ml-auto cursor-pointer"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />

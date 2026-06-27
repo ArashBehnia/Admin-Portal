@@ -5,6 +5,8 @@ import type {
     BlockedIpFilters,
     CreateBlockPayload,
     CreateBlockResponse,
+    RemoveBlockPayload,
+    RemoveBlockResponse,
 } from "@/types/blockedIpTypes";
 
 function toArray<T>(value: unknown): T[] {
@@ -71,6 +73,18 @@ export async function createBlock(
         {
             method: "POST",
             body: JSON.stringify(body),
+        },
+    );
+}
+
+export async function removeBlock(
+    payload: RemoveBlockPayload,
+): Promise<RemoveBlockResponse> {
+    return backendFetch<RemoveBlockResponse>(
+        "/admin/security/ip-blocklist/remove",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
         },
     );
 }
