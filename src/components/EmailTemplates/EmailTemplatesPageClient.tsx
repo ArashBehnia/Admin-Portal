@@ -33,12 +33,12 @@ const EmailTemplatesPageClient = () => {
 
     if (isError) {
         return (
-            <div className="w-full max-w-content mx-auto px-6">
-                <div className="my-6">
-                    <h1 className="text-2xl font-bold text-text">
+            <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+                <div>
+                    <h1 className="text-[20px] font-bold text-text leading-snug">
                         Email Templates
                     </h1>
-                    <p className="text-sm text-muted mt-1">
+                    <p className="text-[13px] text-muted mt-0.5">
                         Manage all transactional email, SMS and push notification
                         templates. Changes take effect immediately without a deploy.
                     </p>
@@ -53,18 +53,18 @@ const EmailTemplatesPageClient = () => {
     }
 
     return (
-        <div className="w-full max-w-content mx-auto px-6">
-            <div className="my-6">
-                <h1 className="text-2xl font-bold text-text">
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+            <div>
+                <h1 className="text-[20px] font-bold text-text leading-snug">
                     Email Templates
                 </h1>
-                <p className="text-sm text-muted mt-1">
+                <p className="text-[13px] text-muted mt-0.5">
                     Manage all transactional email, SMS and push notification
                     templates. Changes take effect immediately without a deploy.
                 </p>
             </div>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
                 {isLoading ? (
                     <EmailTemplatesSkeleton />
                 ) : (
@@ -88,19 +88,19 @@ const EmailTemplatesPageClient = () => {
 
 function EmailTemplatesSkeleton() {
     return (
-        <div className="space-y-6 animate-pulse">
+        <div className="space-y-5 animate-pulse">
             {/* Stats cards skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                     <div
                         key={i}
-                        className="bg-card border border-border rounded-lg p-5 space-y-3"
+                        className="bg-card border border-border rounded p-4 flex flex-col gap-1.5"
                     >
                         <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-border" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-border" />
                             <div className="h-3 w-24 bg-border rounded" />
                         </div>
-                        <div className="h-8 w-12 bg-border rounded" />
+                        <div className="h-6 w-12 bg-border rounded" />
                     </div>
                 ))}
             </div>

@@ -73,15 +73,15 @@ const TemplateEditorClient = ({
 
     if (isLoadingTemplate) {
         return (
-            <div className="w-full max-w-content mx-auto font-sans bg-page min-h-screen pb-16 px-6">
-                <div className="py-6 space-y-6 animate-pulse">
+            <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+                <div className="space-y-5 animate-pulse">
                     {/* Breadcrumb skeleton */}
-                    <div className="flex items-center gap-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 text-[12px]">
                         <div className="h-3 w-3 bg-border rounded" />
                         <div className="h-3 w-20 bg-border rounded" />
                     </div>
                     {/* Header skeleton */}
-                    <div className="h-7 w-64 bg-border rounded" />
+                    <div className="h-5 w-64 bg-border rounded" />
                     {/* Tabs skeleton */}
                     <div className="flex gap-6 border-b border-border pb-0">
                         {["Email", "SMS", "Push notification"].map((tab) => (
@@ -176,9 +176,9 @@ const TemplateEditorClient = ({
 
     if (!currentTemplate) {
         return (
-            <div className="w-full max-w-content mx-auto font-sans bg-page min-h-screen pb-16 px-6">
-                <div className="py-6 space-y-4">
-                    <div className="flex items-center gap-1.5 text-xs text-muted">
+            <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-1.5 text-[12px] text-muted">
                         <Link
                             href="/email-templates"
                             className="hover:text-text flex items-center gap-1 transition-colors"
@@ -187,9 +187,9 @@ const TemplateEditorClient = ({
                             Email Templates
                         </Link>
                         <span>&gt;</span>
-                        <span className="text-text font-bold">{templateName}</span>
+                        <span className="text-text font-medium">{templateName}</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-text">
+                    <h1 className="text-[20px] font-bold text-text leading-snug">
                         Edit template — {templateName}
                     </h1>
                 </div>
@@ -203,10 +203,10 @@ const TemplateEditorClient = ({
     }
 
     return (
-        <div className="w-full max-w-content mx-auto font-sans bg-page min-h-screen pb-16 px-6">
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
             {/* Breadcrumb */}
-            <div className="pt-6 pb-1">
-                <div className="flex items-center gap-1.5 text-xs text-muted font-semibold">
+            <div>
+                <div className="flex items-center gap-1.5 text-[12px] text-muted font-semibold">
                     <Link
                         href="/email-templates"
                         className="hover:text-text flex items-center gap-1 transition-colors"
@@ -215,13 +215,13 @@ const TemplateEditorClient = ({
                         Email Templates
                     </Link>
                     <span>&gt;</span>
-                    <span className="text-text font-bold">{templateName}</span>
+                    <span className="text-text font-medium">{templateName}</span>
                 </div>
             </div>
 
             {/* Header */}
-            <div className="pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold text-text">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 className="text-[20px] font-bold text-text leading-snug">
                     Edit template — {templateName}
                 </h1>
 

@@ -53,10 +53,10 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
     } = useStaffAndRoles({ initialStaff, initialRoles, initialSummary });
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-content mx-auto pb-16 px-1 lg:px-4">
-            <div className="flex flex-col gap-1.5">
-                <h1 className="text-[26px] font-bold text-text tracking-tight font-sans">Staff & Roles</h1>
-                <p className="text-sm text-muted">Manage HomeBy internal staff accounts and access levels.</p>
+        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+            <div>
+                <h1 className="text-[20px] font-bold text-text leading-snug">Staff & Roles</h1>
+                <p className="text-[13px] text-muted mt-0.5">Manage HomeBy internal staff accounts and access levels.</p>
             </div>
 
             <StaffStats stats={stats} isLoading={isLoading} />

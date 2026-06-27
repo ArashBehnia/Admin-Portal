@@ -21,17 +21,17 @@ const StaffStats = ({ stats, isLoading }: StaffStatsProps) => {
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {cards.map((card) => (
-                <div key={card.label} className={`bg-card border border-border rounded-lg shadow-sm p-5 flex flex-col gap-2 ${card.hover} transition-colors`}>
-                    <div className="flex items-center gap-2">
-                        {card.dot && <span className={`w-2 h-2 rounded-full ${card.dot} inline-block`} />}
-                        <span className="text-[13px] text-muted font-medium">{card.label}</span>
+                <div key={card.label} className={`bg-card border border-border rounded shadow-sm p-4 flex flex-col gap-1.5 ${card.hover} transition-colors`}>
+                    <div className="flex items-center gap-1.5">
+                        {card.dot && <span className={`w-1.5 h-1.5 rounded-full ${card.dot} inline-block shrink-0`} />}
+                        <span className="text-[12px] text-muted">{card.label}</span>
                     </div>
                     {isLoading ? (
-                        <div className="h-8 w-12 bg-page animate-pulse rounded" />
+                        <div className="h-6 w-12 bg-page animate-pulse rounded" />
                     ) : (
-                        <span className="text-[28px] font-bold text-text leading-none font-sans">{card.value}</span>
+                        <span className="text-[24px] font-bold text-text">{card.value}</span>
                     )}
                 </div>
             ))}

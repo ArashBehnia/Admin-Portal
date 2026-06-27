@@ -20,21 +20,21 @@ const EmailTemplatesStats = ({ stats }: EmailTemplatesStatsProps) => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {cards.map(({ label, value, dot }) => (
                 <div
                     key={label}
-                    className="bg-card border border-border rounded-lg p-5 shadow-sm space-y-1"
+                    className="bg-card border border-border rounded shadow-sm p-4 flex flex-col gap-1.5"
                 >
-                    <p className="text-xs text-muted font-medium flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5">
                         {dot && (
                             <span
-                                className={`w-2 h-2 rounded-full ${dot} inline-block`}
+                                className={`w-1.5 h-1.5 rounded-full ${dot} inline-block shrink-0`}
                             />
                         )}
-                        {label}
-                    </p>
-                    <p className="text-3xl font-bold text-text">{value}</p>
+                        <span className="text-[12px] text-muted">{label}</span>
+                    </div>
+                    <span className="text-[24px] font-bold text-text">{value}</span>
                 </div>
             ))}
         </div>
