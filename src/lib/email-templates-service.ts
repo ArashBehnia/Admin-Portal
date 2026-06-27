@@ -116,27 +116,29 @@ export async function fetchEmailTemplatesPage(
 
 // ─── GET: Single template by name (uses page query) ────────────
 export async function fetchEmailTemplateByName(name: string): Promise<Template | null> {
-    const endpoint = `/admin/template/page?keywords=${encodeURIComponent(name)}`;
-    logApiData("GET", endpoint);
-    const raw = await backendFetch(endpoint);
-    console.log("[email-templates-service] fetchEmailTemplateByName raw:", JSON.stringify(raw, null, 2));
-    const arr = toArray<Record<string, unknown>>(raw);
-    const templates = arr.map(normalizeTemplate);
-    const found = templates.find((t) => t.name === name) ?? null;
-    console.log("[email-templates-service] fetchEmailTemplateByName result:", found ? JSON.stringify(found, null, 2) : "null");
-    return found;
+    try {
+        const endpoint = `/admin/template/page?keywords=${encodeURIComponent(name)}`;
+        logApiData("GET", endpoint);
+        const raw = await backendFetch(endpoint);
+        const arr = toArray<Record<string, unknown>>(raw);
+        const templates = arr.map(normalizeTemplate);
+        return templates.find((t) => t.name === name) ?? null;
+    } catch {
+        return null;
+    }
 }
 
 // ─── GET: Single template by ID ────────────────────────────────
 export async function fetchEmailTemplateById(id: string): Promise<Template | null> {
-    const endpoint = `/admin/template/${encodeURIComponent(id)}`;
-    logApiData("GET", endpoint);
-    const raw = await backendFetch(endpoint);
-    console.log("[email-templates-service] fetchEmailTemplateById raw:", JSON.stringify(raw, null, 2));
-    const obj = toObject(raw);
-    const result = Object.keys(obj).length > 0 ? normalizeTemplate(obj) : null;
-    console.log("[email-templates-service] fetchEmailTemplateById result:", result ? JSON.stringify(result, null, 2) : "null");
-    return result;
+    try {
+        const endpoint = `/admin/template/${encodeURIComponent(id)}`;
+        logApiData("GET", endpoint);
+        const raw = await backendFetch(endpoint);
+        const obj = toObject(raw);
+        return Object.keys(obj).length > 0 ? normalizeTemplate(obj) : null;
+    } catch {
+        return null;
+    }
 }
 
 // ─── POST: Create template ─────────────────────────────────────
@@ -168,8 +170,7 @@ export async function updateTemplate(id: string, data: Record<string, unknown>):
 
 // ─── DELETE: Remove template ────────────────────────────────────
 export async function deleteTemplate(id: string): Promise<void> {
-    const endpoint = `/admin/template/${encodeURIComponent(id)}`;
+    const endpoint = `/admin/template?id=${encodeURIComponent(id)}`;
     logApiData("DELETE", endpoint);
     await backendFetch(endpoint, { method: "DELETE" });
-    console.log("[email-templates-service] deleteTemplate completed for id:", id);
 }

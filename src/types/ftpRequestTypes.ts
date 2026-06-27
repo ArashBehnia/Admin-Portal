@@ -35,6 +35,9 @@ export type FtpRequest = {
     ftpUsername: string;
     status: string;
     requestedAt: string;
+    adminMessage: string | null;
+    approvedAt: string | null;
+    rejectedAt: string | null;
 };
 
 export type FtpRequestsData = {

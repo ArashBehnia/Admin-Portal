@@ -275,6 +275,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
         };
 
         const payload = {
+            id: currentTemplate.id,
             type: typeMap[activeTab] || "email",
             name: templateName,
             provider: currentTemplate.smsProvider?.toLowerCase() || "twilio",

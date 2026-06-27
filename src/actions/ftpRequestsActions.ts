@@ -14,6 +14,9 @@ function mapRequest(item: FtpRequestListItemDto) {
         ftpUsername: item.ftpUsername ?? "",
         status: item.status ?? "",
         requestedAt: item.createdAt ?? "",
+        adminMessage: item.adminMessage ?? null,
+        approvedAt: item.approvedAt ?? null,
+        rejectedAt: item.rejectedAt ?? null,
     };
 }
 

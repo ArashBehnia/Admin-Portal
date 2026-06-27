@@ -45,6 +45,8 @@ export async function backendFetch<T>(
         throw new BackendError(msg || `Backend returned ${response.status}`, response.status);
     }
 
-    const json = await response.json();
+    const text = await response.text();
+    if (!text) return {} as T;
+    const json = JSON.parse(text);
     return (json.data ?? json) as T;
 }

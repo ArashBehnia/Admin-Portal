@@ -29,3 +29,19 @@ export async function fetchFtpRequestsPage(
 
     return { data: items, total: items.length, page, limit };
 }
+
+export async function approveFtpRequest(id: string): Promise<void> {
+    await backendFetch(`/admin/agency-staff-ftp-requests/${id}/approve`, {
+        method: "POST",
+    });
+}
+
+export async function rejectFtpRequest(
+    id: string,
+    reason: string,
+): Promise<void> {
+    await backendFetch(`/admin/agency-staff-ftp-requests/${id}/reject`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+    });
+}

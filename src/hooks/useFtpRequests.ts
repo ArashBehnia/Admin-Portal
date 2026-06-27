@@ -22,6 +22,9 @@ type ApiFtpRequestItem = {
     status: string;
     ftpUsername: string | null;
     createdAt: string;
+    adminMessage: string | null;
+    approvedAt: string | null;
+    rejectedAt: string | null;
 };
 
 function mapRequest(item: ApiFtpRequestItem): FtpRequest {
@@ -34,6 +37,9 @@ function mapRequest(item: ApiFtpRequestItem): FtpRequest {
         ftpUsername: item.ftpUsername ?? "",
         status: item.status ?? "",
         requestedAt: item.createdAt ?? "",
+        adminMessage: item.adminMessage ?? null,
+        approvedAt: item.approvedAt ?? null,
+        rejectedAt: item.rejectedAt ?? null,
     };
 }
 
@@ -144,6 +150,50 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
 
     const hasActiveFilters = Boolean(searchQuery || status);
 
+    const approveRequest = useCallback(
+        async (id: string) => {
+            setIsLoading(true);
+            try {
+                await api.post(`/api/admin/agency-staff-ftp-requests/${id}/approve`);
+                setRequests((prev) =>
+                    prev.map((r) =>
+                        r.id === id
+                            ? { ...r, status: "approved", approvedAt: new Date().toISOString() }
+                            : r,
+                    ),
+                );
+            } catch (err) {
+                console.error("Failed to approve FTP request:", err);
+                throw err;
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [],
+    );
+
+    const rejectRequest = useCallback(
+        async (id: string, reason: string) => {
+            setIsLoading(true);
+            try {
+                await api.post(`/api/admin/agency-staff-ftp-requests/${id}/reject`, { reason });
+                setRequests((prev) =>
+                    prev.map((r) =>
+                        r.id === id
+                            ? { ...r, status: "rejected", adminMessage: reason, rejectedAt: new Date().toISOString() }
+                            : r,
+                    ),
+                );
+            } catch (err) {
+                console.error("Failed to reject FTP request:", err);
+                throw err;
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [],
+    );
+
     return {
         requests,
         totalCount,
@@ -159,6 +209,8 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         setShowFilters,
         hasActiveFilters,
         resetFilters,
+        approveRequest,
+        rejectRequest,
     };
 };
 

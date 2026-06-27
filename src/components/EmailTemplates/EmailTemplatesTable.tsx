@@ -10,6 +10,7 @@ import {
     CATEGORIES,
 } from "@/actions/emailTemplatesActions";
 import Toast from "@/components/Shared/Toast";
+import ConfirmModal from "./TemplateName/ConfirmModal";
 import type { ToastState } from "@/hooks/useTemplateEditor";
 
 function formatRelativeTime(value: string): string {
@@ -68,6 +69,7 @@ const EmailTemplatesTable = ({
 }: EmailTemplatesTableProps) => {
     const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
     const [toast, setToast] = useState<ToastState>({
         title: "",
         message: "",
@@ -83,15 +85,19 @@ const EmailTemplatesTable = ({
         setToast({ title, message, type, visible: true });
     };
 
-    const handleDelete = async (template: Template) => {
-        const displayName = formatTemplateName(template.name);
-        if (!confirm(`Delete template "${displayName}"? This cannot be undone.`)) {
-            return;
-        }
+    const handleDeleteClick = (template: Template) => {
+        setDeleteTarget(template);
+    };
 
-        setDeletingId(template.id);
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+
+        const displayName = formatTemplateName(deleteTarget.name);
+        setDeletingId(deleteTarget.id);
+        setDeleteTarget(null);
+
         try {
-            const res = await fetch(`/api/email-templates/${encodeURIComponent(template.id)}`, {
+            const res = await fetch(`/api/email-templates/${encodeURIComponent(deleteTarget.id)}`, {
                 method: "DELETE",
             });
 
@@ -204,7 +210,7 @@ const EmailTemplatesTable = ({
                                                 </Link>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDelete(template)}
+                                                    onClick={() => handleDeleteClick(template)}
                                                     disabled={deletingId === template.id}
                                                     className="p-1 text-danger/60 hover:text-danger transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                     title="Delete template"
@@ -236,6 +242,16 @@ const EmailTemplatesTable = ({
                 message={toast.message}
                 type={toast.type}
                 onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+            />
+
+            <ConfirmModal
+                isOpen={deleteTarget !== null}
+                title="Delete Template"
+                message={`Are you sure you want to delete "${deleteTarget ? formatTemplateName(deleteTarget.name) : ""}"? This cannot be undone.`}
+                confirmLabel="Yes, delete"
+                cancelLabel="No, keep it"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setDeleteTarget(null)}
             />
         </div>
     );

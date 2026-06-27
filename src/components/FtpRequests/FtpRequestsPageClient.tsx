@@ -33,6 +33,8 @@ const FtpRequestsPageClient = ({
         setShowFilters,
         hasActiveFilters,
         resetFilters,
+        approveRequest,
+        rejectRequest,
     } = useFtpRequests({ initialData });
 
     const [selectedRequest, setSelectedRequest] =
@@ -85,6 +87,8 @@ const FtpRequestsPageClient = ({
                 <FtpRequestDrawer
                     request={selectedRequest}
                     onClose={() => setSelectedRequest(null)}
+                    onApprove={approveRequest}
+                    onReject={rejectRequest}
                 />
             )}
         </div>
