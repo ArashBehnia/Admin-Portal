@@ -47,8 +47,9 @@ const EmailTemplatesPageClient = () => {
                             Email Templates
                         </h1>
                         <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
-                            Manage all transactional email, SMS and push notification
-                            templates. Changes take effect immediately without a deploy.
+                            Manage all transactional email, SMS and push
+                            notification templates. Changes take effect
+                            immediately without a deploy.
                         </p>
                     </div>
                     <div className="flex items-center gap-2 self-start shrink-0">
@@ -86,8 +87,9 @@ const EmailTemplatesPageClient = () => {
                         Email Templates
                     </h1>
                     <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">
-                        Manage all transactional email, SMS and push notification
-                        templates. Changes take effect immediately without a deploy.
+                        Manage all transactional email, SMS and push
+                        notification templates. Changes take effect immediately
+                        without a deploy.
                     </p>
                 </div>
                 <div className="flex items-center gap-2 self-start shrink-0">
@@ -165,16 +167,18 @@ function EmailTemplatesSkeleton() {
             {/* Table skeleton */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-[12px]">
-                            <thead>
-                                <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] font-bold tracking-wider uppercase">
+                    <table className="w-full text-left border-collapse text-[12px]">
+                        <thead>
+                            <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] font-bold tracking-wider uppercase">
                                 <th className="px-6 py-4">Template name</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Channel</th>
                                 <th className="px-6 py-4">Last modified</th>
                                 <th className="px-6 py-4">Modified by</th>
                                 <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-6 py-4 text-right">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">

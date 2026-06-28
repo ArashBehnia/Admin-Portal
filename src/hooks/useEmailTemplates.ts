@@ -29,13 +29,11 @@ const useEmailTemplates = () => {
 
     const [searchQuery, setSearchQuery] = useState("");
     const searchQueryRef = useRef(searchQuery);
-    searchQueryRef.current = searchQuery;
 
     const [selectedCategory] = useState<CategoryFilter>("All types");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
-    pageSizeRef.current = pageSize;
 
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -80,22 +78,37 @@ const useEmailTemplates = () => {
 
     // Initial load
     useEffect(() => {
-        loadPage(1);
+        const timer = setTimeout(() => {
+            loadPage(1);
+        }, 0);
+        return () => clearTimeout(timer);
     }, [loadPage]);
+
+    // Sync refs
+    useEffect(() => {
+        searchQueryRef.current = searchQuery;
+    }, [searchQuery]);
+
+    useEffect(() => {
+        pageSizeRef.current = pageSize;
+    }, [pageSize]);
 
     // Search with debounce
     useEffect(() => {
-        setCurrentPage(1);
         const timer = setTimeout(() => {
+            setCurrentPage(1);
             loadPage(1, searchQuery || undefined);
-        }, searchQuery ? 400 : 0);
+        }, searchQuery ? 1000 : 0);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
     // Page size change
     useEffect(() => {
-        setCurrentPage(1);
-        loadPage(1, searchQueryRef.current || undefined);
+        const timer = setTimeout(() => {
+            setCurrentPage(1);
+            loadPage(1, searchQueryRef.current || undefined);
+        }, 0);
+        return () => clearTimeout(timer);
     }, [pageSize, loadPage]);
 
     // Page change

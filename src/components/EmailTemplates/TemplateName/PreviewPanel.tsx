@@ -84,13 +84,7 @@ const PreviewPanel = ({
                             <span className="font-semibold text-slate-700">
                                 From:{" "}
                             </span>
-                            {fromName} &lt;{fromEmail}&gt;
-                        </div>
-                        <div>
-                            <span className="font-semibold text-slate-700">
-                                To:{" "}
-                            </span>
-                            james@raywhitebondi.com.au
+                            {fromEmail}
                         </div>
                         <div className="mt-0.5">
                             <span className="font-semibold text-slate-700">

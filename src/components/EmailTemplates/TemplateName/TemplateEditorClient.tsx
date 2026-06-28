@@ -318,7 +318,7 @@ const TemplateEditorClient = ({
                     />
                 </div>
 
-                <div className="lg:col-span-5 bg-card border border-border rounded-lg p-6 shadow-sm">
+                <div className="lg:col-span-5  border border-border rounded-lg p-6 shadow-sm">
                     <PreviewPanel
                         activeTab={activeTab}
                         previewMode={previewMode}
