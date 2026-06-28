@@ -160,7 +160,7 @@ const EmailTemplatesTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-[12px]">
+                    <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] font-bold tracking-wider uppercase">
                                 <th className="px-6 py-4 w-12">#</th>
@@ -178,7 +178,7 @@ const EmailTemplatesTable = ({
                                 filteredTemplates.map((template, index) => (
                                     <tr
                                         key={template.id}
-                                        className="hover:bg-page/40 transition-colors text-sm text-text"
+                                        className="hover:bg-page/40 transition-colors text-text"
                                     >
                                         <td className="px-6 py-4 text-muted font-medium">
                                             {index + 1}
@@ -215,7 +215,7 @@ const EmailTemplatesTable = ({
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
                                                     href={`/email-templates/${template.name}`}
-                                                    className="text-accent hover:underline text-sm font-semibold transition-colors"
+                                                    className="text-accent hover:underline text-[13px] font-semibold transition-colors"
                                                 >
                                                     Edit
                                                 </Link>

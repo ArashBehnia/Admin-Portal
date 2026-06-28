@@ -84,7 +84,7 @@ const ApplicationsTable = ({
             {/* Table */}
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-[12px]">
+                    <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Applicant</th>

@@ -116,7 +116,7 @@ const StaffTable = ({
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
                 {isLoading ? (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-[12px]">
+                        <table className="w-full text-left border-collapse text-[12px]  min-w-[var(--min-table-width)]">
                             <thead>
                                 <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                     <th className="px-6 py-4">Staff Member</th>
@@ -150,7 +150,7 @@ const StaffTable = ({
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-[12px]">
+                        <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                             <thead>
                                 <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                     <th className="px-6 py-4">Staff Member</th>
@@ -179,10 +179,10 @@ const StaffTable = ({
                                         return (
                                             <tr
                                                 key={member.id}
-                                                className="hover:bg-page/35 transition-colors text-sm text-text"
+                                                className="hover:bg-page/35 transition-colors text-text"
                                             >
                                                 <td className="px-6 py-4 font-sans">
-                                                    <div className="font-bold text-text text-[14px]">
+                                                    <div className="font-bold text-text">
                                                         {member.name}
                                                     </div>
                                                     <div className="text-[12px] text-muted mt-0.5 font-medium">
@@ -234,7 +234,7 @@ const StaffTable = ({
                                                                     member,
                                                                 )
                                                             }
-                                                            className="text-accent hover:underline text-xs font-bold cursor-pointer"
+                                                            className="text-accent hover:underline text-[13px] font-bold cursor-pointer"
                                                         >
                                                             Edit
                                                         </button>
