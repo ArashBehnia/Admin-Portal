@@ -7,7 +7,6 @@ import {
     BlockedIpsData,
     StrategyValue,
     ReasonValue,
-    ROWS_PER_PAGE,
 } from "@/types/blockedIpTypes";
 import api from "@/lib/axios";
 
@@ -26,11 +25,6 @@ type ApiBlockedIpItem = {
     meta: any;
 };
 
-type ApiPage = {
-    data: ApiBlockedIpItem[];
-    total: number;
-};
-
 function mapEntry(item: ApiBlockedIpItem): BlockedIp {
     return {
         id: item.key || "",
@@ -44,12 +38,6 @@ function mapEntry(item: ApiBlockedIpItem): BlockedIp {
     };
 }
 
-function mapPageData(page: ApiPage): BlockedIpsData {
-    const items = Array.isArray(page.data) ? page.data : [];
-    const entries = items.map(mapEntry);
-    return { entries, total: page.total };
-}
-
 const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
     // ─── Data ─────────────────────────────────────────────────────────
     const [entries, setEntries] = useState<BlockedIp[]>(
@@ -60,7 +48,8 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
 
     // ─── Pagination State ────────────────────────────────────────────
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
     // ─── Filter State ────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -81,9 +70,9 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         ) => {
             setIsLoading(true);
             try {
-                const offset = (page - 1) * ROWS_PER_PAGE;
+                const offset = (page - 1) * rowsPerPage;
                 const params = new URLSearchParams({
-                    limit: String(ROWS_PER_PAGE),
+                    limit: String(rowsPerPage),
                     offset: String(offset),
                 });
                 if (opts?.filter) params.set("filter", opts.filter);
@@ -94,26 +83,22 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
                     `/api/blocked-ips/page?${params.toString()}`,
                 );
 
-                const rawPage = res.data?.data ?? res.data;
-                const pageData: ApiPage = {
-                    data: Array.isArray(rawPage?.data)
-                        ? rawPage.data
-                        : Array.isArray(rawPage)
-                          ? rawPage
-                          : [],
-                    total: rawPage?.total ?? 0,
-                };
-                const result = mapPageData(pageData);
+                const pageData = res.data;
+                const items: ApiBlockedIpItem[] = Array.isArray(pageData?.data)
+                    ? pageData.data
+                    : Array.isArray(pageData)
+                      ? pageData
+                      : [];
 
-                setEntries(result.entries);
-                setTotalCount(result.total);
+                setEntries(items.map(mapEntry));
+                setTotalCount(pageData?.total ?? items.length);
             } catch (err) {
                 console.error("Failed to load blocked IPs:", err);
             } finally {
                 setIsLoading(false);
             }
         },
-        [],
+        [rowsPerPage],
     );
 
     // ─── Build current filter opts ───────────────────────────────────
@@ -145,7 +130,7 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         return () => {
             if (debounceRef.current) clearTimeout(debounceRef.current);
         };
-    }, [searchQuery, strategy, reason, loadPage, currentFilters]);
+    }, [searchQuery, strategy, reason, rowsPerPage, loadPage, currentFilters]);
 
     // ─── Reset all filters ───────────────────────────────────────────
     const resetFilters = useCallback(() => {
@@ -180,6 +165,8 @@ const useBlockedIps = ({ initialData }: UseBlockedIpsProps) => {
         currentPage,
         totalPages,
         handlePageChange,
+        rowsPerPage,
+        setRowsPerPage,
 
         // Filters
         searchQuery,

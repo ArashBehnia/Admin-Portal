@@ -87,6 +87,8 @@ const ApplicationsPageClient = ({
         statusFilter,
         handleStatusFilterChange,
         currentPage,
+        pageSize,
+        setPageSize,
         handlePageChange,
         isLoading,
         selectedApp,
@@ -146,6 +148,7 @@ const ApplicationsPageClient = ({
                 applications={applications}
                 totalCount={totalCount}
                 currentPage={currentPage}
+                rowsPerPage={pageSize}
                 searchQuery={searchQuery}
                 statusFilter={statusFilter}
                 selectedAppId={selectedApp?.id}
@@ -153,6 +156,7 @@ const ApplicationsPageClient = ({
                 onSearchChange={setSearchQuery}
                 onStatusFilterChange={handleStatusFilterChange}
                 onPageChange={handlePageChange}
+                onRowsPerPageChange={setPageSize}
                 onReviewClick={openDrawer}
                 onApprove={handleApprove}
                 onReject={(id) => handleReject(id)}

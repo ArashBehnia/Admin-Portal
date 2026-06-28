@@ -35,12 +35,14 @@ interface StaffTableProps {
     currentPage: number;
     totalPages: number;
     totalItems: number;
+    rowsPerPage: number;
     rolesList: { slug: string; name: string }[];
     onSearchChange: (val: string) => void;
     onRoleFilterChange: (val: string) => void;
     onAddClick: () => void;
     onEditClick: (member: StaffMember) => void;
     onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 const StaffTable = ({
@@ -52,12 +54,14 @@ const StaffTable = ({
     currentPage,
     totalPages,
     totalItems,
+    rowsPerPage,
     rolesList,
     onSearchChange,
     onRoleFilterChange,
     onAddClick,
     onEditClick,
     onPageChange,
+    onRowsPerPageChange,
 }: StaffTableProps) => {
     return (
         <div className="flex flex-col gap-5 animate-fade-in">
@@ -269,7 +273,9 @@ const StaffTable = ({
                     currentPage={currentPage}
                     totalPages={totalPages}
                     totalCount={totalItems}
+                    rowsPerPage={rowsPerPage}
                     onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
                 />
             )}
         </div>

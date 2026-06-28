@@ -5,7 +5,6 @@ import {
     FtpRequest,
     FtpRequestsData,
     StatusValue,
-    ROWS_PER_PAGE,
 } from "@/types/ftpRequestTypes";
 import api from "@/lib/axios";
 
@@ -49,8 +48,11 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
     );
     const [totalCount, setTotalCount] = useState(initialData?.total ?? 0);
     const [isLoading, setIsLoading] = useState(false);
+    const [pageSize, setPageSize] = useState(20);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     const [searchQuery, setSearchQuery] = useState("");
     const [status, setStatus] = useState<StatusValue>("");
@@ -68,9 +70,9 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         ) => {
             setIsLoading(true);
             try {
-                const offset = (page - 1) * ROWS_PER_PAGE;
+                const offset = (page - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
-                    limit: String(ROWS_PER_PAGE),
+                    limit: String(pageSizeRef.current),
                     offset: String(offset),
                     sortOrder: "1",
                 });
@@ -81,25 +83,15 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
                     `/api/ftp-requests/page?${params.toString()}`,
                 );
 
-                const resData = res.data;
-                let items: ApiFtpRequestItem[] = [];
-                let total = 0;
-
-                if (Array.isArray(resData)) {
-                    items = resData;
-                    total = items.length;
-                } else if (resData && typeof resData === "object") {
-                    items = Array.isArray(resData.data)
-                        ? resData.data
-                        : [];
-                    total =
-                        typeof resData.total === "number"
-                            ? resData.total
-                            : items.length;
-                }
+                const pageData = res.data;
+                const items: ApiFtpRequestItem[] = Array.isArray(pageData?.data)
+                    ? pageData.data
+                    : Array.isArray(pageData)
+                      ? pageData
+                      : [];
 
                 setRequests(items.map(mapRequest));
-                setTotalCount(total);
+                setTotalCount(pageData?.total ?? items.length);
             } catch (err) {
                 console.error("Failed to load FTP requests:", err);
             } finally {
@@ -142,6 +134,11 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
             if (debounceRef.current) clearTimeout(debounceRef.current);
         };
     }, [searchQuery, status, loadPage, currentFilters]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, currentFilters());
+    }, [pageSize, loadPage, currentFilters]);
 
     const resetFilters = useCallback(() => {
         setSearchQuery("");
@@ -214,6 +211,8 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         isLoading,
         currentPage,
         totalPages,
+        pageSize,
+        setPageSize,
         handlePageChange,
         searchQuery,
         setSearchQuery,

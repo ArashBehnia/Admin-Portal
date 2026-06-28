@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Search, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Check, X } from "lucide-react";
 import { Application } from "@/actions/applicationsActions";
 import StatusBadge from "./StatusBadge";
+import ApplicationsPagination from "./ApplicationsPagination";
 
 const STATUS_FILTERS = [
     "All",
@@ -12,12 +13,11 @@ const STATUS_FILTERS = [
     "Rejected",
 ] as const;
 
-const ROWS_PER_PAGE = 10;
-
 interface ApplicationsTableProps {
     applications: Application[];
     totalCount: number;
     currentPage: number;
+    rowsPerPage: number;
     searchQuery: string;
     statusFilter: string;
     selectedAppId?: string;
@@ -25,6 +25,7 @@ interface ApplicationsTableProps {
     onSearchChange: (val: string) => void;
     onStatusFilterChange: (val: "All" | Application["status"]) => void;
     onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
     onReviewClick: (app: Application) => void;
     onApprove: (id: string) => void;
     onReject: (id: string) => void;
@@ -34,6 +35,7 @@ const ApplicationsTable = ({
     applications,
     totalCount,
     currentPage,
+    rowsPerPage,
     searchQuery,
     statusFilter,
     selectedAppId,
@@ -41,11 +43,12 @@ const ApplicationsTable = ({
     onSearchChange,
     onStatusFilterChange,
     onPageChange,
+    onRowsPerPageChange,
     onReviewClick,
     onApprove,
     onReject,
 }: ApplicationsTableProps) => {
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
     return (
         <div className="flex flex-col gap-4">
@@ -186,62 +189,15 @@ const ApplicationsTable = ({
             </div>
 
             {/* Pagination */}
-            {totalCount > ROWS_PER_PAGE && (
-                <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-muted">
-                        Showing {Math.min((currentPage - 1) * ROWS_PER_PAGE + 1, totalCount)} to{" "}
-                        {Math.min(currentPage * ROWS_PER_PAGE, totalCount)} of {totalCount}
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => onPageChange(currentPage - 1)}
-                            disabled={currentPage <= 1}
-                            className="p-1.5 rounded border border-border text-muted hover:bg-page hover:text-text transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            <ChevronLeft className="w-4 h-4" />
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                            .filter((page) => {
-                                if (totalPages <= 5) return true;
-                                if (page === 1 || page === totalPages) return true;
-                                if (Math.abs(page - currentPage) <= 1) return true;
-                                return false;
-                            })
-                            .reduce<(number | "ellipsis")[]>((acc, page, idx, arr) => {
-                                if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
-                                    acc.push("ellipsis");
-                                }
-                                acc.push(page);
-                                return acc;
-                            }, [])
-                            .map((item, idx) =>
-                                item === "ellipsis" ? (
-                                    <span key={`ellipsis-${idx}`} className="px-1 text-muted">
-                                        ...
-                                    </span>
-                                ) : (
-                                    <button
-                                        key={item}
-                                        onClick={() => onPageChange(item)}
-                                        className={`min-w-[32px] h-8 px-2 text-[13px] font-medium rounded border transition-colors cursor-pointer ${
-                                            currentPage === item
-                                                ? "bg-text text-card border-text"
-                                                : "bg-card text-muted border-border hover:bg-page hover:text-text"
-                                        }`}
-                                    >
-                                        {item}
-                                    </button>
-                                ),
-                            )}
-                        <button
-                            onClick={() => onPageChange(currentPage + 1)}
-                            disabled={currentPage >= totalPages}
-                            className="p-1.5 rounded border border-border text-muted hover:bg-page hover:text-text transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            <ChevronRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+            {!isLoading && applications.length > 0 && (
+                <ApplicationsPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                />
             )}
         </div>
     );

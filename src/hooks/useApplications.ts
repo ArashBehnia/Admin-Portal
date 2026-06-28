@@ -80,6 +80,9 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
     >("All");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
 
     // ─── Drawer State ─────────────────────────────────────────────────
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
@@ -105,11 +108,11 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         async (status?: string, page?: number, filter?: string) => {
             setIsLoading(true);
             const p = page ?? 1;
-            const offset = (p - 1) * 10;
+            const offset = (p - 1) * pageSizeRef.current;
             try {
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: "10",
+                    limit: String(pageSizeRef.current),
                 });
                 if (status && status !== "All") params.set("status", status.toLowerCase());
                 if (filter) params.set("filter", filter);
@@ -172,6 +175,11 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         }, searchQuery ? 400 : 0);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage, statusFilter]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(statusFilter, 1, searchQueryRef.current);
+    }, [pageSize, loadPage, statusFilter]);
 
     // ─── Status filter change ────────────────────────────────────────
     const handleStatusFilterChange = useCallback((val: "All" | Application["status"]) => {
@@ -350,6 +358,8 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         statusFilter,
         handleStatusFilterChange,
         currentPage,
+        pageSize,
+        setPageSize,
         handlePageChange,
 
         // Drawer

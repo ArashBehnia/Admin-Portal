@@ -1,20 +1,23 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ROWS_PER_PAGE } from "@/types/ftpRequestTypes";
 
 interface FtpRequestsPaginationProps {
     currentPage: number;
     totalPages: number;
     totalCount: number;
+    rowsPerPage: number;
     onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 const FtpRequestsPagination = ({
     currentPage,
     totalPages,
     totalCount,
+    rowsPerPage,
     onPageChange,
+    onRowsPerPageChange,
 }: FtpRequestsPaginationProps) => {
     const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1)
         .filter(
@@ -29,16 +32,32 @@ const FtpRequestsPagination = ({
         }, []);
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-1">
-            <p className="text-[12px] text-muted">
-                Showing{" "}
-                <span className="font-medium text-text">
-                    {(currentPage - 1) * ROWS_PER_PAGE + 1}–
-                    {Math.min(currentPage * ROWS_PER_PAGE, totalCount)}
-                </span>{" "}
-                of <span className="font-medium text-text">{totalCount}</span>{" "}
-                requests
-            </p>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
+            <div className="flex flex-wrap items-center gap-4 justify-center sm:justify-start w-full sm:w-auto">
+                <div className="flex items-center gap-2">
+                    <span className="text-[12px] text-muted">Show</span>
+                    <select
+                        value={rowsPerPage}
+                        onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
+                        className="bg-transparent border border-border rounded px-2 py-1 text-[12px] text-text focus:outline-none focus:border-accent cursor-pointer"
+                    >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                    </select>
+                    <span className="text-[12px] text-muted">entries</span>
+                </div>
+                <p className="text-[12px] text-muted">
+                    Showing{" "}
+                    <span className="font-medium text-text">
+                        {totalCount === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}–
+                        {Math.min(currentPage * rowsPerPage, totalCount)}
+                    </span>{" "}
+                    of <span className="font-medium text-text">{totalCount}</span>{" "}
+                    requests
+                </p>
+            </div>
             <div className="flex items-center gap-1">
                 <button
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}

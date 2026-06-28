@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Agency,
     AgenciesData,
     AgencyFilter,
     AgencyStats,
     AgencyListItemDto,
-    ROWS_PER_PAGE,
 } from "@/types/agencyTypes";
 import api from "@/lib/axios";
 
@@ -101,8 +100,11 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
+    const [pageSize, setPageSize] = useState(20);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -113,10 +115,10 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         async (page: number, keywords?: string) => {
             setIsLoading(true);
             try {
-                const offset = (page - 1) * ROWS_PER_PAGE;
+                const offset = (page - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(ROWS_PER_PAGE),
+                    limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
 
@@ -163,6 +165,11 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, searchQuery || undefined);
+    }, [pageSize, loadPage, searchQuery]);
+
     const filteredAgencies = agencies.filter((agency) => {
         const matchesFilter = (() => {
             if (activeFilter === "All") return true;
@@ -196,6 +203,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         isLoading: isLoading || isSearching,
         currentPage,
         totalPages,
+        pageSize,
+        setPageSize,
         handlePageChange,
         isModalOpen,
         setIsModalOpen,

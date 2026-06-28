@@ -20,6 +20,8 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
         currentPage,
         totalPages,
         totalCount,
+        pageSize,
+        setPageSize,
         handlePageChange,
         isModalOpen,
         setIsModalOpen,
@@ -80,7 +82,9 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 totalCount={totalCount}
+                rowsPerPage={pageSize}
                 onPageChange={handlePageChange}
+                onRowsPerPageChange={setPageSize}
             />
 
             <CreateAgencySidebar

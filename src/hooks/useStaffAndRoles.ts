@@ -41,10 +41,12 @@ const useStaffAndRoles = ({
     const [isActivityLoading, setIsActivityLoading] = useState(false);
 
     // ─── Pagination State ─────────────────────────────────────────────
-    const PAGE_SIZE = 10;
+    const [pageSize, setPageSize] = useState(10);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
     // ─── UI / Navigation State ────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -175,11 +177,11 @@ const useStaffAndRoles = ({
             if (!hasLoadedOnceRef.current) setIsInitialLoad(true);
             setIsLoading(true);
             const pageNum = page ?? 1;
-            const offset = (pageNum - 1) * PAGE_SIZE;
+            const offset = (pageNum - 1) * pageSizeRef.current;
             try {
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(PAGE_SIZE),
+                    limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("filter", keywords);
                 if (role && role !== "All") params.set("role", role);
@@ -290,6 +292,12 @@ const useStaffAndRoles = ({
         loadPage(searchQueryRef.current || undefined, 1, roleFilter);
         setCurrentPage(1);
     }, [roleFilter, loadPage]);
+
+    // ─── Page size: refetch from backend ──────────────────────────────
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(searchQueryRef.current || undefined, 1, roleFilterRef.current);
+    }, [pageSize, loadPage]);
 
     // ─── Derived / Computed ───────────────────────────────────────────
     const stats = {
@@ -677,6 +685,8 @@ const useStaffAndRoles = ({
         currentPage,
         totalPages,
         totalItems,
+        pageSize,
+        setPageSize,
         setPage,
 
         // UI State

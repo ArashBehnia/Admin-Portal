@@ -8,7 +8,6 @@ import {
 } from "@/types/propertyReportTypes";
 import usePropertyReports from "@/hooks/usePropertyReports";
 import PropertyReportsTable from "./PropertyReportsTable";
-import PropertyReportsPagination from "./PropertyReportsPagination";
 import PropertyReportDrawer from "./PropertyReportDrawer";
 
 interface PropertyReportsPageClientProps {
@@ -24,6 +23,8 @@ const PropertyReportsPageClient = ({
         currentPage,
         totalPages,
         totalCount,
+        pageSize,
+        setPageSize,
         handlePageChange,
         searchQuery,
         setSearchQuery,
@@ -73,6 +74,10 @@ const PropertyReportsPageClient = ({
                 endDate={endDate}
                 showFilters={showFilters}
                 hasActiveFilters={hasActiveFilters}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                rowsPerPage={pageSize}
                 onSearchChange={setSearchQuery}
                 onReportTypeChange={setReportType}
                 onStartDateChange={setStartDate}
@@ -80,13 +85,8 @@ const PropertyReportsPageClient = ({
                 onToggleFilters={() => setShowFilters(!showFilters)}
                 onResetFilters={resetFilters}
                 onViewReport={setSelectedReport}
-            />
-
-            <PropertyReportsPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
                 onPageChange={handlePageChange}
+                onRowsPerPageChange={setPageSize}
             />
 
             {/* Report Detail Drawer */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Agent, DrawerTab } from "@/types/agentTypes";
 import api from "@/lib/axios";
 
@@ -17,8 +17,6 @@ interface AgentSummary {
     active_listings: number;
 }
 
-const ROWS_PER_PAGE = 20;
-
 const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
     // ─── Data State ───────────────────────────────────────────────────
     const [agents, setAgents] = useState<Agent[]>(initialAgents);
@@ -32,6 +30,13 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
         ftp_enabled: 0,
         active_listings: 0,
     });
+
+    // ─── Pagination State ─────────────────────────────────────────────
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     // ─── Search State ─────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -66,12 +71,14 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (keywords?: string) => {
+        async (page?: number, keywords?: string) => {
             setIsLoading(true);
             try {
+                const p = page ?? 1;
+                const offset = (p - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
-                    offset: "0",
-                    limit: String(ROWS_PER_PAGE),
+                    offset: String(offset),
+                    limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
 
@@ -117,18 +124,34 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
         [],
     );
 
+    // ─── Page change handler ──────────────────────────────────────────
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+        loadPage(page, searchQueryRef.current);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [loadPage]);
+
     // ─── Search with debounce ─────────────────────────────────────────
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
+
     useEffect(() => {
+        setCurrentPage(1);
         if (!searchQuery) {
-            loadPage();
+            loadPage(1);
             return;
         }
         setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(searchQuery).finally(() => setIsSearching(false));
+            loadPage(1, searchQuery).finally(() => setIsSearching(false));
         }, 400);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, searchQueryRef.current);
+    }, [pageSize, loadPage]);
 
     // ─── Helpers ──────────────────────────────────────────────────────
     const getInitials = (name: string) =>
@@ -167,6 +190,11 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
         totalCount,
         summary,
         isLoading: isLoading || isSearching,
+        currentPage,
+        totalPages,
+        pageSize,
+        setPageSize,
+        handlePageChange,
 
         // Search
         searchQuery,

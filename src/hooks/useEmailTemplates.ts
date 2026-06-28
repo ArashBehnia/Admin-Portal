@@ -58,6 +58,8 @@ const useEmailTemplates = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] =
         useState<CategoryFilter>("All types");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     const stats = {
         total: templates.length,
@@ -77,6 +79,17 @@ const useEmailTemplates = () => {
         });
     }, [templates, searchQuery, selectedCategory]);
 
+    const totalCount = filteredTemplates.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+    const paginatedTemplates = filteredTemplates.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize,
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedCategory]);
+
     const getCategoryStyles = (category: TemplateCategory) => {
         switch (category) {
             case "email":
@@ -91,7 +104,13 @@ const useEmailTemplates = () => {
     };
 
     return {
-        filteredTemplates,
+        filteredTemplates: paginatedTemplates,
+        allFilteredCount: totalCount,
+        currentPage,
+        totalPages,
+        pageSize,
+        setPageSize,
+        setCurrentPage,
         stats,
         isLoading: templatesQuery.isLoading,
         isError: templatesQuery.isError,

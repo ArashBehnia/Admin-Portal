@@ -24,7 +24,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
         filteredStaff, rolesList, stats,
         staffActivity, isActivityLoading,
         isLoading,
-        currentPage, totalPages, totalItems, setPage,
+        currentPage, totalPages, totalItems, pageSize, setPageSize, setPage,
         searchQuery, setSearchQuery,
         roleFilter, setRoleFilter,
         activeTab, setActiveTab,
@@ -84,12 +84,14 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
                     currentPage={currentPage}
                     totalPages={totalPages}
                     totalItems={totalItems}
+                    rowsPerPage={pageSize}
                     rolesList={rolesList}
                     onSearchChange={setSearchQuery}
                     onRoleFilterChange={setRoleFilter}
                     onAddClick={handleOpenAddModal}
                     onEditClick={openEditModal}
                     onPageChange={setPage}
+                    onRowsPerPageChange={setPageSize}
                 />
             )}
 

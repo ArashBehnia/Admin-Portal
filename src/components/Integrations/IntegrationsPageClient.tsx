@@ -37,6 +37,8 @@ const IntegrationsPageClient = ({
         filterStatus,
         setFilterStatus,
         currentPage,
+        pageSize,
+        setPageSize,
         setCurrentPage,
     } = useIntegrations({ initialData });
 
@@ -159,7 +161,9 @@ const IntegrationsPageClient = ({
                             currentPage={currentPage}
                             totalPages={totalPages}
                             totalCount={totalCount}
+                            rowsPerPage={pageSize}
                             onPageChange={setCurrentPage}
+                            onRowsPerPageChange={setPageSize}
                         />
                     )}
                 </>

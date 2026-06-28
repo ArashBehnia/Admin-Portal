@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Feed,
     FeedStats,
     IntegrationsData,
     StatusFilter,
-    ROWS_PER_PAGE,
 } from "@/types/integrationTypes";
 import api from "@/lib/axios";
 
@@ -128,16 +127,19 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState<StatusFilter>("All");
     const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
         async (page: number, keywords?: string) => {
             setIsLoading(true);
             try {
-                const offset = (page - 1) * ROWS_PER_PAGE;
+                const offset = (page - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(ROWS_PER_PAGE),
+                    limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
 
@@ -185,12 +187,17 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
         return matchesStatus;
     });
 
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     // ─── Effects ──────────────────────────────────────────────────────
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, filterStatus]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, searchQuery || undefined);
+    }, [pageSize, loadPage, searchQuery]);
 
     // ─── Page change ──────────────────────────────────────────────────
     const handlePageChange = useCallback(
@@ -235,6 +242,8 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
 
         // Pagination
         currentPage,
+        pageSize,
+        setPageSize,
         setCurrentPage: handlePageChange,
     };
 };

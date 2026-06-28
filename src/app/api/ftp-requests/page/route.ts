@@ -5,8 +5,9 @@ import type { FtpRequestFilters } from "@/types/ftpRequestTypes";
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const page = searchParams.get("page") ?? "1";
+        const offset = searchParams.get("offset") ?? "0";
         const limit = searchParams.get("limit") ?? "20";
+        const page = Math.floor(Number(offset) / Number(limit)) + 1;
 
         const filters: FtpRequestFilters = {};
         const status = searchParams.get("status");

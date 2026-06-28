@@ -5,7 +5,6 @@ import {
     PropertyReport,
     PropertyReportsData,
     ReportTypeValue,
-    ROWS_PER_PAGE,
 } from "@/types/propertyReportTypes";
 import api from "@/lib/axios";
 
@@ -33,11 +32,6 @@ type ApiReportItem = {
         bathrooms: number;
         carSpaces: number;
     };
-};
-
-type ApiPage = {
-    data: ApiReportItem[];
-    total: number;
 };
 
 function getAvatarUrl(avatarUrl: string): string {
@@ -70,12 +64,6 @@ function mapReport(item: ApiReportItem): PropertyReport {
     };
 }
 
-function mapPageData(page: ApiPage): PropertyReportsData {
-    const items = Array.isArray(page.data) ? page.data : [];
-    const reports = items.map(mapReport);
-    return { reports, total: page.total };
-}
-
 const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
     // ─── Data ─────────────────────────────────────────────────────────
     const [reports, setReports] = useState<PropertyReport[]>(
@@ -85,8 +73,11 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // ─── Pagination State ────────────────────────────────────────────
+    const [pageSize, setPageSize] = useState(20);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     // ─── Filter State ────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -109,10 +100,10 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
         ) => {
             setIsLoading(true);
             try {
-                const offset = (page - 1) * ROWS_PER_PAGE;
+                const offset = (page - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(ROWS_PER_PAGE),
+                    limit: String(pageSizeRef.current),
                 });
                 if (opts?.filter) params.set("filter", opts.filter);
                 if (opts?.type) params.set("type", opts.type);
@@ -125,19 +116,15 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
                     `/api/property-reports/page?${params.toString()}`,
                 );
 
-                const rawPage = res.data?.data ?? res.data;
-                const pageData: ApiPage = {
-                    data: Array.isArray(rawPage?.data)
-                        ? rawPage.data
-                        : Array.isArray(rawPage)
-                          ? rawPage
-                          : [],
-                    total: rawPage?.total ?? 0,
-                };
-                const result = mapPageData(pageData);
+                const pageData = res.data;
+                const items: ApiReportItem[] = Array.isArray(pageData?.data)
+                    ? pageData.data
+                    : Array.isArray(pageData)
+                      ? pageData
+                      : [];
 
-                setReports(result.reports);
-                setTotalCount(result.total);
+                setReports(items.map(mapReport));
+                setTotalCount(pageData?.total ?? items.length);
             } catch (err) {
                 console.error("Failed to load property reports:", err);
             } finally {
@@ -179,6 +166,11 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
         };
     }, [searchQuery, reportType, startDate, endDate, loadPage, currentFilters]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, currentFilters());
+    }, [pageSize, loadPage, currentFilters]);
+
     // ─── Reset all filters ───────────────────────────────────────────
     const resetFilters = useCallback(() => {
         setSearchQuery("");
@@ -200,6 +192,8 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
         // Pagination
         currentPage,
         totalPages,
+        pageSize,
+        setPageSize,
         handlePageChange,
 
         // Filters

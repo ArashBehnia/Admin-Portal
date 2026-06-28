@@ -10,6 +10,12 @@ import EmailTemplatesTable from "./EmailTemplatesTable";
 const EmailTemplatesPageClient = () => {
     const {
         filteredTemplates,
+        allFilteredCount,
+        currentPage,
+        totalPages,
+        pageSize,
+        setPageSize,
+        setCurrentPage,
         stats,
         isLoading,
         isError,
@@ -111,10 +117,16 @@ const EmailTemplatesPageClient = () => {
 
                         <EmailTemplatesTable
                             filteredTemplates={filteredTemplates}
+                            totalCount={allFilteredCount}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            rowsPerPage={pageSize}
                             searchQuery={searchQuery}
                             selectedCategory={selectedCategory}
                             onSearchChange={setSearchQuery}
                             onCategoryChange={setSelectedCategory}
+                            onPageChange={setCurrentPage}
+                            onRowsPerPageChange={setPageSize}
                         />
                     </>
                 )}

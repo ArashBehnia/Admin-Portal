@@ -11,6 +11,7 @@ import {
 } from "@/actions/emailTemplatesActions";
 import Toast from "@/components/Shared/Toast";
 import ConfirmModal from "./TemplateName/ConfirmModal";
+import EmailTemplatesPagination from "./EmailTemplatesPagination";
 import type { ToastState } from "@/hooks/useTemplateEditor";
 
 function formatRelativeTime(value: string): string {
@@ -54,18 +55,30 @@ function formatTemplateName(name: string): string {
 
 interface EmailTemplatesTableProps {
     filteredTemplates: Template[];
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    rowsPerPage: number;
     searchQuery: string;
     selectedCategory: CategoryFilter;
     onSearchChange: (val: string) => void;
     onCategoryChange: (val: CategoryFilter) => void;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 const EmailTemplatesTable = ({
     filteredTemplates,
+    totalCount,
+    currentPage,
+    totalPages,
+    rowsPerPage,
     searchQuery,
     selectedCategory,
     onSearchChange,
     onCategoryChange,
+    onPageChange,
+    onRowsPerPageChange,
 }: EmailTemplatesTableProps) => {
     const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -235,6 +248,18 @@ const EmailTemplatesTable = ({
                     </table>
                 </div>
             </div>
+
+            {/* Pagination */}
+            {filteredTemplates.length > 0 && (
+                <EmailTemplatesPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                />
+            )}
 
             <Toast
                 visible={toast.visible}

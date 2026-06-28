@@ -18,6 +18,11 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
         totalCount,
         summary,
         isLoading,
+        currentPage,
+        totalPages,
+        pageSize,
+        setPageSize,
+        handlePageChange,
         searchQuery,
         setSearchQuery,
         activeDrawerTab,
@@ -77,11 +82,16 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
                 filteredAgents={agents}
                 searchQuery={searchQuery}
                 selectedAgentId={selectedAgent?.id}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                rowsPerPage={pageSize}
                 onSearchChange={setSearchQuery}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={setPageSize}
                 onViewClick={openDrawer}
                 getStatusClasses={getStatusClasses}
                 isLoading={isLoading}
-                totalCount={totalCount}
             />
 
             {selectedAgent && (

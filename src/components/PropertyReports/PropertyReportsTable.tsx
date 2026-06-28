@@ -6,6 +6,7 @@ import {
     REPORT_TYPE_OPTIONS,
     ReportTypeValue,
 } from "@/types/propertyReportTypes";
+import PropertyReportsPagination from "./PropertyReportsPagination";
 
 interface PropertyReportsTableProps {
     reports: PropertyReport[];
@@ -16,6 +17,10 @@ interface PropertyReportsTableProps {
     endDate: string;
     showFilters: boolean;
     hasActiveFilters: boolean;
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+    rowsPerPage: number;
     onSearchChange: (val: string) => void;
     onReportTypeChange: (val: ReportTypeValue) => void;
     onStartDateChange: (val: string) => void;
@@ -23,6 +28,8 @@ interface PropertyReportsTableProps {
     onToggleFilters: () => void;
     onResetFilters: () => void;
     onViewReport: (report: PropertyReport) => void;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 function ReportTypeBadge({ type }: { type: string }) {
@@ -74,6 +81,10 @@ const PropertyReportsTable = ({
     endDate,
     showFilters,
     hasActiveFilters,
+    currentPage,
+    totalPages,
+    totalCount,
+    rowsPerPage,
     onSearchChange,
     onReportTypeChange,
     onStartDateChange,
@@ -81,6 +92,8 @@ const PropertyReportsTable = ({
     onToggleFilters,
     onResetFilters,
     onViewReport,
+    onPageChange,
+    onRowsPerPageChange,
 }: PropertyReportsTableProps) => {
     return (
         <div className="flex flex-col gap-4">
@@ -292,6 +305,17 @@ const PropertyReportsTable = ({
                     </table>
                 </div>
             </div>
+
+            {!isLoading && reports.length > 0 && (
+                <PropertyReportsPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                />
+            )}
         </div>
     );
 };

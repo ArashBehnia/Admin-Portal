@@ -8,7 +8,6 @@ import {
 } from "@/types/ftpRequestTypes";
 import useFtpRequests from "@/hooks/useFtpRequests";
 import FtpRequestsTable from "./FtpRequestsTable";
-import FtpRequestsPagination from "./FtpRequestsPagination";
 import FtpRequestDrawer from "./FtpRequestDrawer";
 
 interface FtpRequestsPageClientProps {
@@ -24,6 +23,8 @@ const FtpRequestsPageClient = ({
         currentPage,
         totalPages,
         totalCount,
+        pageSize,
+        setPageSize,
         handlePageChange,
         searchQuery,
         setSearchQuery,
@@ -68,18 +69,17 @@ const FtpRequestsPageClient = ({
                 status={status}
                 showFilters={showFilters}
                 hasActiveFilters={hasActiveFilters}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                rowsPerPage={pageSize}
                 onSearchChange={setSearchQuery}
                 onStatusChange={setStatus}
                 onToggleFilters={() => setShowFilters(!showFilters)}
                 onResetFilters={resetFilters}
                 onViewRequest={setSelectedRequest}
-            />
-
-            <FtpRequestsPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
                 onPageChange={handlePageChange}
+                onRowsPerPageChange={setPageSize}
             />
 
             {/* Request Detail Drawer */}

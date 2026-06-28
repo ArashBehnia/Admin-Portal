@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface FeedsPaginationProps {
+interface ApplicationsPaginationProps {
     currentPage: number;
     totalPages: number;
     totalCount: number;
@@ -11,14 +11,14 @@ interface FeedsPaginationProps {
     onRowsPerPageChange: (rows: number) => void;
 }
 
-const FeedsPagination = ({
+const ApplicationsPagination = ({
     currentPage,
     totalPages,
     totalCount,
     rowsPerPage,
     onPageChange,
     onRowsPerPageChange,
-}: FeedsPaginationProps) => {
+}: ApplicationsPaginationProps) => {
     const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1)
         .filter(
             (p) =>
@@ -55,7 +55,7 @@ const FeedsPagination = ({
                         {Math.min(currentPage * rowsPerPage, totalCount)}
                     </span>{" "}
                     of <span className="font-medium text-text">{totalCount}</span>{" "}
-                    feeds
+                    applications
                 </p>
             </div>
             <div className="flex items-center gap-1">
@@ -104,4 +104,4 @@ const FeedsPagination = ({
     );
 };
 
-export default FeedsPagination;
+export default ApplicationsPagination;

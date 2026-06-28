@@ -11,7 +11,6 @@ import api from "@/lib/axios";
 import Toast from "@/components/Shared/Toast";
 import type { ToastState } from "@/hooks/useStaffAndRoles";
 import BlockedIpsTable from "./BlockedIpsTable";
-import BlockedIpsPagination from "./BlockedIpsPagination";
 import CreateBlockPanel from "./CreateBlockPanel";
 import ConfirmBlockModal from "./ConfirmBlockModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
@@ -30,6 +29,8 @@ const BlockedIpsPageClient = ({
         totalPages,
         totalCount,
         handlePageChange,
+        rowsPerPage,
+        setRowsPerPage,
         searchQuery,
         setSearchQuery,
         strategy,
@@ -223,6 +224,10 @@ const BlockedIpsPageClient = ({
                 reason={reason}
                 showFilters={showFilters}
                 hasActiveFilters={hasActiveFilters}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                rowsPerPage={rowsPerPage}
                 onSearchChange={setSearchQuery}
                 onStrategyChange={setStrategy}
                 onReasonChange={setReason}
@@ -230,13 +235,8 @@ const BlockedIpsPageClient = ({
                 onResetFilters={resetFilters}
                 onCreateClick={handleCreateClick}
                 onDelete={handleDeleteClick}
-            />
-
-            <BlockedIpsPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
                 onPageChange={handlePageChange}
+                onRowsPerPageChange={setRowsPerPage}
             />
 
             {/* Create Block Panel */}

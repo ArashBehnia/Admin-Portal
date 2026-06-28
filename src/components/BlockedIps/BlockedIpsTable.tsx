@@ -8,6 +8,7 @@ import {
     StrategyValue,
     ReasonValue,
 } from "@/types/blockedIpTypes";
+import BlockedIpsPagination from "./BlockedIpsPagination";
 
 interface BlockedIpsTableProps {
     entries: BlockedIp[];
@@ -17,6 +18,10 @@ interface BlockedIpsTableProps {
     reason: ReasonValue;
     showFilters: boolean;
     hasActiveFilters: boolean;
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+    rowsPerPage: number;
     onSearchChange: (val: string) => void;
     onStrategyChange: (val: StrategyValue) => void;
     onReasonChange: (val: ReasonValue) => void;
@@ -24,6 +29,8 @@ interface BlockedIpsTableProps {
     onResetFilters: () => void;
     onCreateClick: () => void;
     onDelete: (entry: BlockedIp) => void;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 function StrategyBadge({ strategy }: { strategy: string }) {
@@ -112,6 +119,10 @@ const BlockedIpsTable = ({
     reason,
     showFilters,
     hasActiveFilters,
+    currentPage,
+    totalPages,
+    totalCount,
+    rowsPerPage,
     onSearchChange,
     onStrategyChange,
     onReasonChange,
@@ -119,6 +130,8 @@ const BlockedIpsTable = ({
     onResetFilters,
     onCreateClick,
     onDelete,
+    onPageChange,
+    onRowsPerPageChange,
 }: BlockedIpsTableProps) => {
     return (
         <div className="flex flex-col gap-4">
@@ -257,13 +270,13 @@ const BlockedIpsTable = ({
                     <table className="w-full text-left border-collapse text-[12px]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
-                                <th className="px-6 py-4">IP / User</th>
-                                <th className="px-6 py-4">Strategy</th>
-                                <th className="px-6 py-4">Reason</th>
-                                <th className="px-6 py-4">Blocked at</th>
-                                <th className="px-6 py-4">TTL</th>
-                                <th className="px-6 py-4">Meta</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-3 py-2.5">IP / User</th>
+                                <th className="px-3 py-2.5">Strategy</th>
+                                <th className="px-3 py-2.5">Reason</th>
+                                <th className="px-3 py-2.5">Blocked at</th>
+                                <th className="px-3 py-2.5">TTL</th>
+                                <th className="px-3 py-2.5">Meta</th>
+                                <th className="px-3 py-2.5 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
@@ -322,6 +335,17 @@ const BlockedIpsTable = ({
                     </table>
                 </div>
             </div>
+
+            {!isLoading && entries.length > 0 && (
+                <BlockedIpsPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                />
+            )}
         </div>
     );
 };

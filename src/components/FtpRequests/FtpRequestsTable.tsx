@@ -6,6 +6,7 @@ import {
     STATUS_OPTIONS,
     StatusValue,
 } from "@/types/ftpRequestTypes";
+import FtpRequestsPagination from "./FtpRequestsPagination";
 
 interface FtpRequestsTableProps {
     requests: FtpRequest[];
@@ -14,11 +15,17 @@ interface FtpRequestsTableProps {
     status: StatusValue;
     showFilters: boolean;
     hasActiveFilters: boolean;
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+    rowsPerPage: number;
     onSearchChange: (val: string) => void;
     onStatusChange: (val: StatusValue) => void;
     onToggleFilters: () => void;
     onResetFilters: () => void;
     onViewRequest: (request: FtpRequest) => void;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rows: number) => void;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -68,11 +75,17 @@ const FtpRequestsTable = ({
     status,
     showFilters,
     hasActiveFilters,
+    currentPage,
+    totalPages,
+    totalCount,
+    rowsPerPage,
     onSearchChange,
     onStatusChange,
     onToggleFilters,
     onResetFilters,
     onViewRequest,
+    onPageChange,
+    onRowsPerPageChange,
 }: FtpRequestsTableProps) => {
     return (
         <div className="flex flex-col gap-4">
@@ -239,6 +252,17 @@ const FtpRequestsTable = ({
                     </table>
                 </div>
             </div>
+
+            {!isLoading && requests.length > 0 && (
+                <FtpRequestsPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                />
+            )}
         </div>
     );
 };
