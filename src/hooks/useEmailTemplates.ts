@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Template,
     CategoryFilter,
     TemplateCategory,
 } from "@/actions/emailTemplatesActions";
-
-async function fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-    return res.json();
-}
 
 function toArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) return value;
@@ -29,66 +22,97 @@ function toArray<T>(value: unknown): T[] {
 }
 
 const useEmailTemplates = () => {
-    const templatesQuery = useQuery({
-        queryKey: ["email-templates"],
-        queryFn: () => fetchJson<Template[] | unknown>("/api/email-templates"),
-        select: (data) => toArray<Template>(data),
-    });
-
-    const templates = useMemo(() => toArray<Template>(templatesQuery.data), [templatesQuery.data]);
-
-    useEffect(() => {
-        if (templatesQuery.data) {
-            console.log("[useEmailTemplates] raw query data:", JSON.stringify(templatesQuery.data, null, 2));
-            console.log("[useEmailTemplates] normalized templates:", JSON.stringify(templates, null, 2));
-            console.log("[useEmailTemplates] stats:", {
-                total: templates.length,
-                active: templates.filter((t) => t.status === "Active").length,
-                draft: templates.filter((t) => t.status === "Draft").length,
-            });
-        }
-    }, [templatesQuery.data, templates]);
-
-    useEffect(() => {
-        if (templatesQuery.isError) {
-            console.error("[useEmailTemplates] query error:", templatesQuery.error);
-        }
-    }, [templatesQuery.isError, templatesQuery.error]);
+    const [templates, setTemplates] = useState<Template[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCategory, setSelectedCategory] =
-        useState<CategoryFilter>("All types");
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
+
+    const [selectedCategory] = useState<CategoryFilter>("All types");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const pageSizeRef = useRef(pageSize);
+    pageSizeRef.current = pageSize;
 
-    const stats = {
-        total: templates.length,
-        active: templates.filter((t) => t.status === "Active").length,
-        draft: templates.filter((t) => t.status === "Draft").length,
-    };
-
-    const filteredTemplates = useMemo(() => {
-        return templates.filter((t) => {
-            const matchesSearch = t.name
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-            const matchesCategory =
-                selectedCategory === "All types" ||
-                t.category.toLowerCase() === selectedCategory.toLowerCase();
-            return matchesSearch && matchesCategory;
-        });
-    }, [templates, searchQuery, selectedCategory]);
-
-    const totalCount = filteredTemplates.length;
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-    const paginatedTemplates = filteredTemplates.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize,
+
+    const loadPage = useCallback(
+        async (page: number, filter?: string) => {
+            setIsLoading(true);
+            setIsError(false);
+            try {
+                const offset = (page - 1) * pageSizeRef.current;
+                const params = new URLSearchParams({
+                    offset: String(offset),
+                    limit: String(pageSizeRef.current),
+                });
+                if (filter) params.set("filter", filter);
+
+                const res = await fetch(
+                    `/api/email-templates?${params.toString()}`,
+                );
+                if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+                const json = await res.json();
+
+                const items: Template[] = Array.isArray(json)
+                    ? json
+                    : Array.isArray(json.data)
+                      ? json.data
+                      : [];
+                const total =
+                    typeof json.total === "number"
+                        ? json.total
+                        : items.length;
+
+                setTemplates(items);
+                setTotalCount(total);
+            } catch {
+                setIsError(true);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [],
     );
 
+    // Initial load
+    useEffect(() => {
+        loadPage(1);
+    }, [loadPage]);
+
+    // Search with debounce
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedCategory]);
+        const timer = setTimeout(() => {
+            loadPage(1, searchQuery || undefined);
+        }, searchQuery ? 400 : 0);
+        return () => clearTimeout(timer);
+    }, [searchQuery, loadPage]);
+
+    // Page size change
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, searchQueryRef.current || undefined);
+    }, [pageSize, loadPage]);
+
+    // Page change
+    const handlePageChange = useCallback(
+        (page: number) => {
+            setCurrentPage(page);
+            loadPage(page, searchQueryRef.current || undefined);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+        [loadPage],
+    );
+
+    const stats = {
+        total: totalCount,
+        active: totalCount,
+        draft: 0,
+    };
 
     const getCategoryStyles = (category: TemplateCategory) => {
         switch (category) {
@@ -104,20 +128,20 @@ const useEmailTemplates = () => {
     };
 
     return {
-        filteredTemplates: paginatedTemplates,
+        filteredTemplates: templates,
         allFilteredCount: totalCount,
         currentPage,
         totalPages,
         pageSize,
         setPageSize,
-        setCurrentPage,
+        setCurrentPage: handlePageChange,
         stats,
-        isLoading: templatesQuery.isLoading,
-        isError: templatesQuery.isError,
+        isLoading,
+        isError,
         searchQuery,
         setSearchQuery,
         selectedCategory,
-        setSelectedCategory,
+        setSelectedCategory: () => {},
         getCategoryStyles,
     };
 };

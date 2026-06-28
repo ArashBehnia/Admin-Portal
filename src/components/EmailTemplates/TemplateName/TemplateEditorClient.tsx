@@ -80,11 +80,11 @@ const TemplateEditorClient = ({
     } = useTemplateEditor({ templateName });
 
     useEffect(() => {
-        console.log("[TemplateEditorClient] render state:", {
-            templateName,
-            isLoadingTemplate,
-            currentTemplate: currentTemplate ? JSON.stringify(currentTemplate, null, 2) : "null",
-        });
+        // console.log("[TemplateEditorClient] render state:", {
+        //     templateName,
+        //     isLoadingTemplate,
+        //     currentTemplate: currentTemplate ? JSON.stringify(currentTemplate, null, 2) : "null",
+        // });
     }, [templateName, isLoadingTemplate, currentTemplate]);
 
     const CHANNEL_TABS = ["Email", "SMS", "Push Notification"] as const;

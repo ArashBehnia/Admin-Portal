@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { backendFetch } from "@/lib/api";
 import type { Template, TemplateChannel } from "@/actions/emailTemplatesActions";
 
@@ -77,12 +78,12 @@ function serializeTemplate(data: Record<string, unknown>): Record<string, unknow
 }
 
 function logApiData(method: string, endpoint: string, payload?: unknown, response?: unknown) {
-    console.log("API Data:", {
-        method,
-        endpoint,
-        ...(payload !== undefined && { payload }),
-        ...(response !== undefined && { response }),
-    });
+    // console.log("API Data:", {
+    //     method,
+    //     endpoint,
+    //     ...(payload !== undefined && { payload }),
+    //     ...(response !== undefined && { response }),
+    // });
 }
 
 // ─── GET: Summary cards ────────────────────────────────────────
@@ -90,28 +91,38 @@ export async function fetchEmailTemplatesSummary() {
     const endpoint = "/admin/email-templates/summary";
     logApiData("GET", endpoint);
     const raw = await backendFetch(endpoint);
-    console.log("[email-templates-service] fetchEmailTemplatesSummary:", JSON.stringify(raw, null, 2));
+    // console.log("summery ",raw)
+    // console.log("[email-templates-service] fetchEmailTemplatesSummary:", JSON.stringify(raw, null, 2));
     return raw;
 }
 
 // ─── GET: Paginated template list ──────────────────────────────
 export async function fetchEmailTemplatesPage(
-    params: { limit?: number; offset?: number; keywords?: string } = {},
-): Promise<Template[]> {
+    params: { limit?: number; offset?: number; filter?: string } = {},
+): Promise<{ data: Template[]; total: number }> {
     const qs = new URLSearchParams();
     if (params.limit) qs.set("limit", String(params.limit));
     if (params.offset) qs.set("offset", String(params.offset));
-    if (params.keywords) qs.set("keywords", params.keywords);
+    if (params.filter) qs.set("filter", params.filter);
     const query = qs.toString();
     const endpoint = `/admin/template/page${query ? `?${query}` : ""}`;
     logApiData("GET", endpoint);
     const raw = await backendFetch(endpoint);
-    console.log("[email-templates-service] fetchEmailTemplatesPage raw:", JSON.stringify(raw, null, 2));
+    // console.log("[email-templates-service] fetchEmailTemplatesPage raw:", JSON.stringify(raw, null, 2));
+
     const arr = toArray<Record<string, unknown>>(raw);
-    console.log("[email-templates-service] fetchEmailTemplatesPage array length:", arr.length);
+    // console.log("[email-templates-service] fetchEmailTemplatesPage array length:", arr.length);
     const normalized = arr.map(normalizeTemplate);
-    console.log("[email-templates-service] fetchEmailTemplatesPage normalized:", JSON.stringify(normalized, null, 2));
-    return normalized;
+    // console.log("[email-templates-service] fetchEmailTemplatesPage normalized:", JSON.stringify(normalized));
+
+    // Try to extract total from response — backend may return { data: [...], total } or just [...]
+    let total = arr.length;
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+        const obj = raw as Record<string, unknown>;
+        if (typeof obj.total === "number") total = obj.total;
+    }
+
+    return { data: normalized, total };
 }
 
 // ─── GET: Single template by name (uses page query) ────────────
@@ -150,9 +161,9 @@ export async function createTemplate(template: Partial<Template>): Promise<Templ
         method: "POST",
         body: JSON.stringify(serialized),
     });
-    console.log("[email-templates-service] createTemplate raw:", JSON.stringify(raw, null, 2));
+    // console.log("[email-templates-service] createTemplate raw:", JSON.stringify(raw, null, 2));
     const result = normalizeTemplate(toObject(raw));
-    console.log("[email-templates-service] createTemplate normalized:", JSON.stringify(result, null, 2));
+    // console.log("[email-templates-service] createTemplate normalized:", JSON.stringify(result, null, 2));
     return result;
 }
 

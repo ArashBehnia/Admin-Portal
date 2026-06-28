@@ -146,10 +146,8 @@ const EmailTemplatesTable = ({
                 </div>
                 <select
                     value={selectedCategory}
-                    onChange={(e) =>
-                        onCategoryChange(e.target.value as CategoryFilter)
-                    }
-                    className="w-auto bg-card border border-border rounded-md px-3 py-2 text-sm text-text focus:outline-none focus:border-accent/50 transition-colors cursor-pointer"
+                    disabled
+                    className="w-auto bg-card border border-border rounded-md px-3 py-2 text-sm text-muted/50 cursor-not-allowed opacity-50"
                 >
                     {CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>

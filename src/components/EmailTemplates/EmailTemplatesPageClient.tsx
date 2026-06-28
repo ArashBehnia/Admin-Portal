@@ -26,16 +26,16 @@ const EmailTemplatesPageClient = () => {
     } = useEmailTemplates();
 
     useEffect(() => {
-        console.log("[EmailTemplatesPageClient] render state:", {
-            isLoading,
-            isError,
-            totalTemplates: filteredTemplates.length,
-            stats,
-        });
+        // console.log("[EmailTemplatesPageClient] render state:", {
+        //     isLoading,
+        //     isError,
+        //     totalTemplates: filteredTemplates.length,
+        //     stats,
+        // });
     }, [isLoading, isError, filteredTemplates.length, stats]);
 
     useEffect(() => {
-        console.log("[EmailTemplatesPageClient] filteredTemplates:", JSON.stringify(filteredTemplates, null, 2));
+        // console.log("[EmailTemplatesPageClient] filteredTemplates:", JSON.stringify(filteredTemplates, null, 2));
     }, [filteredTemplates]);
 
     if (isError) {

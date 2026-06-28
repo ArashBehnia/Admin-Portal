@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import { fetchEmailTemplatesPage } from "@/lib/email-templates-service";
-import { backendFetch } from "@/lib/api";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        console.log("[API /email-templates] GET request received");
-        const data = await fetchEmailTemplatesPage();
-        console.log("[API /email-templates] GET response:", JSON.stringify(data, null, 2));
-        return NextResponse.json(data);
+        const { searchParams } = new URL(request.url);
+        const limit = searchParams.get("limit") ?? undefined;
+        const offset = searchParams.get("offset") ?? undefined;
+        const filter = searchParams.get("filter") ?? undefined;
+
+        const result = await fetchEmailTemplatesPage({
+            ...(limit && { limit: Number(limit) }),
+            ...(offset && { offset: Number(offset) }),
+            ...(filter && { filter }),
+        });
+
+        return NextResponse.json(result);
     } catch (error) {
         const message =
             error instanceof Error ? error.message : "Internal server error";
@@ -18,18 +25,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
+        const { backendFetch } = await import("@/lib/api");
         const body = await request.json();
-        console.log("[API /email-templates] POST request body:", JSON.stringify(body, null, 2));
         const data = await backendFetch("/admin/template", {
             method: "POST",
             body: JSON.stringify(body),
         });
-        console.log("[API /email-templates] POST response:", JSON.stringify(data, null, 2));
         return NextResponse.json(data, { status: 201 });
     } catch (error) {
         const message =
             error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /email-templates] POST error:", message);
+        // console.error("[API /email-templates] POST error:", message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }

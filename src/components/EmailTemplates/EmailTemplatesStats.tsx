@@ -9,6 +9,7 @@ interface EmailTemplatesStatsProps {
 }
 
 const EmailTemplatesStats = ({ stats }: EmailTemplatesStatsProps) => {
+    // console.log("EmailTemplatesStats", stats)
     const cards = [
         { label: "Total templates", value: stats.total, dot: null },
         { label: "Active", value: stats.active, dot: "bg-success" },

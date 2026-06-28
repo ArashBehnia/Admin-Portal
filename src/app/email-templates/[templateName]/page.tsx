@@ -8,7 +8,7 @@ interface PageProps {
 
 export default async function TemplateEditorPage({ params }: PageProps) {
     const { templateName } = await params;
-    console.log("[email-templates/[templateName]/page.tsx] server-side prefetch for:", templateName);
+    // console.log("[email-templates/[templateName]/page.tsx] server-side prefetch for:", templateName);
 
     const queryClient = new QueryClient();
 
@@ -21,7 +21,7 @@ export default async function TemplateEditorPage({ params }: PageProps) {
             queryKey: ["email-template", templateName],
             queryFn: async () => {
                 const found = await fetchEmailTemplateByName(templateName);
-                console.log("[email-templates/[templateName]/page.tsx] template lookup result:", found ? JSON.stringify(found, null, 2) : "not found, using fallback");
+                // console.log("[email-templates/[templateName]/page.tsx] template lookup result:", found ? JSON.stringify(found, null, 2) : "not found, using fallback");
                 return (
                     found ?? {
                         id: "",
@@ -45,7 +45,7 @@ export default async function TemplateEditorPage({ params }: PageProps) {
     ]);
 
     const dehydratedState = dehydrate(queryClient);
-    console.log("[email-templates/[templateName]/page.tsx] prefetch complete, dehydrated queries:", dehydratedState.queries.length);
+    // console.log("[email-templates/[templateName]/page.tsx] prefetch complete, dehydrated queries:", dehydratedState.queries.length);
 
     return (
         <HydrationBoundary state={dehydratedState}>

@@ -112,7 +112,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     // ─── Initialize form from fetched template ────────────────────
     useEffect(() => {
         if (currentTemplate && !initializedRef.current) {
-            console.log("[useTemplateEditor] initializing form from template:", currentTemplate.name);
+            // console.log("[useTemplateEditor] initializing form from template:", currentTemplate.name);
             setFromName(currentTemplate.fromName || "HomeBy Team");
             setFromEmail(currentTemplate.fromEmail || "info@homeby.com.au");
             setSubject(currentTemplate.subject || "");
@@ -128,7 +128,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     const saveMutation = useMutation({
         mutationFn: async (data: Record<string, unknown>) => {
             const urlId = (data.id as string) || templateName;
-            console.log("[useTemplateEditor] save mutation URL id:", urlId, "payload:", JSON.stringify(data, null, 2));
+            // console.log("[useTemplateEditor] save mutation URL id:", urlId, "payload:", JSON.stringify(data, null, 2));
             const res = await fetch(`/api/email-templates/${encodeURIComponent(urlId)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -140,11 +140,11 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
                 throw new Error(errorMessage);
             }
             const result = await res.json();
-            console.log("[useTemplateEditor] save mutation response:", JSON.stringify(result, null, 2));
+            // console.log("[useTemplateEditor] save mutation response:", JSON.stringify(result, null, 2));
             return result;
         },
         onSuccess: async (result) => {
-            console.log("[useTemplateEditor] save mutation success, result:", JSON.stringify(result, null, 2));
+            // console.log("[useTemplateEditor] save mutation success, result:", JSON.stringify(result, null, 2));
             // Immediately update query cache with mutation response so form re-syncs
             queryClient.setQueryData(["email-template", templateName], result);
             // Reset initializedRef so useEffect re-syncs form with fresh data
@@ -158,7 +158,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
             );
         },
         onError: (error: Error) => {
-            console.error("[useTemplateEditor] save mutation error:", error);
+            // console.error("[useTemplateEditor] save mutation error:", error);
             showToast("Save Failed", error.message, "error");
         },
     });
@@ -290,7 +290,7 @@ const useTemplateEditor = ({ templateName }: UseTemplateEditorProps) => {
     };
 
     const handleSendTest = (emailAddress: string) => {
-        console.log("[useTemplateEditor] handleSendTest to:", emailAddress);
+        // console.log("[useTemplateEditor] handleSendTest to:", emailAddress);
         setIsTestEmailModalOpen(false);
         showToast(
             "Test Email Sent",
