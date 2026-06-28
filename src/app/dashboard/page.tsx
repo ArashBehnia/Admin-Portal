@@ -29,8 +29,8 @@ export default async function DashboardPage() {
             queryFn: () => fetchUserActivity(30),
         }),
         queryClient.prefetchQuery({
-            queryKey: ["dashboard", "hotspots", 7],
-            queryFn: () => fetchDemandHotspots(7, 10),
+            queryKey: ["dashboard", "hotspots", 30],
+            queryFn: () => fetchDemandHotspots(30, 10),
         }),
     ]);
 

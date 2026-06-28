@@ -123,15 +123,18 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const profileRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    console.log(user)
+    const sessionName = typeof window !== "undefined" ? sessionStorage.getItem("userName") || "" : "";
+    const sessionEmail = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") || "" : "";
+    const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
 
-    const name = user
-        ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-          user.email ||
-          "Admin"
-        : "Admin";
-    const role = (user?.role as string) || "user";
-    const userEmail = user?.email || "admin@homeby.com.au";
+    const name = sessionName ||
+        (user
+            ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+              user.email ||
+              "Admin"
+            : "Admin");
+    const role = sessionRole || (user?.role as string) || "user";
+    const userEmail = sessionEmail || user?.email || "admin@homeby.com.au";
     const userInitials = name
         ? name
               .split(" ")
@@ -145,6 +148,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
         try {
             await fetch("/api/auth/logout", { method: "POST" });
         } finally {
+            sessionStorage.clear();
             router.push("/login");
         }
     }, [router]);

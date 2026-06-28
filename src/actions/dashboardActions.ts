@@ -46,9 +46,9 @@ export type OverviewData = {
     systemHealth: SystemHealth;
 };
 
-export type Timeframe = "7d" | "30d" | "90d" | "YTD" | "Custom";
+export type Timeframe = "7d" | "30d" | "90d" | "YTD";
 
-export const TIMEFRAME_DAYS: Record<Exclude<Timeframe, "Custom" | "YTD">, number> = {
+export const TIMEFRAME_DAYS: Record<Exclude<Timeframe, "YTD">, number> = {
     "7d": 7,
     "30d": 30,
     "90d": 90,

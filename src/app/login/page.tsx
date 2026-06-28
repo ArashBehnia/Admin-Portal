@@ -158,9 +158,15 @@ export default function LoginPage() {
             const meRes = await fetch("/api/auth/me");
             const meData = await meRes.json();
             console.log("User data after login:", meData);
-            
+
+            // Save user info to sessionStorage for Topbar
+            const fullName = [meData.firstName, meData.lastName].filter(Boolean).join(" ") || meData.email || "Admin";
+            sessionStorage.setItem("userName", fullName);
+            sessionStorage.setItem("userEmail", meData.email || "");
+            sessionStorage.setItem("userRole", meData.role || "");
+
             setUser(meData);
-            
+
             router.refresh();
             router.push("/dashboard");
         } catch {

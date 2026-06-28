@@ -26,7 +26,7 @@ function toArray<T>(value: unknown): T[] {
     return [];
 }
 
-const TIMEFRAMES: Timeframe[] = ["7d", "30d", "90d", "YTD", "Custom"];
+const TIMEFRAMES: Timeframe[] = ["7d", "30d", "90d", "YTD"];
 
 async function fetchJson<T>(url: string): Promise<T> {
     const res = await fetch(url);
@@ -52,7 +52,11 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 function daysForTimeframe(tf: Timeframe): number {
-    if (tf === "Custom" || tf === "YTD") return 30;
+    if (tf === "YTD") {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        return Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+    }
     return TIMEFRAME_DAYS[tf];
 }
 
