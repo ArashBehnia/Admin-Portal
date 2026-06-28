@@ -27,7 +27,7 @@ import {
     Upload
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import type { User } from "@/lib/auth";
+import { useUser } from "@/contexts/UserContext";
 
 export type SidebarItemType = {
     title: string;
@@ -129,11 +129,11 @@ const sidebarConfig: SidebarGroupType[] = [
 
 interface SidebarProps {
     onClose?: () => void;
-    user: User | null;
 }
 
-const Sidebar = ({ onClose, user }: SidebarProps) => {
+const Sidebar = ({ onClose }: SidebarProps) => {
     const currentPath = usePathname();
+    const user = useUser();
     const userRole = (user?.role as string) || "user";
 
     const hasAccess = (item: SidebarItemType) => {
@@ -254,8 +254,8 @@ const Sidebar = ({ onClose, user }: SidebarProps) => {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-border shrink-0 text-meta text-muted">
-                v0.1 · {userRole}
+            <div className="p-4 border-t border-border shrink-0 text-xs text-muted">
+                v0.1 · {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
             </div>
         </div>
     );

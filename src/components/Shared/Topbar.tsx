@@ -14,11 +14,10 @@ import {
     Menu,
 } from "lucide-react";
 import Link from "next/link";
-import type { User as UserType } from "@/lib/auth";
+import { useUser } from "@/contexts/UserContext";
 
 interface TopbarProps {
     onOpenSidebar: () => void;
-    user: UserType | null;
 }
 
 type RecentItem = {
@@ -34,13 +33,16 @@ const recentSearches: RecentItem[] = [
     { id: "3", name: "McGrath Surry Hills", type: "Agency", path: "/agencies" },
 ];
 
-export const Topbar = ({ onOpenSidebar, user }: TopbarProps) => {
+export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const router = useRouter();
+    const user = useUser();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const profileRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // console.log(user)
 
     const name = user
         ? (`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Admin")
@@ -207,16 +209,15 @@ export const Topbar = ({ onOpenSidebar, user }: TopbarProps) => {
 
                                 <div className="py-1">
                                     <Link
-                                        href="/staff"
-                                        onClick={() => setIsProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-muted hover:bg-page hover:text-text transition-colors"
+                                        href="#"
+                                        className="flex items-center gap-2.5 px-4 py-2 text-muted opacity-50 cursor-not-allowed pointer-events-none transition-colors"
                                     >
                                         <User size={16} />
                                         <span>Profile Link</span>
                                     </Link>
                                     <button
-                                        onClick={() => setIsProfileOpen(false)}
-                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-muted hover:bg-page hover:text-text transition-colors text-left"
+                                        disabled
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-muted opacity-50 cursor-not-allowed transition-colors text-left"
                                     >
                                         <Lock size={16} />
                                         <span>Change Password</span>
@@ -229,7 +230,7 @@ export const Topbar = ({ onOpenSidebar, user }: TopbarProps) => {
                                             setIsProfileOpen(false);
                                             logout();
                                         }}
-                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-danger hover:bg-red-50 transition-colors text-left font-medium"
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-danger hover:bg-red-50 transition-colors text-left font-medium cursor-pointer"
                                     >
                                         <LogOut size={16} />
                                         <span>Logout</span>

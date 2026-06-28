@@ -4,17 +4,13 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Topbar from "@/components/Shared/Topbar";
 import Sidebar from "@/components/Shared/Sidebar";
-import type { User } from "@/lib/auth";
+import { useUser } from "@/contexts/UserContext";
 
-interface AppLayoutProps {
-    children: React.ReactNode;
-    user: User | null;
-}
-
-const AppLayout = ({ children, user }: AppLayoutProps) => {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     const isLogin = pathname === "/login";
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const user = useUser();
 
     useEffect(() => {
         setIsSidebarOpen(false);
@@ -45,12 +41,12 @@ const AppLayout = ({ children, user }: AppLayoutProps) => {
                 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
             `}
             >
-                <Sidebar onClose={() => setIsSidebarOpen(false)} user={user} />
+                <Sidebar onClose={() => setIsSidebarOpen(false)} />
             </div>
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 lg:ml-[200px] xl:ml-[300px] transition-all duration-300">
-                <Topbar onOpenSidebar={() => setIsSidebarOpen(true)} user={user} />
+                <Topbar onOpenSidebar={() => setIsSidebarOpen(true)} />
                 <main className="flex-1 p-6 w-full">{children}</main>
             </div>
         </div>

@@ -153,6 +153,10 @@ export default function LoginPage() {
                 return;
             }
 
+            const meRes = await fetch("/api/auth/me");
+            const meData = await meRes.json();
+            console.log("User data after login:", meData);
+
             router.push("/dashboard");
         } catch {
             setError("Network error. Please try again.");
