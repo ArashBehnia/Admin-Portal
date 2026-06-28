@@ -69,6 +69,7 @@ export type AgentActivityDto = {
 
 export type Agent = {
     id: string;
+    agencyId: string;
     name: string;
     email: string;
     phone: string;

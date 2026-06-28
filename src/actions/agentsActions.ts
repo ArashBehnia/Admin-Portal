@@ -8,6 +8,7 @@ export type Activity = {
 
 export type Agent = {
     id: string;
+    agencyId: string;
     name: string;
     email: string;
     phone: string;
@@ -69,6 +70,7 @@ function mapAgentFromDto(item: AgentListItemDto): Agent {
 
     return {
         id: String(item.id),
+        agencyId: String(item.agencyId ?? ""),
         name,
         email: item.email ?? "",
         phone: item.mobile ?? "",

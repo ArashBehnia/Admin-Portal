@@ -20,6 +20,59 @@ interface CreateAgencySidebarProps {
     onSuccess: () => void;
 }
 
+type FormErrors = Partial<Record<string, string>>;
+
+function validate(fields: {
+    name: string;
+    email: string;
+    phone: string;
+    agencyAddress: string;
+    state: string;
+    postcode: string;
+    crmSelection: string;
+    crmName: string;
+}): FormErrors {
+    const errors: FormErrors = {};
+
+    if (!fields.name.trim()) {
+        errors.name = "Agency name is required.";
+    }
+
+    if (!fields.email.trim()) {
+        errors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
+        errors.email = "Enter a valid email address.";
+    }
+
+    if (!fields.phone.trim()) {
+        errors.phone = "Phone number is required.";
+    }
+
+    if (!fields.agencyAddress.trim()) {
+        errors.agencyAddress = "Agency address is required.";
+    }
+
+    if (!fields.state) {
+        errors.state = "State is required.";
+    }
+
+    if (!fields.postcode.trim()) {
+        errors.postcode = "Postcode is required.";
+    } else if (!/^\d{4}$/.test(fields.postcode.trim())) {
+        errors.postcode = "Postcode must be exactly 4 digits.";
+    }
+
+    if (!fields.crmSelection) {
+        errors.crmSelection = "CRM selection is required.";
+    }
+
+    if (fields.crmSelection === "Other" && !fields.crmName.trim()) {
+        errors.crmName = "CRM name is required when Other is selected.";
+    }
+
+    return errors;
+}
+
 const CreateAgencySidebar = ({
     isOpen,
     onClose,
@@ -40,6 +93,8 @@ const CreateAgencySidebar = ({
     const [description, setDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [errors, setErrors] = useState<FormErrors>({});
+    const [touched, setTouched] = useState<Record<string, boolean>>({});
 
     if (!isOpen) return null;
 
@@ -58,6 +113,8 @@ const CreateAgencySidebar = ({
         setRentalRla("");
         setDescription("");
         setError("");
+        setErrors({});
+        setTouched({});
     };
 
     const handleClose = () => {
@@ -65,8 +122,60 @@ const CreateAgencySidebar = ({
         onClose();
     };
 
+    const markTouched = (field: string) => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+    };
+
+    const validateField = (field: string, value: string) => {
+        const result = validate({
+            name,
+            email,
+            phone,
+            agencyAddress,
+            state,
+            postcode,
+            crmSelection,
+            crmName,
+            [field]: value,
+        });
+        setErrors((prev) => {
+            const next = { ...prev };
+            if (result[field]) {
+                next[field] = result[field];
+            } else {
+                delete next[field];
+            }
+            return next;
+        });
+    };
+
     const handleSubmit = async () => {
         setError("");
+
+        const formErrors = validate({
+            name,
+            email,
+            phone,
+            agencyAddress,
+            state,
+            postcode,
+            crmSelection,
+            crmName,
+        });
+        setErrors(formErrors);
+        setTouched({
+            name: true,
+            email: true,
+            phone: true,
+            agencyAddress: true,
+            state: true,
+            postcode: true,
+            crmSelection: true,
+            crmName: true,
+        });
+
+        if (Object.keys(formErrors).length > 0) return;
+
         setIsSubmitting(true);
 
         try {
@@ -112,6 +221,13 @@ const CreateAgencySidebar = ({
         }
     };
 
+    const fieldClass = (field: string) =>
+        `w-full border rounded px-3 py-2 text-[13px] focus:outline-none focus:ring-1 bg-card text-text ${
+            touched[field] && errors[field]
+                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                : "border-border focus:border-accent focus:ring-accent"
+        }`;
+
     return (
         <div className="fixed inset-0 z-[9999] flex justify-end">
             <div
@@ -136,118 +252,197 @@ const CreateAgencySidebar = ({
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     <div className="space-y-1.5">
                         <label className="block text-[13px] font-semibold text-text">
-                            Agency Name <span className="text-red-500">*</span>
+                            Agency Name
                         </label>
                         <input
                             type="text"
                             placeholder="Enter agency name"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                if (touched.name) validateField("name", e.target.value);
+                            }}
+                            onBlur={() => {
+                                markTouched("name");
+                                validateField("name", name);
+                            }}
+                            className={fieldClass("name")}
                         />
+                        {touched.name && errors.name && (
+                            <p className="text-[11px] text-red-500">{errors.name}</p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="block text-[13px] font-semibold text-text">
-                            Email <span className="text-red-500">*</span>
+                            Email
                         </label>
                         <input
                             type="email"
                             placeholder="agency@example.com"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (touched.email) validateField("email", e.target.value);
+                            }}
+                            onBlur={() => {
+                                markTouched("email");
+                                validateField("email", email);
+                            }}
+                            className={fieldClass("email")}
                         />
+                        {touched.email && errors.email && (
+                            <p className="text-[11px] text-red-500">{errors.email}</p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="block text-[13px] font-semibold text-text">
-                            Phone Number <span className="text-red-500">*</span>
+                            Phone Number
                         </label>
                         <input
                             type="tel"
                             placeholder="+61412345678"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                            onChange={(e) => {
+                                setPhone(e.target.value);
+                                if (touched.phone) validateField("phone", e.target.value);
+                            }}
+                            onBlur={() => {
+                                markTouched("phone");
+                                validateField("phone", phone);
+                            }}
+                            className={fieldClass("phone")}
                         />
+                        {touched.phone && errors.phone && (
+                            <p className="text-[11px] text-red-500">{errors.phone}</p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="block text-[13px] font-semibold text-text">
-                            Agency Address <span className="text-red-500">*</span>
+                            Agency Address
                         </label>
                         <input
                             type="text"
                             placeholder="10 Smith Street, Sydney"
                             value={agencyAddress}
-                            onChange={(e) => setAgencyAddress(e.target.value)}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                            onChange={(e) => {
+                                setAgencyAddress(e.target.value);
+                                if (touched.agencyAddress) validateField("agencyAddress", e.target.value);
+                            }}
+                            onBlur={() => {
+                                markTouched("agencyAddress");
+                                validateField("agencyAddress", agencyAddress);
+                            }}
+                            className={fieldClass("agencyAddress")}
                         />
+                        {touched.agencyAddress && errors.agencyAddress && (
+                            <p className="text-[11px] text-red-500">{errors.agencyAddress}</p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
                             <label className="block text-[13px] font-semibold text-text">
-                                State <span className="text-red-500">*</span>
+                                State
                             </label>
                             <select
                                 value={state}
-                                onChange={(e) => setState(e.target.value)}
-                                className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                                onChange={(e) => {
+                                    setState(e.target.value);
+                                    if (touched.state) validateField("state", e.target.value);
+                                }}
+                                onBlur={() => {
+                                    markTouched("state");
+                                    validateField("state", state);
+                                }}
+                                className={fieldClass("state")}
                             >
                                 <option value="">Select</option>
                                 {STATES.map((s) => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
+                            {touched.state && errors.state && (
+                                <p className="text-[11px] text-red-500">{errors.state}</p>
+                            )}
                         </div>
                         <div className="space-y-1.5">
                             <label className="block text-[13px] font-semibold text-text">
-                                Postcode <span className="text-red-500">*</span>
+                                Postcode
                             </label>
                             <input
                                 type="text"
                                 placeholder="2000"
                                 maxLength={4}
                                 value={postcode}
-                                onChange={(e) => setPostcode(e.target.value.replace(/\D/g, ""))}
-                                className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "");
+                                    setPostcode(val);
+                                    if (touched.postcode) validateField("postcode", val);
+                                }}
+                                onBlur={() => {
+                                    markTouched("postcode");
+                                    validateField("postcode", postcode);
+                                }}
+                                className={fieldClass("postcode")}
                             />
+                            {touched.postcode && errors.postcode && (
+                                <p className="text-[11px] text-red-500">{errors.postcode}</p>
+                            )}
                         </div>
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="block text-[13px] font-semibold text-text">
-                            CRM Selection <span className="text-red-500">*</span>
+                            CRM Selection
                         </label>
                         <select
                             value={crmSelection}
                             onChange={(e) => {
                                 setCrmSelection(e.target.value);
                                 if (e.target.value !== "Other") setCrmName("");
+                                if (touched.crmSelection) validateField("crmSelection", e.target.value);
                             }}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                            onBlur={() => {
+                                markTouched("crmSelection");
+                                validateField("crmSelection", crmSelection);
+                            }}
+                            className={fieldClass("crmSelection")}
                         >
                             <option value="">Select CRM</option>
                             {CRM_OPTIONS.map((c) => (
                                 <option key={c} value={c}>{c}</option>
                             ))}
                         </select>
+                        {touched.crmSelection && errors.crmSelection && (
+                            <p className="text-[11px] text-red-500">{errors.crmSelection}</p>
+                        )}
                     </div>
 
                     {crmSelection === "Other" && (
                         <div className="space-y-1.5">
                             <label className="block text-[13px] font-semibold text-text">
-                                CRM Name <span className="text-red-500">*</span>
+                                CRM Name
                             </label>
                             <input
                                 type="text"
                                 placeholder="Enter CRM name"
                                 value={crmName}
-                                onChange={(e) => setCrmName(e.target.value)}
-                                className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
+                                onChange={(e) => {
+                                    setCrmName(e.target.value);
+                                    if (touched.crmName) validateField("crmName", e.target.value);
+                                }}
+                                onBlur={() => {
+                                    markTouched("crmName");
+                                    validateField("crmName", crmName);
+                                }}
+                                className={fieldClass("crmName")}
                             />
+                            {touched.crmName && errors.crmName && (
+                                <p className="text-[11px] text-red-500">{errors.crmName}</p>
+                            )}
                         </div>
                     )}
 

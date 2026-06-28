@@ -10,6 +10,8 @@ interface AgentOverview {
     email?: string;
     mobile?: string;
     role?: string;
+    firstName?: string;
+    lastName?: string;
     agencyId?: string;
     agencyName?: string;
     isActive: boolean;
@@ -34,6 +36,7 @@ interface AgentDrawerProps {
     onClose: () => void;
     getInitials: (name: string) => string;
     getStatusClasses: (status: Agent["status"]) => string;
+    onRefresh?: () => void;
 }
 
 function formatRelativeTime(iso?: string): string {
@@ -60,6 +63,7 @@ const AgentDrawer = ({
     onClose,
     getInitials,
     getStatusClasses,
+    onRefresh,
 }: AgentDrawerProps) => {
     const [overview, setOverview] = useState<AgentOverview | null>(null);
     const [activities, setActivities] = useState<AgentActivityItem[]>([]);
@@ -75,7 +79,7 @@ const AgentDrawer = ({
     const [passwordError, setPasswordError] = useState("");
 
     const [showChangeRole, setShowChangeRole] = useState(false);
-    const [selectedRole, setSelectedRole] = useState("standard");
+    const [selectedRole, setSelectedRole] = useState("agent");
     const [isChangingRole, setIsChangingRole] = useState(false);
     const [roleError, setRoleError] = useState("");
 
@@ -86,7 +90,7 @@ const AgentDrawer = ({
         let cancelled = false;
 
         async function loadOverview() {
-            if (activeDrawerTab !== "profile" || fetchedOverviewRef.current === selectedAgent.id) return;
+            if (fetchedOverviewRef.current === selectedAgent.id) return;
             fetchedOverviewRef.current = selectedAgent.id;
             setLoadingOverview(true);
             try {
@@ -131,6 +135,8 @@ const AgentDrawer = ({
         ? [overview.role].filter(Boolean).join(" ") || selectedAgent.role
         : selectedAgent.role;
 
+    const isActive = overview?.isActive ?? selectedAgent.status === "Active";
+
     const handleResetPassword = async () => {
         if (!newPassword.trim()) {
             setPasswordError("Password is required");
@@ -144,8 +150,8 @@ const AgentDrawer = ({
         setPasswordError("");
         try {
             const res = await api.put(
-                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId ?? ""}`,
-                { password: newPassword },
+                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
+                { password: newPassword, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
             );
             if (res.data?.success) {
                 setShowResetPassword(false);
@@ -165,12 +171,13 @@ const AgentDrawer = ({
         setRoleError("");
         try {
             const res = await api.put(
-                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId ?? ""}`,
-                { role: selectedRole },
+                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
+                { role: selectedRole, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
             );
             if (res.data?.success) {
                 setShowChangeRole(false);
                 setOverview((prev) => prev ? { ...prev, role: selectedRole } : null);
+                onRefresh?.();
             } else {
                 setRoleError(res.data?.error ?? "Failed to change role");
             }
@@ -186,11 +193,12 @@ const AgentDrawer = ({
         setDeactivateError("");
         try {
             const res = await api.put(
-                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId ?? ""}`,
-                { isActive: !overview?.isActive },
+                `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
+                { isActive: !isActive, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
             );
             if (res.data?.success) {
                 setOverview((prev) => prev ? { ...prev, isActive: !prev.isActive } : null);
+                onRefresh?.();
             } else {
                 setDeactivateError(res.data?.error ?? "Failed to update status");
             }
@@ -419,8 +427,10 @@ const AgentDrawer = ({
                                             onChange={(e) => setSelectedRole(e.target.value)}
                                             className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
                                         >
+                                            <option value="owner">Owner</option>
+                                            <option value="agent">Agent</option>
                                             <option value="admin">Admin</option>
-                                            <option value="standard">Standard</option>
+                                            <option value="assistant">Assistant</option>
                                         </select>
                                         {roleError && (
                                             <p className="text-[12px] text-red-500">{roleError}</p>
@@ -468,7 +478,7 @@ const AgentDrawer = ({
                             {/* Deactivate/Reactivate */}
                             <div className="border border-border rounded-lg p-4">
                                 <h3 className="text-sm font-semibold text-text mb-2">
-                                    {overview?.isActive ? "Deactivate Account" : "Reactivate Account"}
+                                    {isActive ? "Deactivate Account" : "Reactivate Account"}
                                 </h3>
                                 {deactivateError && (
                                     <p className="text-[12px] text-red-500 mb-2">{deactivateError}</p>
@@ -477,14 +487,14 @@ const AgentDrawer = ({
                                     onClick={handleDeactivate}
                                     disabled={isDeactivating}
                                     className={`w-full py-2.5 px-4 font-semibold rounded-md text-sm transition-all text-left cursor-pointer disabled:opacity-40 ${
-                                        overview?.isActive
+                                        isActive
                                             ? "text-danger hover:bg-red-50"
                                             : "text-success hover:bg-green-50"
                                     }`}
                                 >
                                     {isDeactivating
                                         ? "Updating..."
-                                        : overview?.isActive
+                                        : isActive
                                           ? "Deactivate account"
                                           : "Reactivate account"}
                                 </button>

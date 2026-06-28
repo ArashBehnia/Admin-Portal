@@ -1,10 +1,12 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Agent } from "@/types/agentTypes";
 import useAgents from "@/hooks/useAgents"
 import AgentsTable from "./AgentsTable";
 import AgentDrawer from "./AgentDrawer";
+import CreateAgentDrawer from "./CreateAgentDrawer";
 
 interface AgentsPageClientProps {
     initialAgents: Agent[];
@@ -31,7 +33,10 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
         getStatusClasses,
         openDrawer,
         closeDrawer,
+        refreshPage,
     } = useAgents({ initialAgents, initialTotal });
+
+    const [showCreateDrawer, setShowCreateDrawer] = useState(false);
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
@@ -43,13 +48,21 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
                         Search and manage all agents across all agencies.
                     </p>
                 </div>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
-                    title="Refresh"
-                >
-                    <RefreshCw className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 self-start shrink-0">
+                    <button
+                        onClick={() => setShowCreateDrawer(true)}
+                        className="bg-accent hover:bg-accent/90 text-white px-3.5 py-1.5 rounded text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                        <Plus className="w-4 h-4" /> Create
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
+                        title="Refresh"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
             {/* Summary Cards */}
@@ -102,8 +115,15 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
                     onClose={closeDrawer}
                     getInitials={getInitials}
                     getStatusClasses={getStatusClasses}
+                    onRefresh={refreshPage}
                 />
             )}
+
+            <CreateAgentDrawer
+                isOpen={showCreateDrawer}
+                onClose={() => setShowCreateDrawer(false)}
+                onSuccess={() => window.location.reload()}
+            />
         </div>
     );
 };

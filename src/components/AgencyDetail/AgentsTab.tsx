@@ -53,9 +53,6 @@ const AgentsTab = ({ agents, isLoading }: AgentsTabProps) => {
                                 <th className="font-medium py-3 px-3">
                                     Status
                                 </th>
-                                <th className="font-medium py-3 pl-3 pr-4 text-right">
-                                    Actions
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,11 +99,6 @@ const AgentsTab = ({ agents, isLoading }: AgentsTabProps) => {
                                                     {agent?.status}
                                                 </span>
                                             </div>
-                                        </td>
-                                        <td className="py-3 pl-3 pr-4 text-right whitespace-nowrap">
-                                            <button className="text-accent font-medium hover:underline cursor-pointer">
-                                                Edit
-                                            </button>
                                         </td>
                                     </tr>
                                 );

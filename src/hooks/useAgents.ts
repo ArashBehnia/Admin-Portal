@@ -88,6 +88,7 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
                 const items: Agent[] = (pageData.data ?? []).map(
                     (item: Record<string, unknown>) => ({
                         id: String(item.id ?? ""),
+                        agencyId: String(item.agencyId ?? ""),
                         name: [item.firstName, item.lastName]
                             .filter(Boolean)
                             .join(" ") ||
@@ -108,7 +109,7 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
                         lastLogin: formatRelativeTime(
                             item.lastLoggedIn as string | undefined,
                         ),
-                        status: mapStatus(item.status as string | undefined),
+                        status: mapStatus(item.status as string | undefined, item.isActive as boolean | undefined),
                         activities: [],
                     }),
                 );
@@ -211,6 +212,7 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
         // Handlers
         openDrawer,
         closeDrawer,
+        refreshPage: () => loadPage(currentPage, searchQueryRef.current),
     };
 };
 
@@ -231,7 +233,8 @@ function formatRelativeTime(iso?: string): string {
     return `${years} year${years > 1 ? "s" : ""} ago`;
 }
 
-function mapStatus(status?: string): "Active" | "Inactive" | "Pending" {
+function mapStatus(status?: string, isActive?: boolean): "Active" | "Inactive" | "Pending" {
+    if (isActive === false) return "Inactive";
     if (!status) return "Active";
     const s = status.toLowerCase();
     if (s === "active" || s === "enabled" || s === "live") return "Active";
