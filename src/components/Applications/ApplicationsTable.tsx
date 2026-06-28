@@ -87,12 +87,12 @@ const ApplicationsTable = ({
                     <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
-                                <th className="px-6 py-4">Applicant</th>
-                                <th className="px-6 py-4">Agency</th>
-                                <th className="px-6 py-4">CRM</th>
-                                <th className="px-6 py-4">Submitted</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-3 py-4">Applicant</th>
+                                <th className="px-3 py-4">Agency</th>
+                                <th className="px-3 py-4">CRM</th>
+                                <th className="px-3 py-4">Submitted</th>
+                                <th className="px-3 py-4">Status</th>
+                                <th className="px-3 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
@@ -119,7 +119,7 @@ const ApplicationsTable = ({
                                                 : ""
                                         }`}
                                     >
-                                        <td className="py-3 pl-4 pr-3 whitespace-nowrap">
+                                        <td className="py-3 px-3 whitespace-nowrap">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-text">
                                                     {app.name || "\u2014"}

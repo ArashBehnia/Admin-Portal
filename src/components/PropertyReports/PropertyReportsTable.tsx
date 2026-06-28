@@ -211,12 +211,12 @@ const PropertyReportsTable = ({
                     <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
-                                <th className="px-6 py-4">Property</th>
-                                <th className="px-6 py-4">Reporter</th>
-                                <th className="px-6 py-4">Report type</th>
-                                <th className="px-6 py-4">Message</th>
-                                <th className="px-6 py-4">Created at</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-4 py-4">Property</th>
+                                <th className="px-4 py-4">Reporter</th>
+                                <th className="px-4 py-4">Report type</th>
+                                <th className="px-4 py-4">Message</th>
+                                <th className="px-4 py-4">Created at</th>
+                                <th className="px-4 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { RefreshCw } from "lucide-react";
 import {
     FtpRequest,
@@ -9,6 +9,15 @@ import {
 import useFtpRequests from "@/hooks/useFtpRequests";
 import FtpRequestsTable from "./FtpRequestsTable";
 import FtpRequestDrawer from "./FtpRequestDrawer";
+import ChangePasswordDrawer from "./ChangePasswordDrawer";
+import Toast from "@/components/Shared/Toast";
+
+interface ToastState {
+    visible: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "info";
+}
 
 interface FtpRequestsPageClientProps {
     initialData: FtpRequestsData;
@@ -40,6 +49,43 @@ const FtpRequestsPageClient = ({
 
     const [selectedRequest, setSelectedRequest] =
         useState<FtpRequest | null>(null);
+    const [passwordRequest, setPasswordRequest] =
+        useState<FtpRequest | null>(null);
+
+    const [toast, setToast] = useState<ToastState>({
+        visible: false,
+        title: "",
+        message: "",
+        type: "success",
+    });
+    const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showToast = useCallback(
+        (title: string, message: string, type: ToastState["type"] = "success") => {
+            if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+            setToast({ visible: true, title, message, type });
+            toastTimerRef.current = setTimeout(
+                () => setToast((prev) => ({ ...prev, visible: false })),
+                4000,
+            );
+        },
+        [],
+    );
+
+    const handleApprove = useCallback(
+        async (id: string) => {
+            try {
+                await approveRequest(id);
+                showToast("Approved", "FTP request has been approved successfully.");
+            } catch (err: unknown) {
+                const message =
+                    (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+                    (err instanceof Error ? err.message : "Failed to approve FTP request.");
+                showToast("Approve Failed", message, "error");
+            }
+        },
+        [approveRequest, showToast],
+    );
 
     return (
         <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
@@ -78,6 +124,8 @@ const FtpRequestsPageClient = ({
                 onToggleFilters={() => setShowFilters(!showFilters)}
                 onResetFilters={resetFilters}
                 onViewRequest={setSelectedRequest}
+                onChangePassword={setPasswordRequest}
+                onApprove={handleApprove}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={setPageSize}
             />
@@ -87,10 +135,33 @@ const FtpRequestsPageClient = ({
                 <FtpRequestDrawer
                     request={selectedRequest}
                     onClose={() => setSelectedRequest(null)}
-                    onApprove={approveRequest}
+                    onApprove={handleApprove}
                     onReject={rejectRequest}
                 />
             )}
+
+            {/* Change Password Drawer */}
+            {passwordRequest && (
+                <ChangePasswordDrawer
+                    request={passwordRequest}
+                    onClose={() => setPasswordRequest(null)}
+                    onSuccess={() =>
+                        showToast(
+                            "Password Updated",
+                            "FTP password has been changed successfully.",
+                        )
+                    }
+                />
+            )}
+
+            {/* Toast */}
+            <Toast
+                visible={toast.visible}
+                title={toast.title}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+            />
         </div>
     );
 };

@@ -11,10 +11,10 @@ interface ApplicationStatsProps {
 
 const ApplicationStats = ({ stats }: ApplicationStatsProps) => {
     const cards = [
-        { label: "Total applications", value: stats.total, dot: null },
-        { label: "Pending review", value: stats.pending, dot: "bg-orange-400" },
+        { label: "Total Applications", value: stats.total, dot: null },
+        { label: "Pending", value: stats.pending, dot: "bg-orange-400" },
         {
-            label: "Approved this month",
+            label: "Approved",
             value: stats.approvedThisMonth,
             dot: "bg-green-500",
         },

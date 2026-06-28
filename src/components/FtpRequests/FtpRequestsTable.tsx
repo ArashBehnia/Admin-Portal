@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Eye, SlidersHorizontal, X } from "lucide-react";
+import { Search, Eye, Key, SlidersHorizontal, X } from "lucide-react";
 import {
     FtpRequest,
     STATUS_OPTIONS,
@@ -24,6 +24,8 @@ interface FtpRequestsTableProps {
     onToggleFilters: () => void;
     onResetFilters: () => void;
     onViewRequest: (request: FtpRequest) => void;
+    onChangePassword: (request: FtpRequest) => void;
+    onApprove: (id: string) => void;
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rows: number) => void;
 }
@@ -84,6 +86,8 @@ const FtpRequestsTable = ({
     onToggleFilters,
     onResetFilters,
     onViewRequest,
+    onChangePassword,
+    onApprove,
     onPageChange,
     onRowsPerPageChange,
 }: FtpRequestsTableProps) => {
@@ -179,14 +183,14 @@ const FtpRequestsTable = ({
                     <table className="w-full text-left border-collapse text-[12px] min-w-[var(--min-table-width)]">
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
-                                <th className="px-6 py-4">Agency</th>
-                                <th className="px-6 py-4">Agent</th>
-                                <th className="px-6 py-4">Email</th>
-                                <th className="px-6 py-4">Allowed IP</th>
-                                <th className="px-6 py-4">FTP Username</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Requested At</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-4 py-3">Agency</th>
+                                <th className="px-4 py-3">Agent</th>
+                                <th className="px-4 py-3">Email</th>
+                                <th className="px-4 py-3">Allowed IP</th>
+                                <th className="px-4 py-3">FTP Username</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Requested At</th>
+                                <th className="px-4 py-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
@@ -235,15 +239,35 @@ const FtpRequestsTable = ({
                                             {formatDate(req.requestedAt)}
                                         </td>
                                         <td className="py-2.5 px-4 text-right">
-                                            <button
-                                                onClick={() =>
-                                                    onViewRequest(req)
-                                                }
-                                                className="text-accent hover:underline font-medium flex items-center gap-1 ml-auto cursor-pointer"
-                                            >
-                                                <Eye className="w-3.5 h-3.5" />
-                                                View
-                                            </button>
+                                            <div className="flex items-center justify-end gap-3">
+                                                <button
+                                                    onClick={() =>
+                                                        onViewRequest(req)
+                                                    }
+                                                    className="text-accent hover:underline font-medium flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    View
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        onChangePassword(req)
+                                                    }
+                                                    disabled={
+                                                        req?.status.toLowerCase() !== "approved" &&
+                                                        req?.status.toLowerCase() !== "accepted"
+                                                    }
+                                                    className={`font-medium flex items-center gap-1 ${
+                                                        req?.status.toLowerCase() !== "approved" &&
+                                                        req?.status.toLowerCase() !== "accepted"
+                                                            ? "text-muted cursor-not-allowed opacity-50"
+                                                            : "text-warning hover:underline cursor-pointer"
+                                                    }`}
+                                                >
+                                                    {/* <Key className="w-3.5 h-3.5" /> */}
+                                                    Change Password
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
