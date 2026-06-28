@@ -7,11 +7,13 @@ export async function GET(request: Request) {
         const offset = searchParams.get("offset") ?? "0";
         const limit = searchParams.get("limit") ?? "10";
         const keywords = searchParams.get("keywords") ?? undefined;
+        const status = searchParams.get("status") ?? undefined;
 
         const result = await fetchIntegrationsPage(
             Number(offset),
             Number(limit),
             keywords,
+            status,
         );
         // Return shape matching what the client expects:
         // { data: [...items], total, offset, limit }

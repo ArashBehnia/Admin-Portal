@@ -21,12 +21,14 @@ export async function fetchIntegrationsPage(
     offset = 0,
     limit = 10,
     keywords?: string,
+    status?: string,
 ): Promise<{ data: IntegrationListItemDto[]; total: number }> {
     const params = new URLSearchParams({
         offset: String(offset),
         limit: String(limit),
     });
     if (keywords) params.set("keywords", keywords);
+    if (status && status !== "All") params.set("status", status);
 
     const raw = await backendFetch<unknown>(
         `/admin/integrations/page?${params.toString()}`,

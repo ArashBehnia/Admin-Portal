@@ -125,7 +125,10 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
 
     // ─── Filter & Pagination State ────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
     const [filterStatus, setFilterStatus] = useState<StatusFilter>("All");
+    const filterStatusRef = useRef(filterStatus);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
@@ -133,7 +136,7 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (page: number, keywords?: string) => {
+        async (page: number, keywords?: string, status?: string) => {
             setIsLoading(true);
             try {
                 const offset = (page - 1) * pageSizeRef.current;
@@ -142,6 +145,7 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
                     limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
+                if (status && status !== "All") params.set("status", status);
 
                 const [summaryRes, pageRes] = await Promise.all([
                     api.get("/api/integrations/summary"),
@@ -155,9 +159,20 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
                 const pageData: ApiPage = pageRes.data;
                 const result = mapPageData(summary, pageData);
 
+                // Use summary stats for total count (page API total is unreliable)
+                let filteredTotal = summary.totalAgencies;
+                const s = (status ?? "All").toLowerCase();
+                if (s === "healthy") filteredTotal = summary.connected;
+                else if (s === "failing") filteredTotal = summary.feedErrors24h;
+                else if (s === "warning")
+                    filteredTotal = Math.max(
+                        0,
+                        summary.totalAgencies - summary.connected - summary.feedErrors24h,
+                    );
+
                 setStats(result.stats);
                 setFeeds(result.feeds);
-                setTotalCount(result.total);
+                setTotalCount(filteredTotal);
             } catch (err) {
                 console.error("Failed to load integrations:", err);
             } finally {
@@ -170,40 +185,37 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
     // ─── Search with debounce ─────────────────────────────────────────
     useEffect(() => {
         if (!searchQuery) {
-            loadPage(1);
+            loadPage(1, undefined, filterStatusRef.current);
             return;
         }
         setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(1, searchQuery).finally(() => setIsSearching(false));
+            loadPage(1, searchQuery, filterStatusRef.current).finally(() => setIsSearching(false));
         }, 400);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
-    // ─── Derived / Computed (client-side status filter) ───────────────
-    const filteredFeeds = feeds.filter((feed) => {
-        const matchesStatus =
-            filterStatus === "All" || feed.status === filterStatus;
-        return matchesStatus;
-    });
+    // ─── Derived / Computed ───────────────────────────────────────────
+    const filteredFeeds = feeds;
 
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     // ─── Effects ──────────────────────────────────────────────────────
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, filterStatus]);
+        loadPage(1, searchQueryRef.current, filterStatus);
+    }, [filterStatus, loadPage]);
 
     useEffect(() => {
         setCurrentPage(1);
-        loadPage(1, searchQuery || undefined);
-    }, [pageSize, loadPage, searchQuery]);
+        loadPage(1, searchQuery || undefined, filterStatusRef.current);
+    }, [pageSize, loadPage]);
 
     // ─── Page change ──────────────────────────────────────────────────
     const handlePageChange = useCallback(
         (page: number) => {
             setCurrentPage(page);
-            loadPage(page, searchQuery || undefined);
+            loadPage(page, searchQuery || undefined, filterStatusRef.current);
         },
         [loadPage, searchQuery],
     );
