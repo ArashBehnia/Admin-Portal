@@ -18,7 +18,7 @@ const DemandHotspots = ({ hotspots }: DemandHotspotsProps) => {
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm min-w-[var(--min-table-width)]">
                     <thead>
-                        <tr className="border-b border-border bg-card text-[12px] text-muted font-bold uppercase tracking-wider">
+                        <tr className="border-b border-border/60 bg-card text-[13px] text-muted font-semibold">
                             <th className="pb-3 pt-1">Suburb</th>
                             <th className="pb-3 pt-1">State</th>
                             <th className="pb-3 pt-1 text-right">
@@ -32,16 +32,16 @@ const DemandHotspots = ({ hotspots }: DemandHotspotsProps) => {
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/60">
+                    <tbody className="divide-y divide-border/40">
                         {hotspots.map((row, idx) => (
                             <tr
                                 key={idx}
                                 className="hover:bg-page/20 transition-colors"
                             >
-                                <td className="py-3.5 text-text font-bold">
+                                <td className="py-3.5 text-text font-semibold">
                                     {row.suburb}
                                 </td>
-                                <td className="py-3.5 text-muted font-semibold">
+                                <td className="py-3.5 text-muted font-medium">
                                     {row.state}
                                 </td>
                                 <td className="py-3.5 text-text text-right font-medium">

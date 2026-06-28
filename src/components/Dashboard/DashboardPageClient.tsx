@@ -54,7 +54,7 @@ const DashboardPageClient = () => {
     }
 
     return (
-        <div className="flex flex-col gap-5 w-full max-w-content mx-auto">
+        <div className="flex flex-col gap-8 w-full max-w-content mx-auto">
             {/* Header + Timeframe */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
@@ -107,9 +107,9 @@ const DashboardPageClient = () => {
                         />
                     )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {pipeline && <OnboardingPipeline pipeline={pipeline} />}
-                        {userActivity && <UserActivityChart data={userActivity} />}
+                        {userActivity && <UserActivityChart data={userActivity} timeframe={timeframe} />}
                     </div>
 
                     {hotspots && <DemandHotspots hotspots={hotspots} />}

@@ -1,20 +1,41 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { User } from "@/lib/auth";
 
-const UserContext = createContext<User | null>(null);
+type UserContextType = {
+    user: User | null;
+    setUser: (user: User | null) => void;
+};
+
+const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({
-    user,
+    user: initialUser,
     children,
 }: {
     user: User | null;
     children: React.ReactNode;
 }) {
-    return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+    const [user, setUser] = useState<User | null>(initialUser);
+
+    useEffect(() => {
+        setUser(initialUser);
+    }, [initialUser]);
+
+    return (
+        <UserContext.Provider value={{ user, setUser }}>
+            {children}
+        </UserContext.Provider>
+    );
 }
 
 export function useUser() {
-    return useContext(UserContext);
+    const context = useContext(UserContext);
+    return context?.user ?? null;
+}
+
+export function useSetUser() {
+    const context = useContext(UserContext);
+    return context?.setUser ?? (() => {});
 }

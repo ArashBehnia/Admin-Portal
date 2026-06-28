@@ -40,15 +40,15 @@ const KPICards = ({ kpis, getTrendClass }: KPICardsProps) => {
                         </span>
                     )}
                     <div>
-                        <span className="text-[13px] text-muted font-bold">
+                        <span className="text-[13px] text-text font-semibold">
                             {label}
                         </span>
-                        <p className="text-3xl font-black text-text mt-1">
+                        <p className="text-[32px] font-bold text-text mt-1.5 leading-none tracking-tight">
                             {comingSoon ? "–" : data.value}
                         </p>
                     </div>
                     <p
-                        className={`text-[12px] font-bold mt-2 ${comingSoon ? "text-muted" : getTrendClass(data.trendType)}`}
+                        className={`text-[12px] font-semibold mt-3 ${comingSoon ? "text-muted" : getTrendClass(data.trendType)}`}
                     >
                         {comingSoon ? "Billing integration pending" : data.trend}
                     </p>

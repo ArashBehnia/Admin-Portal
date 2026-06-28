@@ -62,7 +62,7 @@ export async function getUser(): Promise<User | null> {
 
             if (userId) {
                 const found = json.content.find(
-                    (u: User) => u.id === userId,
+                    (u: User) => String(u.id) === String(userId),
                 );
                 if (found) return found;
             }

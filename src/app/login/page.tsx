@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useSetUser } from "@/contexts/UserContext";
 
 type LoginStep = "password" | "mfa" | "forgot_password";
 
 export default function LoginPage() {
     const router = useRouter();
+    const setUser = useSetUser();
 
     const [step, setStep] = useState<LoginStep>("password");
 
@@ -156,7 +158,10 @@ export default function LoginPage() {
             const meRes = await fetch("/api/auth/me");
             const meData = await meRes.json();
             console.log("User data after login:", meData);
-
+            
+            setUser(meData);
+            
+            router.refresh();
             router.push("/dashboard");
         } catch {
             setError("Network error. Please try again.");

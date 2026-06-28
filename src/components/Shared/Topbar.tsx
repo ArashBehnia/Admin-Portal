@@ -123,7 +123,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const profileRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // console.log(user)
+    console.log(user)
 
     const name = user
         ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||

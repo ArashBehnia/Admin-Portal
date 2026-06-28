@@ -30,22 +30,25 @@ const renderAttentionIcon = (id: string) => {
 
 const AttentionAlerts = ({ items, getAttentionLink }: AttentionAlertsProps) => {
     return (
-        <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted/90">
+        <div className="flex flex-col gap-2.5">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
                 Attention required
             </span>
             <div className="flex flex-wrap items-center gap-3">
-                {items.map((item, idx) => (
-                    <Link
-                        key={item.id ?? idx}
-                        href={getAttentionLink(item.id)}
-                        className="bg-warning/10 hover:bg-warning/15 border border-warning/20 text-warning rounded-md px-3.5 py-2 flex items-center gap-2 text-xs font-semibold transition-all cursor-pointer"
-                    >
-                        {renderAttentionIcon(item.id)}
-                        <span>{item.label}</span>
-                        <ArrowRight size={13} className="stroke-[2.5]" />
-                    </Link>
-                ))}
+                {items.map((item, idx) => {
+                    const href = idx === 0 ? "/integrations" : idx === 1 ? "/agencies" : idx === 2 ? "/applications" : getAttentionLink(item.id);
+                    return (
+                        <Link
+                            key={item.id ?? idx}
+                            href={href}
+                            className="bg-[#FFF8F3] hover:bg-[#FFF2EA] border border-[#FFDCC3] text-[#E05C00] rounded px-3 py-1.5 flex items-center gap-2 text-[13px] font-semibold transition-all cursor-pointer shadow-sm"
+                        >
+                            {renderAttentionIcon(item.id)}
+                            <span>{item.label}</span>
+                            <ArrowRight size={14} className="stroke-[2.5]" />
+                        </Link>
+                    );
+                })}
             </div>
         </div>
     );

@@ -9,9 +9,9 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
         {
             label: "API status",
             content: (
-                <div className="flex items-center gap-2 mt-2">
-                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-sm font-bold text-text">
+                <div className="flex items-center gap-2 mt-2.5">
+                    <span className={`w-2.5 h-2.5 rounded-full ${health.apiStatus.status === "operational" ? "bg-success" : health.apiStatus.status === "maintenance" ? "bg-warning" : "bg-danger"} animate-pulse`} />
+                    <span className="text-xl font-bold text-text">
                         {health.apiStatus.status}
                     </span>
                 </div>
@@ -21,7 +21,7 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
         {
             label: "Queue depth (REAXML)",
             content: (
-                <span className="text-lg font-black text-text mt-2">
+                <span className="text-2xl font-bold text-text mt-2 block">
                     {health.queueDepth}
                 </span>
             ),
@@ -30,7 +30,7 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
         {
             label: "Failed jobs (24h)",
             content: (
-                <span className="text-lg font-black text-text mt-2">
+                <span className="text-2xl font-bold text-text mt-2 block">
                     {health.failedJobs}
                 </span>
             ),
@@ -39,9 +39,9 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
         {
             label: "Stale feeds >24h",
             content: (
-                <div className="flex items-center gap-2 mt-2">
-                    <span className="w-2 h-2 rounded-full bg-warning" />
-                    <span className="text-lg font-black text-text">
+                <div className="flex items-center gap-2 mt-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-warning" />
+                    <span className="text-2xl font-bold text-text">
                         {health.staleFeeds}
                     </span>
                 </div>
@@ -51,9 +51,9 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
         {
             label: "Feeds healthy",
             content: (
-                <div className="flex items-center gap-2 mt-2">
-                    <span className="w-2 h-2 rounded-full bg-success" />
-                    <span className="text-lg font-black text-text">
+                <div className="flex items-center gap-2 mt-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-success" />
+                    <span className="text-2xl font-bold text-text">
                         {health.feedsHealthy.healthy} /{" "}
                         {health.feedsHealthy.total}
                     </span>
@@ -65,8 +65,8 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
 
     return (
         <div className="flex flex-col gap-2 relative">
-            <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted/90">
+            <div className="flex items-center gap-2 mb-1">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
                     System health
                 </span>
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
@@ -81,7 +81,7 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
                             warning ? "border-l-2 border-l-warning" : ""
                         }`}
                     >
-                        <span className="text-[12px] text-muted font-bold">
+                        <span className="text-[12px] text-text font-semibold">
                             {label}
                         </span>
                         {content}
