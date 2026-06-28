@@ -14,8 +14,8 @@ const OnboardingPipeline = ({ pipeline }: OnboardingPipelineProps) => {
                 </h2>
                 <p className="text-xs text-muted mt-0.5">Counts by stage</p>
 
-                <div className="mt-8 select-none">
-                    <div className="flex">
+                <div className="mt-8 select-none overflow-x-auto">
+                    <div className="flex min-w-[500px]">
                         {pipeline.stages.map((stage, idx) => (
                             <div key={idx} className="flex-1 text-center">
                                 <span className="text-xs text-muted font-medium">
@@ -24,7 +24,7 @@ const OnboardingPipeline = ({ pipeline }: OnboardingPipelineProps) => {
                             </div>
                         ))}
                     </div>
-                    <div className="flex items-center mt-1">
+                    <div className="flex items-center mt-1 min-w-[500px]">
                         {pipeline.stages.map((stage, idx) => (
                             <div
                                 key={idx}

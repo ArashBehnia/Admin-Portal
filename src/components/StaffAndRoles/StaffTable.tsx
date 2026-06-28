@@ -66,7 +66,7 @@ const StaffTable = ({
     return (
         <div className="flex flex-col gap-5 animate-fade-in">
             <div className="flex flex-col md:flex-row gap-3 items-center mt-1">
-                <div className="relative w-[260px] shrink-0">
+                <div className="relative w-full md:w-[260px] shrink-0">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                     <input
                         type="text"

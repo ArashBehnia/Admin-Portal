@@ -131,7 +131,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         <Menu size={20} />
                     </button>
 
-                    <nav className="flex items-center text-sm font-medium text-muted">
+                    <nav className="flex items-center text-sm font-medium text-muted overflow-hidden">
                       {breadcrumbs.map((crumb, idx) => {
                         const isLast = idx === breadcrumbs.length - 1;
                         const pathUpTo = '/' + pathname.split('/').filter(Boolean).slice(0, idx + 1).join('/');

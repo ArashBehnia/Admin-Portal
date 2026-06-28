@@ -60,7 +60,7 @@ const ApplicationDrawer = ({
             />
 
             {/* Drawer */}
-            <div className="fixed top-0 right-0 h-full w-[450px] bg-card shadow-2xl z-[60] flex flex-col border-l border-border overflow-hidden animate-slide-left">
+            <div className="fixed top-0 right-0 h-full w-full max-w-[450px] bg-card shadow-2xl z-[60] flex flex-col border-l border-border overflow-hidden animate-slide-left">
                 {/* Header */}
                 <div className="px-6 py-5 border-b border-border relative">
                     <button

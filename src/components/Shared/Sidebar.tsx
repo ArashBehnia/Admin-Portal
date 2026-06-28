@@ -142,7 +142,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     };
 
     return (
-        <div className="xl:w-[300px] lg:w-[200px] h-screen bg-card border-r border-border flex flex-col">
+        <div className="w-[280px] xl:w-[300px] lg:w-[200px] h-screen bg-card border-r border-border flex flex-col">
             <div className="h-[64px] flex items-center justify-between px-5 border-b border-border/50 shrink-0">
                 <div className="font-bold text-lg text-text">HomeBy Admin</div>
                 {onClose && (

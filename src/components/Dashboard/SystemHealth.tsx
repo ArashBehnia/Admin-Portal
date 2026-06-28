@@ -73,7 +73,7 @@ const SystemHealth = ({ health }: SystemHealthProps) => {
                     Coming soon
                 </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 opacity-50 pointer-events-none">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 opacity-50 pointer-events-none">
                 {cards.map(({ label, content, warning }) => (
                     <div
                         key={label}

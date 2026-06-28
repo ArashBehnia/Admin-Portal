@@ -133,7 +133,7 @@ const EmailTemplatesTable = ({
     return (
         <div className="flex flex-col gap-6">
             {/* Search + Category Filter */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="relative w-full max-w-xs">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted" />
                     <input

@@ -134,11 +134,11 @@ function DashboardSkeleton() {
                     />
                 ))}
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                     <div
                         key={i}
-                        className="bg-card border border-border rounded h-9 w-40"
+                        className="bg-card border border-border rounded h-9 w-full sm:w-[calc(50%-6px)] lg:w-40"
                     />
                 ))}
             </div>

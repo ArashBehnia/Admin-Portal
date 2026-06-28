@@ -16,7 +16,7 @@ const DemandHotspots = ({ hotspots }: DemandHotspotsProps) => {
                 </p>
             </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+                <table className="w-full text-left border-collapse text-sm min-w-[var(--min-table-width)]">
                     <thead>
                         <tr className="border-b border-border bg-card text-[12px] text-muted font-bold uppercase tracking-wider">
                             <th className="pb-3 pt-1">Suburb</th>
