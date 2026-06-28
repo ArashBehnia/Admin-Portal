@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { useEffect } from "react";
 import { Agency, AgencyTab, AgencyDetailData } from "@/actions/agenciesActions";
 import useAgencyDetail from "@/hooks/useAgencyDetail";
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import AgencyHeader from "./AgencyHeader";
 import AgencyTabs from "./AgencyTabs";
 import OverviewTab from "./OverviewTab";
@@ -42,6 +44,15 @@ const AgencyDetailClient = ({
         isAgentsLoading,
         fetchAgents,
     } = useAgencyDetail({ agencyId, detailData });
+
+    const { setDynamicCrumb } = useBreadcrumb();
+
+    useEffect(() => {
+        if (agency?.name) {
+            setDynamicCrumb(agency.name);
+        }
+        return () => setDynamicCrumb(null);
+    }, [agency?.name, setDynamicCrumb]);
 
     const handleTabChange = (tab: AgencyTab) => {
         setActiveTab(tab);

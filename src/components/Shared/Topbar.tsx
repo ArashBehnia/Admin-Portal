@@ -12,30 +12,111 @@ import {
     Building2,
     X,
     Menu,
+    FileText,
+    LayoutDashboard,
+    Plug,
+    UserCircle,
+    ClipboardList,
+    Mail,
+    Shield,
+    File,
+    Upload,
+    Ban,
+    ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 
 interface TopbarProps {
     onOpenSidebar: () => void;
 }
 
-type RecentItem = {
+type SearchItem = {
     id: string;
     name: string;
-    type: "Agency" | "Agent";
+    type: string;
     path: string;
+    icon: React.ElementType;
 };
 
-const recentSearches: RecentItem[] = [
-    { id: "1", name: "Ray White Bondi", type: "Agency", path: "/agencies" },
-    { id: "2", name: "James Mitchell", type: "Agent", path: "/agents" },
-    { id: "3", name: "McGrath Surry Hills", type: "Agency", path: "/agencies" },
+const searchablePages: SearchItem[] = [
+    {
+        id: "1",
+        name: "Dashboard",
+        type: "Page",
+        path: "/dashboard",
+        icon: LayoutDashboard,
+    },
+    {
+        id: "2",
+        name: "Agencies",
+        type: "Page",
+        path: "/agencies",
+        icon: Building2,
+    },
+    {
+        id: "3",
+        name: "Agents",
+        type: "Page",
+        path: "/agents",
+        icon: UserCircle,
+    },
+    {
+        id: "4",
+        name: "Applications",
+        type: "Page",
+        path: "/applications",
+        icon: ClipboardList,
+    },
+    {
+        id: "5",
+        name: "Property Reports",
+        type: "Page",
+        path: "/property-reports",
+        icon: File,
+    },
+    {
+        id: "6",
+        name: "Ftp Requests",
+        type: "Page",
+        path: "/ftp-requests",
+        icon: Upload,
+    },
+    {
+        id: "7",
+        name: "Blocked IPs",
+        type: "Page",
+        path: "/blocked-ips",
+        icon: Ban,
+    },
+    {
+        id: "8",
+        name: "Staff & Roles",
+        type: "Page",
+        path: "/staff",
+        icon: Shield,
+    },
+    {
+        id: "9",
+        name: "Email Templates",
+        type: "Page",
+        path: "/email-templates",
+        icon: Mail,
+    },
+    {
+        id: "10",
+        name: "Integrations & Feed",
+        type: "Page",
+        path: "/integrations",
+        icon: Plug,
+    },
 ];
 
 export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const router = useRouter();
     const user = useUser();
+    const { dynamicCrumb } = useBreadcrumb();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -45,12 +126,19 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     // console.log(user)
 
     const name = user
-        ? (`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Admin")
+        ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          user.email ||
+          "Admin"
         : "Admin";
     const role = (user?.role as string) || "user";
     const userEmail = user?.email || "admin@homeby.com.au";
     const userInitials = name
-        ? name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase()
+        ? name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase()
         : "AD";
 
     const logout = useCallback(async () => {
@@ -67,7 +155,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
         return segments.map((segment) => {
             if (/^\d+$/.test(segment) || segment.length > 20) {
-                return "Detail";
+                return dynamicCrumb || "Detail";
             }
 
             const formatted = segment
@@ -116,7 +204,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
         }
     }, [isSearchOpen]);
 
-    const filteredRecent = recentSearches.filter((item) =>
+    const filteredSearch = searchablePages.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
@@ -132,22 +220,37 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                     </button>
 
                     <nav className="flex items-center text-sm font-medium text-muted overflow-hidden">
-                      {breadcrumbs.map((crumb, idx) => {
-                        const isLast = idx === breadcrumbs.length - 1;
-                        const pathUpTo = '/' + pathname.split('/').filter(Boolean).slice(0, idx + 1).join('/');
-                        return (
-                          <React.Fragment key={idx}>
-                            {idx > 0 && <span className="mx-2 text-muted">/</span>}
-                            {isLast ? (
-                              <span className="text-text font-medium">{crumb}</span>
-                            ) : (
-                              <Link href={pathUpTo} className="text-muted hover:text-text transition-colors">
-                                {crumb}
-                              </Link>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
+                        {breadcrumbs.map((crumb, idx) => {
+                            const isLast = idx === breadcrumbs.length - 1;
+                            const pathUpTo =
+                                "/" +
+                                pathname
+                                    .split("/")
+                                    .filter(Boolean)
+                                    .slice(0, idx + 1)
+                                    .join("/");
+                            return (
+                                <React.Fragment key={idx}>
+                                    {idx > 0 && (
+                                        <span className="mx-2 text-muted">
+                                            /
+                                        </span>
+                                    )}
+                                    {isLast ? (
+                                        <span className="text-text font-medium">
+                                            {crumb}
+                                        </span>
+                                    ) : (
+                                        <Link
+                                            href={pathUpTo}
+                                            className="text-muted hover:text-text transition-colors"
+                                        >
+                                            {crumb}
+                                        </Link>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
                     </nav>
                 </div>
 
@@ -172,7 +275,10 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                         <Search size={18} />
                     </button>
 
-                    <button className="p-2 text-muted hover:bg-page rounded-md border border-border/80 transition-colors relative">
+                    <button
+                        disabled
+                        className="p-2 text-muted rounded-md border border-border/80 transition-colors relative opacity-50 cursor-not-allowed"
+                    >
                         <Bell size={18} />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-card" />
                     </button>
@@ -182,7 +288,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                     <div className="relative" ref={profileRef}>
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-2 p-1.5 border border-border rounded-md hover:bg-page transition-colors text-sm font-medium text-text"
+                            className="flex items-center gap-2 p-1.5 border border-border rounded-md hover:bg-page transition-colors text-sm font-medium text-text cursor-pointer"
                         >
                             <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[11px] font-bold">
                                 {userInitials}
@@ -283,8 +389,8 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                                 {searchQuery ? "SEARCH RESULTS" : "RECENT"}
                             </h3>
                             <div className="space-y-1">
-                                {filteredRecent.length > 0 ? (
-                                    filteredRecent.map((item) => (
+                                {filteredSearch.length > 0 ? (
+                                    filteredSearch.map((item) => (
                                         <Link
                                             key={item.id}
                                             href={item.path as any}
@@ -294,17 +400,10 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                                             className="flex items-center justify-between p-2.5 rounded-md hover:bg-page transition-colors text-sm font-medium text-slate-700 hover:text-text"
                                         >
                                             <div className="flex items-center gap-3">
-                                                {item.type === "Agency" ? (
-                                                    <Building2
-                                                        size={16}
-                                                        className="text-muted"
-                                                    />
-                                                ) : (
-                                                    <User
-                                                        size={16}
-                                                        className="text-muted"
-                                                    />
-                                                )}
+                                                <item.icon
+                                                    size={16}
+                                                    className="text-muted"
+                                                />
                                                 <span>{item.name}</span>
                                             </div>
                                             <span className="text-xs font-semibold text-muted bg-page border border-border/80 px-2 py-0.5 rounded">

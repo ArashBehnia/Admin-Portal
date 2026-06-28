@@ -171,7 +171,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                                 {visibleItems.map((item, itemIndex) => {
                                     const Icon = item.icon;
                                     const isSoon = item.soon;
-                                    const isActive = currentPath === item.path;
+                                    const isActive = currentPath === item.path || (item.path ? currentPath.startsWith(`${item.path}/`) : false);
                                     const displayBadge = item.badge;
 
                                     const itemClasses = `group flex items-center justify-between px-3 py-2 rounded-md transition-all text-base ${
