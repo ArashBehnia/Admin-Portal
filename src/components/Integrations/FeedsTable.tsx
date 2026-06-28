@@ -16,8 +16,8 @@ const FeedsTable = ({
     onViewDetails,
 }: FeedsTableProps) => {
     return (
-        <div className="hidden md:block bg-card rounded border border-border shadow-sm w-full overflow-hidden">
-            <table className="table-fixed w-full text-left text-[12px]">
+        <div className="bg-card rounded border border-border shadow-sm w-full overflow-x-auto">
+            <table className="table-fixed w-full text-left text-[12px] min-w-[900px]">
                 <colgroup>
                     <col style={{ width: "17%" }} />
                     <col style={{ width: "9%" }} />

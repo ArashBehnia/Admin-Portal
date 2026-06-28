@@ -251,7 +251,7 @@ const AgentDrawer = ({
                             <button
                                 key={tab}
                                 onClick={() => onTabChange(tab)}
-                                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors capitalize mr-6 relative mb-[-2px] ${
+                                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer capitalize mr-6 relative mb-[-2px] ${
                                     activeDrawerTab === tab
                                         ? "border-accent text-accent font-semibold"
                                         : "border-transparent text-muted hover:text-text"

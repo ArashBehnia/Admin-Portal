@@ -56,21 +56,11 @@ const AgentsTable = ({
                         <thead>
                             <tr className="border-b border-border/80 bg-page/55 text-muted text-[11px] uppercase font-bold tracking-wider">
                                 <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4 hidden md:table-cell">
-                                    Agency
-                                </th>
-                                <th className="px-6 py-4 hidden md:table-cell">
-                                    Role
-                                </th>
-                                <th className="px-6 py-4 hidden lg:table-cell">
-                                    Last login
-                                </th>
-                                <th className="px-6 py-4 hidden lg:table-cell">
-                                    Status
-                                </th>
-                                <th className="px-6 py-4 text-right">
-                                    Actions
-                                </th>
+                                <th className="px-6 py-4">Agency</th>
+                                <th className="px-6 py-4">Role</th>
+                                <th className="px-6 py-4">Last login</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
@@ -79,10 +69,10 @@ const AgentsTable = ({
                                     {Array.from({ length: 8 }).map((_, i) => (
                                         <tr key={i} className="border-b border-border/60 last:border-0">
                                             <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-32" /></td>
-                                            <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-24" /></td>
-                                            <td className="px-6 py-4 hidden md:table-cell"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
-                                            <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
-                                            <td className="px-6 py-4 hidden lg:table-cell"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-24" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-16" /></td>
+                                            <td className="px-6 py-4"><div className="h-4 bg-border/60 rounded animate-pulse w-20" /></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-border/60 rounded animate-pulse w-14" /></td>
                                             <td className="px-6 py-4 text-right"><div className="h-4 bg-border/60 rounded animate-pulse w-12 ml-auto" /></td>
                                         </tr>
                                     ))}
@@ -105,18 +95,21 @@ const AgentsTable = ({
                                                 {agent.email}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 hidden md:table-cell text-muted font-medium">
+                                        <td className="px-6 py-4 text-muted font-medium">
                                             {agent.agency}
                                         </td>
-                                        <td className="px-6 py-4 hidden md:table-cell">
-                                            <span className="px-2.5 py-0.5 bg-page border border-border rounded text-xs font-semibold text-muted">
+                                        <td className="px-6 py-4 max-w-[140px]">
+                                            <span
+                                                className="block px-2.5 py-0.5 bg-page border border-border rounded text-xs font-semibold text-muted truncate"
+                                                title={agent.role}
+                                            >
                                                 {agent.role}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 hidden lg:table-cell text-muted">
+                                        <td className="px-6 py-4 text-muted">
                                             {agent.lastLogin}
                                         </td>
-                                        <td className="px-6 py-4 hidden lg:table-cell">
+                                        <td className="px-6 py-4">
                                             <span
                                                 className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded ${getStatusClasses(agent.status)}`}
                                             >

@@ -5,7 +5,6 @@ import { IntegrationsData, STATUS_FILTERS, StatusFilter } from "@/types/integrat
 import useIntegrations from "@/hooks/useIntegrations";
 import FeedStats from "./FeedStats";
 import FeedsTable from "./FeedsTable";
-import FeedsMobileList from "./FeedsMobileList";
 import FeedsPagination from "./FeedsPagination";
 import DistributionTab from "./DistributionTab";
 import IntegrationDetailsPanel from "./IntegrationDetailsPanel";
@@ -146,11 +145,6 @@ const IntegrationsPageClient = ({
                     </div>
 
                     <FeedsTable
-                        paginatedFeeds={paginatedFeeds}
-                        isLoading={isLoading}
-                        onViewDetails={openDetails}
-                    />
-                    <FeedsMobileList
                         paginatedFeeds={paginatedFeeds}
                         isLoading={isLoading}
                         onViewDetails={openDetails}
