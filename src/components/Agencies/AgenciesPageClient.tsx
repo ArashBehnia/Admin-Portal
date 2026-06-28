@@ -32,6 +32,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
         openMenuId,
         toggleMenu,
         closeMenu,
+        refreshPage,
     } = useAgencies({ initialData });
 
     return (
@@ -76,6 +77,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                 onFilterChange={setActiveFilter}
                 onToggleMenu={toggleMenu}
                 onCloseMenu={closeMenu}
+                onRefresh={refreshPage}
             />
 
             <AgenciesPagination

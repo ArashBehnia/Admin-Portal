@@ -9,6 +9,7 @@ import {
 } from "@/components/Agencies/AgencyBadges";
 import SuspendAgencyModal from "./SuspendAgencyModal";
 import EditAgencySidebar, { EditAgencyData } from "./EditAgencySidebar";
+import DeleteAgencyModal from "./DeleteAgencyModal";
 
 interface AgencyHeaderProps {
     agency: Agency;
@@ -21,6 +22,7 @@ interface AgencyHeaderProps {
     editData: EditAgencyData;
     onSuspendSuccess: () => void;
     onEditSuccess: () => void;
+    onDeleteSuccess: () => void;
 }
 
 const AgencyHeader = ({
@@ -34,10 +36,12 @@ const AgencyHeader = ({
     editData,
     onSuspendSuccess,
     onEditSuccess,
+    onDeleteSuccess,
 }: AgencyHeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
     const [isEditSidebarOpen, setIsEditSidebarOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     return (
         <>
@@ -88,18 +92,6 @@ const AgencyHeader = ({
                                 >
                                     Edit details
                                 </button>
-                                <button
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
-                                >
-                                    Change subscription tier
-                                </button>
-                                <button
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="w-full text-left px-4 py-2 text-[13px] text-text hover:bg-page cursor-pointer"
-                                >
-                                    Send invitation
-                                </button>
                                 <div className="border-t border-border my-1" />
                                 <button
                                     onClick={() => {
@@ -111,10 +103,13 @@ const AgencyHeader = ({
                                     Suspend agency
                                 </button>
                                 <button
-                                    onClick={() => setIsMenuOpen(false)}
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        setIsDeleteModalOpen(true);
+                                    }}
                                     className="w-full text-left px-4 py-2 text-[13px] text-red-600 hover:bg-red-50 cursor-pointer"
                                 >
-                                    Archive agency
+                                    Delete agency
                                 </button>
                             </div>
                         )}
@@ -155,6 +150,14 @@ const AgencyHeader = ({
                 initialData={editData}
                 onClose={() => setIsEditSidebarOpen(false)}
                 onSuccess={onEditSuccess}
+            />
+
+            <DeleteAgencyModal
+                isOpen={isDeleteModalOpen}
+                agencyId={agencyId}
+                agencyName={agency?.name ?? ""}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onSuccess={onDeleteSuccess}
             />
         </>
     );

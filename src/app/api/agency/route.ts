@@ -1,6 +1,59 @@
 import { NextResponse } from "next/server";
 import { backendFetch } from "@/lib/api";
 
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
+
+        if (!id) {
+            return NextResponse.json(
+                { success: false, error: "Agency id is required" },
+                { status: 400 },
+            );
+        }
+
+        try {
+            await backendFetch(`/admin/agency?id=${id}`, {
+                method: "DELETE",
+            });
+            return NextResponse.json({ success: true });
+        } catch (backendError) {
+            const status =
+                backendError instanceof Error && "status" in backendError
+                    ? (backendError as { status: number }).status
+                    : 500;
+            const rawMsg =
+                backendError instanceof Error
+                    ? backendError.message
+                    : String(backendError);
+
+            let detail = rawMsg;
+            try {
+                const parsed = JSON.parse(rawMsg);
+                detail = parsed.message || parsed.error || rawMsg;
+            } catch {
+                // not JSON, use as-is
+            }
+
+            console.error(`[API /agency] DELETE backend error ${status}:`, detail);
+
+            return NextResponse.json(
+                { success: false, error: detail },
+                { status },
+            );
+        }
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : "Internal server error";
+        console.error("[API /agency] DELETE error:", message);
+        return NextResponse.json(
+            { success: false, error: message },
+            { status: 500 },
+        );
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();

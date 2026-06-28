@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Search, MoreHorizontal } from "lucide-react";
 import {
@@ -16,6 +15,7 @@ import {
 } from "./AgencyBadges";
 import EditAgencySidebar from "../AgencyDetail/EditAgencySidebar";
 import SuspendAgencyModal from "../AgencyDetail/SuspendAgencyModal";
+import DeleteAgencyModal from "../AgencyDetail/DeleteAgencyModal";
 
 interface AgenciesTableProps {
     filteredAgencies: Agency[];
@@ -27,6 +27,7 @@ interface AgenciesTableProps {
     onFilterChange: (filter: AgencyFilter) => void;
     onToggleMenu: (id: string) => void;
     onCloseMenu: () => void;
+    onRefresh: () => void;
 }
 
 const AgenciesTable = ({
@@ -39,11 +40,13 @@ const AgenciesTable = ({
     onFilterChange,
     onToggleMenu,
     onCloseMenu,
+    onRefresh,
 }: AgenciesTableProps) => {
-    const router = useRouter();
     const [editAgencyId, setEditAgencyId] = useState<string | null>(null);
     const [suspendAgencyId, setSuspendAgencyId] = useState<string | null>(null);
     const [suspendAgencyName, setSuspendAgencyName] = useState("");
+    const [deleteAgencyId, setDeleteAgencyId] = useState<string | null>(null);
+    const [deleteAgencyName, setDeleteAgencyName] = useState("");
     return (
         <div className="flex flex-col gap-5">
             {/* Controls */}
@@ -228,6 +231,16 @@ const AgenciesTable = ({
                                                             >
                                                                 Suspend
                                                             </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    onCloseMenu();
+                                                                    setDeleteAgencyId(agency?.id ?? null);
+                                                                    setDeleteAgencyName(agency?.name ?? "");
+                                                                }}
+                                                                className="w-full text-left px-4 py-2 text-[13px] text-red-600 hover:bg-red-50 cursor-pointer"
+                                                            >
+                                                                Delete
+                                                            </button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -249,7 +262,7 @@ const AgenciesTable = ({
                     onClose={() => setEditAgencyId(null)}
                     onSuccess={() => {
                         setEditAgencyId(null);
-                        router.refresh();
+                        onRefresh();
                     }}
                 />
             )}
@@ -262,7 +275,20 @@ const AgenciesTable = ({
                     onClose={() => setSuspendAgencyId(null)}
                     onSuccess={() => {
                         setSuspendAgencyId(null);
-                        router.refresh();
+                        onRefresh();
+                    }}
+                />
+            )}
+
+            {deleteAgencyId && (
+                <DeleteAgencyModal
+                    isOpen={true}
+                    agencyId={deleteAgencyId}
+                    agencyName={deleteAgencyName}
+                    onClose={() => setDeleteAgencyId(null)}
+                    onSuccess={() => {
+                        setDeleteAgencyId(null);
+                        onRefresh();
                     }}
                 />
             )}

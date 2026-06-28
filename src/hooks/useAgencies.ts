@@ -194,6 +194,10 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         setOpenMenuId((prev) => (prev === id ? null : id));
     };
 
+    const refreshPage = useCallback(() => {
+        loadPage(currentPage, searchQuery || undefined);
+    }, [loadPage, currentPage, searchQuery]);
+
     const closeMenu = () => setOpenMenuId(null);
 
     return {
@@ -215,6 +219,7 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         openMenuId,
         toggleMenu,
         closeMenu,
+        refreshPage,
     };
 };
 
