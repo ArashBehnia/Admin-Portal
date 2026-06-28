@@ -80,9 +80,7 @@ const CreateAgencySidebar = ({
                 crmSelection,
             };
 
-            if (crmSelection === "Other" && crmName.trim()) {
-                payload.crmName = crmName.trim();
-            }
+            if (crmName.trim()) payload.crmName = crmName.trim();
             if (website.trim()) payload.website = website.trim();
             if (licenceNumber.trim()) payload.licenceNumber = licenceNumber.trim();
             if (principalRla.trim()) payload.principalRla = principalRla.trim();

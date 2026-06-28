@@ -162,28 +162,43 @@ function mapActivityEvents(raw: unknown): ActivityEvent[] {
         obj.events ?? obj.data ?? raw,
     );
     return events.map((e) => ({
-        title: String(e.title ?? ""),
-        date: String(e.date ?? ""),
+        title: String(e.label ?? e.title ?? ""),
+        date: String(e.createdAt ?? e.date ?? ""),
         color: mapActivityTypeToColor(String(e.type ?? "info")),
     }));
 }
+
+const PORTAL_META: Record<string, { icon: string; color: string }> = {
+    homeby: { icon: "HB", color: "bg-blue-100 text-blue-700" },
+    homely: { icon: "HO", color: "bg-green-100 text-green-700" },
+    realestate: { icon: "RE", color: "bg-orange-100 text-orange-700" },
+    domain: { icon: "DO", color: "bg-purple-100 text-purple-700" },
+};
 
 function mapPortals(raw: unknown): Portal[] {
     const obj = raw && typeof raw === "object" && !Array.isArray(raw)
         ? raw as Record<string, unknown>
         : {};
-    const portals = toArray<{
+    const rows = toArray<{
+        portal?: string; connected?: boolean; published?: number; total?: number;
         name?: string; icon?: string; color?: string;
         status?: string; listings?: string; active?: boolean;
-    }>(obj.portals ?? obj.data ?? raw);
-    return portals.map((p) => ({
-        name: String(p.name ?? ""),
-        icon: String(p.icon ?? ""),
-        color: String(p.color ?? "text-muted bg-page"),
-        status: String(p.status ?? "Not connected"),
-        listings: String(p.listings ?? "0 published"),
-        active: Boolean(p.active),
-    }));
+    }>(obj.rows ?? obj.portals ?? obj.data ?? raw);
+    return rows.map((r) => {
+        const portalName = String(r.portal ?? r.name ?? "");
+        const meta = PORTAL_META[portalName.toLowerCase()] ?? { icon: portalName.slice(0, 2).toUpperCase(), color: "bg-gray-100 text-gray-700" };
+        const connected = Boolean(r.connected ?? r.active);
+        const published = Number(r.published ?? 0);
+        const total = Number(r.total ?? 0);
+        return {
+            name: portalName,
+            icon: meta.icon,
+            color: meta.color,
+            status: connected ? "Connected" : "Not connected",
+            listings: `${published}/${total} published`,
+            active: connected,
+        };
+    });
 }
 
 function formatDate(iso?: string): string {
@@ -196,9 +211,20 @@ function formatDate(iso?: string): string {
     }
 }
 
-function mapOnboardingSteps(onboarding?: AgencyOnboardingDto) {
+function mapOnboardingSteps(onboarding?: AgencyOnboardingDto): AgencyOnboardingStepDto[] {
     if (onboarding?.steps && onboarding.steps.length > 0) {
-        return onboarding.steps;
+        let foundCurrent = false;
+        return onboarding.steps.map((step) => {
+            if (step.status) return step;
+            if (step.complete) {
+                return { ...step, status: "completed" as const };
+            }
+            if (!foundCurrent) {
+                foundCurrent = true;
+                return { ...step, status: "current" as const };
+            }
+            return { ...step, status: "pending" as const };
+        });
     }
     return [
         { key: "APPLIED", label: "APPLIED", status: "completed" as const },
@@ -223,10 +249,12 @@ export async function fetchAgencyDetail(id: string): Promise<AgencyDetailData> {
     const onboardingSteps = mapOnboardingSteps(dto.onboarding);
     return {
         abn: String(overview.abn ?? ""),
-        memberSince: formatDate(overview.memberSince),
+        memberSince: formatDate(overview.createdAt),
         email: String(overview.email ?? ""),
         phone: String(overview.phone ?? ""),
         website: String(overview.website ?? ""),
+        activeListings: Number(overview.activeListings ?? 0),
+        activeStaff: Number(overview.activeStaff ?? 0),
         crmProvider: "",
         feedLastSynced: "",
         activityTimeline: mapActivityEvents(dto.activity),
@@ -356,6 +384,8 @@ function fallbackDetailData(id: string): AgencyDetailData {
         email: "",
         phone: "",
         website: "",
+        activeListings: 0,
+        activeStaff: 0,
         crmProvider: "",
         feedLastSynced: "",
         activityTimeline: [],

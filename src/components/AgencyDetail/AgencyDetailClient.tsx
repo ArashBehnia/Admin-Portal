@@ -69,6 +69,8 @@ const AgencyDetailClient = ({
                 agencyId={agencyId}
                 abn={currentDetailData?.abn ?? ""}
                 memberSince={currentDetailData?.memberSince ?? ""}
+                activeListings={currentDetailData?.activeListings ?? 0}
+                activeAgents={currentDetailData?.activeStaff ?? 0}
                 initials={getInitials(agency?.name ?? "")}
                 editData={{
                     name: agency?.name ?? "",

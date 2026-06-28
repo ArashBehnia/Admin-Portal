@@ -162,9 +162,9 @@ const useAgencyDetail = ({ agencyId, detailData }: UseAgencyDetailProps) => {
             const events = data?.events ?? data?.data ?? [];
             if (Array.isArray(events)) {
                 const mapped = events.map(
-                    (e: { title?: string; date?: string; type?: string }) => ({
-                        title: String(e.title ?? ""),
-                        date: String(e.date ?? ""),
+                    (e: { label?: string; title?: string; createdAt?: string; date?: string; type?: string }) => ({
+                        title: String(e.label ?? e.title ?? ""),
+                        date: String(e.createdAt ?? e.date ?? ""),
                         color:
                             e.type === "success"
                                 ? "bg-green-500"

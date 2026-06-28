@@ -8,27 +8,48 @@ export type AgencySummaryDto = {
     with_listings: number;
 };
 
+export type AgencySubscriptionDto = {
+    status: string;
+    label: string;
+    mrr: number;
+    mrrLabel: string;
+};
+
+export type AgencyFeedDto = {
+    status: string;
+    label: string;
+    totalFeeds: number;
+    errorFeeds: number;
+    lastSyncAt: string | null;
+};
+
 export type AgencyListItemDto = {
     id: string;
     name: string;
-    status?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
-    totalStaff?: number;
-    activeStaff?: number;
-    totalListings?: number;
-    activeListings?: number;
-    sales12m?: number;
-    lastActivityAt?: string;
-    subscription?: string;
-    feedStatus?: string;
-    mrr?: string;
-    location?: string;
+    status: string;
+    onboardingStatus: string;
+    onboardingLabel: string;
+    subscription: AgencySubscriptionDto;
+    totalListings: number;
+    activeListings: number;
+    totalAgents: number;
+    activeAgents: number;
+    feed: AgencyFeedDto;
+    mrr: number;
+    mrrLabel: string;
+    lastActivityAt: string;
+    email: string;
+    phone: string;
+    website: string;
+    agencyAddress: string;
+    state: string;
+    postcode: string;
+    crmSelection: string;
+    createdAt: string;
 };
 
 export type AgencyPageDto = {
-    data: AgencyListItemDto[];
+    content: AgencyListItemDto[];
     total: number;
     offset: number;
     limit: number;
@@ -151,6 +172,7 @@ export type AgencyStats = {
     active: string;
     onboarding: string;
     suspended: string;
+    trial: string;
 };
 
 export type AgenciesData = {

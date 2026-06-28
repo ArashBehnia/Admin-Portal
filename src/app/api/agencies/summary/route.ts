@@ -21,6 +21,9 @@ export async function GET() {
             inactive: toNum(obj.inactive),
             pending: toNum(obj.pending),
             with_listings: toNum(obj.with_listings),
+            suspended: toNum(obj.suspended),
+            onboarding: toNum(obj.onboarding),
+            trial: toNum(obj.trial),
         };
 
         return NextResponse.json(data);

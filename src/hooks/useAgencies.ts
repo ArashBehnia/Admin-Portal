@@ -5,6 +5,8 @@ import {
     Agency,
     AgenciesData,
     AgencyFilter,
+    AgencyStats,
+    AgencyListItemDto,
     ROWS_PER_PAGE,
 } from "@/types/agencyTypes";
 import api from "@/lib/axios";
@@ -13,36 +15,11 @@ interface UseAgenciesProps {
     initialData: AgenciesData;
 }
 
-type ApiAgencyItem = {
-    id: string;
-    name: string;
-    status?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
-    totalStaff?: number;
-    activeStaff?: number;
-    totalListings?: number;
-    activeListings?: number;
-    sales12m?: number;
-    lastActivityAt?: string;
-    subscription?: string;
-    feedStatus?: string;
-    mrr?: string;
-    location?: string;
-};
-
-type ApiSummary = {
-    total: number;
-    active: number;
-    inactive: number;
-    pending: number;
-    with_listings: number;
-};
-
 type ApiPage = {
-    data: ApiAgencyItem[];
+    content: AgencyListItemDto[];
     total: number;
+    offset: number;
+    limit: number;
 };
 
 function formatLastActivity(iso?: string): string {
@@ -59,17 +36,6 @@ function formatLastActivity(iso?: string): string {
     return `${months} month${months > 1 ? "s" : ""} ago`;
 }
 
-function mapStatus(status?: string): string {
-    if (!status) return "Approved";
-    const s = status.toLowerCase();
-    if (s === "active" || s === "live") return "Live";
-    if (s === "trial") return "Trial";
-    if (s === "onboarding") return "Onboarding";
-    if (s === "suspended") return "Suspended";
-    if (s === "pending") return "Pending";
-    return status;
-}
-
 function mapHighlight(status?: string): "orange" | "red" | null {
     if (!status) return null;
     const s = status.toLowerCase();
@@ -78,28 +44,42 @@ function mapHighlight(status?: string): "orange" | "red" | null {
     return null;
 }
 
+type ApiSummary = {
+    total: number;
+    active: number;
+    inactive: number;
+    pending: number;
+    with_listings: number;
+    suspended: number;
+    onboarding: number;
+    trial: number;
+};
+
 function mapPageData(
     summary: ApiSummary,
     page: ApiPage,
 ): AgenciesData {
-    const stats = {
+    const stats: AgencyStats = {
         total: String(summary.total),
         active: String(summary.active),
-        onboarding: String(summary.pending),
-        suspended: String(summary.inactive),
+        onboarding: String(summary.onboarding),
+        suspended: String(summary.suspended),
+        trial: String(summary.trial),
     };
 
-    const items = Array.isArray(page.data) ? page.data : [];
+    const items = Array.isArray(page.content) ? page.content : [];
     const agencies: Agency[] = items.map((item) => ({
         id: item.id,
         name: item.name,
-        location: item.location ?? "",
-        subscription: item.subscription ?? "Trial",
-        onboarding: mapStatus(item.status),
-        listings: item.totalListings ?? 0,
-        agents: item.activeStaff ?? item.totalStaff ?? 0,
-        feed: item.feedStatus ?? "Not configured",
-        mrr: item.mrr ?? "$0/mo",
+        location: [item.agencyAddress, item.state, item.postcode]
+            .filter(Boolean)
+            .join(", "),
+        subscription: item.subscription?.label ?? "Trial",
+        onboarding: item.onboardingLabel ?? item.onboardingStatus ?? "",
+        listings: item.activeListings ?? item.totalListings ?? 0,
+        agents: item.activeAgents ?? item.totalAgents ?? 0,
+        feed: item.feed?.label ?? "Not configured",
+        mrr: item.mrrLabel ?? "$0/mo",
         lastActivity: formatLastActivity(item.lastActivityAt),
         highlight: mapHighlight(item.status),
     }));
@@ -108,7 +88,6 @@ function mapPageData(
 }
 
 const useAgencies = ({ initialData }: UseAgenciesProps) => {
-    // ─── Data ─────────────────────────────────────────────────────────
     const [stats, setStats] = useState(initialData?.stats ?? {
         total: "0",
         active: "0",
@@ -122,17 +101,14 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
-    // ─── Pagination State ────────────────────────────────────────────
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
 
-    // ─── UI State ─────────────────────────────────────────────────────
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilter, setActiveFilter] = useState<AgencyFilter>("All");
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-    // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
         async (page: number, keywords?: string) => {
             setIsLoading(true);
@@ -151,16 +127,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
 
                 const summary: ApiSummary =
                     summaryRes.data?.data ?? summaryRes.data;
-                const rawPage = pageRes.data?.data ?? pageRes.data;
-                const pageData: ApiPage = {
-                    data: Array.isArray(rawPage?.data)
-                        ? rawPage.data
-                        : Array.isArray(rawPage)
-                          ? rawPage
-                          : [],
-                    total: rawPage?.total ?? 0,
-                };
-                const result = mapPageData(summary, pageData);
+                const rawPage: ApiPage = pageRes.data?.data ?? pageRes.data;
+                const result = mapPageData(summary, rawPage);
 
                 setStats(result.stats);
                 setAgencies(result.agencies);
@@ -174,7 +142,6 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         [],
     );
 
-    // ─── Page change handler ─────────────────────────────────────────
     const handlePageChange = useCallback(
         (page: number) => {
             setCurrentPage(page);
@@ -183,7 +150,6 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         [loadPage, searchQuery],
     );
 
-    // ─── Search with debounce ─────────────────────────────────────────
     useEffect(() => {
         setCurrentPage(1);
         if (!searchQuery) {
@@ -197,7 +163,6 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
-    // ─── Derived / Computed (client-side status filter) ───────────────
     const filteredAgencies = agencies.filter((agency) => {
         const matchesFilter = (() => {
             if (activeFilter === "All") return true;
@@ -218,7 +183,6 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         return matchesFilter;
     });
 
-    // ─── Handlers ─────────────────────────────────────────────────────
     const toggleMenu = (id: string) => {
         setOpenMenuId((prev) => (prev === id ? null : id));
     };
@@ -226,18 +190,13 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const closeMenu = () => setOpenMenuId(null);
 
     return {
-        // Data
         stats,
         filteredAgencies,
         totalCount,
         isLoading: isLoading || isSearching,
-
-        // Pagination
         currentPage,
         totalPages,
         handlePageChange,
-
-        // UI State
         isModalOpen,
         setIsModalOpen,
         searchQuery,
@@ -245,8 +204,6 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         activeFilter,
         setActiveFilter,
         openMenuId,
-
-        // Handlers
         toggleMenu,
         closeMenu,
     };

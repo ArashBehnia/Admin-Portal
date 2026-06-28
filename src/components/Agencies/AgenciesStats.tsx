@@ -19,7 +19,7 @@ const AgenciesStats = ({ stats }: AgenciesStatsProps) => {
             warning: false,
         },
         {
-            label: "Onboarding in progress",
+            label: "Onboarding",
             value: stats?.onboarding ?? "0",
             dot: "bg-orange-400",
             warning: false,
@@ -30,10 +30,16 @@ const AgenciesStats = ({ stats }: AgenciesStatsProps) => {
             dot: "bg-red-500",
             warning: true,
         },
+        {
+            label: "Trial",
+            value: stats?.trial ?? "0",
+            dot: "bg-blue-400",
+            warning: false,
+        },
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-3">
             {cards.map(({ label, value, dot, warning }) => (
                 <div
                     key={label}

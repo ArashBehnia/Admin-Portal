@@ -80,6 +80,8 @@ export type AgencyDetailData = {
     email: string;
     phone: string;
     website: string;
+    activeListings: number;
+    activeStaff: number;
     activityTimeline: ActivityEvent[];
     distributionPortals: Portal[];
     internalNotes: string;
@@ -122,6 +124,8 @@ export const fetchAgencyDetailData = async (): Promise<AgencyDetailData> => {
         email: "james@gatewayresidential.com.au",
         phone: "+61412345678",
         website: "https://gatewayresidential.com.au",
+        activeListings: 5,
+        activeStaff: 6,
         crmProvider: "Box+Dice",
         feedLastSynced: "14 min ago",
         activityTimeline: [

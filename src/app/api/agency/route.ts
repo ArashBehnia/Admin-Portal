@@ -52,9 +52,16 @@ export async function POST(request: Request) {
             crmSelection: body.crmSelection,
         };
 
-        if (body.crmSelection === "Other" && body.crmName?.trim()) {
+        if (body.crmName?.trim()) {
             additionalData.crmName = body.crmName.trim();
         }
+
+        const path = body.name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-");
 
         const payload: Record<string, unknown> = {
             name: body.name.trim(),
@@ -64,14 +71,12 @@ export async function POST(request: Request) {
             state: body.state,
             postcode: body.postcode.trim(),
             crmSelection: body.crmSelection,
+            status: "active",
+            path,
             additionalData,
         };
 
-        if (body.crmSelection === "Other" && body.crmName?.trim()) {
-            payload.crmName = body.crmName.trim();
-        }
-        if (body.status) payload.status = body.status;
-        if (body.path?.trim()) payload.path = body.path.trim();
+        if (body.crmName?.trim()) payload.crmName = body.crmName.trim();
         if (body.website?.trim()) payload.website = body.website.trim();
         if (body.licenceNumber?.trim()) payload.licenceNumber = body.licenceNumber.trim();
         if (body.principalRla?.trim()) payload.principalRla = body.principalRla.trim();
@@ -107,15 +112,8 @@ export async function POST(request: Request) {
             console.error(`[API /agency] Backend error ${status}:`, detail);
             console.error(`[API /agency] Full backend response:`, rawMsg);
 
-            const userFriendly =
-                status === 400
-                    ? "Invalid request. Please check all fields and try again."
-                    : status === 401 || status === 403
-                      ? "You do not have permission to perform this action."
-                      : detail;
-
             return NextResponse.json(
-                { success: false, error: userFriendly, detail },
+                { success: false, error: detail },
                 { status },
             );
         }

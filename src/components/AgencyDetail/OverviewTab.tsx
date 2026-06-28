@@ -59,50 +59,13 @@ const OverviewTab = ({
                                 </div>
                             );
                         })}
-                        <div className="flex-1 flex flex-col gap-1.5 relative">
-                            <div className="h-1.5 w-full bg-accent rounded-full" />
-                            <span className="text-[9px] font-bold text-accent">
-                                {onboardingCurrentStep || "LIVE"}
-                            </span>
-                        </div>
+
                     </div>
 
-                    <div className="grid grid-cols-[120px_1fr] gap-y-4 text-[12px] pt-2">
-                        <span className="text-muted">Assigned admin</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[9px] font-bold">
-                                SC
-                            </div>
-                            <span className="text-text font-medium">
-                                Sarah Chen
-                            </span>
-                        </div>
-
-                        <span className="text-muted">CRM provider</span>
-                        <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded bg-blue-50 text-accent border border-blue-100 font-medium text-[11px]">
-                                {crmProvider}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded bg-page text-muted border border-border font-medium text-[11px]">
-                                REAXML
-                            </span>
-                        </div>
-
-                        <span className="text-muted">Feed status</span>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                            <span className="text-text font-medium">
-                                Healthy
-                            </span>
-                            <span className="text-muted">
-                                — last synced {feedLastSynced}
-                            </span>
-                        </div>
+                    <div className="flex items-center gap-2 pt-2">
+                        <span className="text-[11px] text-muted italic">Details coming soon</span>
+                        <span className="px-1.5 py-0.5 rounded bg-page text-muted border border-border text-[9px] font-medium">Soon</span>
                     </div>
-
-                    <button className="text-accent text-[12px] font-medium hover:underline self-start mt-2 cursor-pointer">
-                        View feed details ↗
-                    </button>
                 </div>
 
                 {/* Activity Timeline */}

@@ -15,6 +15,8 @@ interface AgencyHeaderProps {
     agencyId: string;
     abn: string;
     memberSince: string;
+    activeListings: number;
+    activeAgents: number;
     initials: string;
     editData: EditAgencyData;
     onSuspendSuccess: () => void;
@@ -26,6 +28,8 @@ const AgencyHeader = ({
     agencyId,
     abn,
     memberSince,
+    activeListings,
+    activeAgents,
     initials,
     editData,
     onSuspendSuccess,
@@ -120,19 +124,19 @@ const AgencyHeader = ({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-5 border-t border-border">
                     <div className="flex flex-col gap-1">
                         <span className="text-[12px] text-muted">Active listings</span>
-                        <span className="text-[18px] font-bold text-text">{agency?.listings}</span>
+                        <span className="text-[18px] font-bold text-text">{activeListings}</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-[12px] text-muted">Active agents</span>
-                        <span className="text-[18px] font-bold text-text">{agency?.agents}</span>
+                        <span className="text-[18px] font-bold text-text">{activeAgents}</span>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 opacity-40">
                         <span className="text-[12px] text-muted">MRR</span>
-                        <span className="text-[18px] font-bold text-text">{agency?.mrr}</span>
+                        <span className="text-[18px] font-bold text-text">—</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-[12px] text-muted">Member since</span>
-                        <span className="text-[18px] font-bold text-text">{memberSince}</span>
+                        <span className="text-[18px] font-bold text-text">{memberSince || "—"}</span>
                     </div>
                 </div>
             </div>
