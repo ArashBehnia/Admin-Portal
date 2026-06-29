@@ -83,11 +83,11 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     // ─── Client-side fetch via axios ──────────────────────────────────
     const loadPage = useCallback(
-        async (page?: number, keywords?: string) => {
-            setIsLoading(true);
+        async (page?: number, keywords?: string, isSearch = false) => {
+            if (isSearch) setIsSearching(true);
+            else setIsLoading(true);
             try {
                 const p = page ?? 1;
-                const isSearch = !!keywords?.trim();
                 const offset = isSearch ? 0 : (p - 1) * pageSizeRef.current;
                 const limit = isSearch ? 200 : pageSizeRef.current;
                 const params = new URLSearchParams({
@@ -133,7 +133,8 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
             } catch (err) {
                 console.error("Failed to load agents:", err);
             } finally {
-                setIsLoading(false);
+                if (isSearch) setIsSearching(false);
+                else setIsLoading(false);
             }
         },
         [],
@@ -157,9 +158,8 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
             loadPage(1);
             return;
         }
-        setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(1, searchQuery.trim()).finally(() => setIsSearching(false));
+            loadPage(1, searchQuery.trim(), true);
         }, 250);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);

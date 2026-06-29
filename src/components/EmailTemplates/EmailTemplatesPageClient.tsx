@@ -18,6 +18,7 @@ const EmailTemplatesPageClient = () => {
         setCurrentPage,
         stats,
         isLoading,
+        isSearching,
         isError,
         searchQuery,
         setSearchQuery,
@@ -129,6 +130,7 @@ const EmailTemplatesPageClient = () => {
                             onCategoryChange={setSelectedCategory}
                             onPageChange={setCurrentPage}
                             onRowsPerPageChange={setPageSize}
+                            isSearching={isSearching}
                         />
                     </>
                 )}

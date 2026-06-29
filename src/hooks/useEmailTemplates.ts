@@ -25,6 +25,7 @@ const useEmailTemplates = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
     const [isError, setIsError] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -38,14 +39,16 @@ const useEmailTemplates = () => {
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     const loadPage = useCallback(
-        async (page: number, filter?: string) => {
-            setIsLoading(true);
+        async (page: number, filter?: string, isSearch = false) => {
+            if (isSearch) setIsSearching(true);
+            else setIsLoading(true);
             setIsError(false);
             try {
-                const offset = (page - 1) * pageSizeRef.current;
+                const offset = isSearch ? 0 : (page - 1) * pageSizeRef.current;
+                const limit = isSearch ? 200 : pageSizeRef.current;
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(pageSizeRef.current),
+                    limit: String(limit),
                 });
                 if (filter) params.set("filter", filter);
 
@@ -70,7 +73,8 @@ const useEmailTemplates = () => {
             } catch {
                 setIsError(true);
             } finally {
-                setIsLoading(false);
+                if (isSearch) setIsSearching(false);
+                else setIsLoading(false);
             }
         },
         [],
@@ -95,10 +99,14 @@ const useEmailTemplates = () => {
 
     // Search with debounce
     useEffect(() => {
+        setCurrentPage(1);
+        if (!searchQuery.trim()) {
+            loadPage(1);
+            return;
+        }
         const timer = setTimeout(() => {
-            setCurrentPage(1);
-            loadPage(1, searchQuery || undefined);
-        }, searchQuery ? 1000 : 0);
+            loadPage(1, searchQuery.trim(), true);
+        }, 250);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
@@ -121,6 +129,17 @@ const useEmailTemplates = () => {
         [loadPage],
     );
 
+    // Client-side filtering fallback
+    const searchLower = searchQuery.trim().toLowerCase();
+    const filteredTemplates = searchLower
+        ? templates.filter(
+              (t) =>
+                  t.name.toLowerCase().includes(searchLower) ||
+                  t.category.toLowerCase().includes(searchLower) ||
+                  (t.subject && t.subject.toLowerCase().includes(searchLower)),
+          )
+        : templates;
+
     const stats = {
         total: totalCount,
         active: totalCount,
@@ -141,7 +160,7 @@ const useEmailTemplates = () => {
     };
 
     return {
-        filteredTemplates: templates,
+        filteredTemplates,
         allFilteredCount: totalCount,
         currentPage,
         totalPages,
@@ -150,6 +169,7 @@ const useEmailTemplates = () => {
         setCurrentPage: handlePageChange,
         stats,
         isLoading,
+        isSearching,
         isError,
         searchQuery,
         setSearchQuery,

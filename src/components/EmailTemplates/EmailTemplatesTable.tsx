@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Loader2 } from "lucide-react";
 import {
     Template,
     CategoryFilter,
@@ -65,6 +65,7 @@ interface EmailTemplatesTableProps {
     onCategoryChange: (val: CategoryFilter) => void;
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rows: number) => void;
+    isSearching?: boolean;
 }
 
 const EmailTemplatesTable = ({
@@ -79,6 +80,7 @@ const EmailTemplatesTable = ({
     onCategoryChange,
     onPageChange,
     onRowsPerPageChange,
+    isSearching = false,
 }: EmailTemplatesTableProps) => {
     const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -143,6 +145,9 @@ const EmailTemplatesTable = ({
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="pl-9 pr-4 py-2 w-full bg-card border border-border rounded-md text-sm text-text placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-colors"
                     />
+                    {isSearching && (
+                        <Loader2 className="absolute right-3 top-2.5 h-4 w-4 text-muted animate-spin" />
+                    )}
                 </div>
                 <select
                     value={selectedCategory}

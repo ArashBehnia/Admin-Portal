@@ -114,8 +114,9 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     const loadPage = useCallback(
-        async (page: number, keywords?: string) => {
-            setIsLoading(true);
+        async (page: number, keywords?: string, isSearch = false) => {
+            if (isSearch) setIsSearching(true);
+            else setIsLoading(true);
             try {
                 const offset = (page - 1) * pageSizeRef.current;
                 const params = new URLSearchParams({
@@ -140,7 +141,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
             } catch (err) {
                 console.error("Failed to load agencies:", err);
             } finally {
-                setIsLoading(false);
+                if (isSearch) setIsSearching(false);
+                else setIsLoading(false);
             }
         },
         [],
@@ -161,9 +163,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
             loadPage(1);
             return;
         }
-        setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(1, trimmed).finally(() => setIsSearching(false));
+            loadPage(1, trimmed, true);
         }, 250);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
