@@ -19,7 +19,7 @@ const AgentsTab = ({ agents, isLoading }: AgentsTabProps) => {
                 <h2 className="text-[14px] font-bold text-text">
                     Agents at this agency
                 </h2>
-                <button className="bg-accent hover:bg-accent/90 text-white px-3 py-1.5 rounded text-[12px] font-medium transition-colors cursor-pointer">
+                <button disabled className="bg-accent/50 text-white/70 px-3 py-1.5 rounded text-[12px] font-medium cursor-not-allowed">
                     + Invite agent
                 </button>
             </div>
