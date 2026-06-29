@@ -5,6 +5,7 @@ import type {
     AgencyOverviewDto,
     AgencyDetailDto,
     AgencyOnboardingDto,
+    AgencyOnboardingStepDto,
     AgencyActivityDto,
     AgencyListingDistributionDto,
 } from "@/types/agencyTypes";
@@ -158,7 +159,7 @@ function mapActivityEvents(raw: unknown): ActivityEvent[] {
     const obj = raw && typeof raw === "object" && !Array.isArray(raw)
         ? raw as Record<string, unknown>
         : {};
-    const events = toArray<{ title?: string; date?: string; type?: string }>(
+    const events = toArray<{ title?: string; label?: string; date?: string; createdAt?: string; type?: string }>(
         obj.events ?? obj.data ?? raw,
     );
     return events.map((e) => ({
@@ -216,9 +217,6 @@ function mapOnboardingSteps(onboarding?: AgencyOnboardingDto): AgencyOnboardingS
         let foundCurrent = false;
         return onboarding.steps.map((step) => {
             if (step.status) return step;
-            if (step.complete) {
-                return { ...step, status: "completed" as const };
-            }
             if (!foundCurrent) {
                 foundCurrent = true;
                 return { ...step, status: "current" as const };
@@ -282,6 +280,8 @@ export async function fetchAgencyDetailOverview(id: string): Promise<AgencyDetai
         email: String(obj.email ?? ""),
         phone: String(obj.phone ?? ""),
         website: String(obj.website ?? ""),
+        activeListings: Number(obj.activeListings ?? 0),
+        activeStaff: Number(obj.activeStaff ?? 0),
         crmProvider: String(obj.crmProvider ?? ""),
         feedLastSynced: String(obj.feedLastSynced ?? ""),
         activityTimeline: [],

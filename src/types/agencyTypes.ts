@@ -62,6 +62,8 @@ export type AgencyOverviewDto = {
     email?: string;
     phone?: string;
     website?: string;
+    abn?: string;
+    createdAt?: string;
     totalStaff: number;
     activeStaff: number;
     totalListings: number;
@@ -123,6 +125,7 @@ export type AgencyDetailDto = {
         phone?: string;
         website?: string;
         abn?: string;
+        createdAt?: string;
         totalStaff: number;
         activeStaff: number;
         totalListings: number;
