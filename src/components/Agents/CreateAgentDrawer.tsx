@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { X, Loader2, ChevronDown, Search } from "lucide-react";
 import api from "@/lib/axios";
 
 const ROLES = [
@@ -69,6 +69,9 @@ const CreateAgentDrawer = ({
     const [loadingAgencies, setLoadingAgencies] = useState(false);
 
     const [agencyId, setAgencyId] = useState("");
+    const [agencySearch, setAgencySearch] = useState("");
+    const [agencyDropdownOpen, setAgencyDropdownOpen] = useState(false);
+    const agencyDropdownRef = useRef<HTMLDivElement>(null);
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -103,10 +106,31 @@ const CreateAgentDrawer = ({
             .finally(() => setLoadingAgencies(false));
     }, [isOpen]);
 
+    const selectedAgency = agencies.find((a) => a.id === agencyId);
+
+    const filteredAgencies = useMemo(() => {
+        if (!agencySearch.trim()) return agencies;
+        const q = agencySearch.toLowerCase();
+        return agencies.filter((a) => a.name.toLowerCase().includes(q));
+    }, [agencies, agencySearch]);
+
+    useEffect(() => {
+        if (!agencyDropdownOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (agencyDropdownRef.current && !agencyDropdownRef.current.contains(e.target as Node)) {
+                setAgencyDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [agencyDropdownOpen]);
+
     if (!isOpen) return null;
 
     const resetForm = () => {
         setAgencyId("");
+        setAgencySearch("");
+        setAgencyDropdownOpen(false);
         setFirstName("");
         setLastName("");
         setEmail("");
@@ -250,25 +274,63 @@ const CreateAgentDrawer = ({
                                 <Loader2 className="w-4 h-4 animate-spin" /> Loading agencies...
                             </div>
                         ) : (
-                            <select
-                                value={agencyId}
-                                onChange={(e) => {
-                                    setAgencyId(e.target.value);
-                                    if (touched.agencyId) validateField("agencyId", e.target.value);
-                                }}
-                                onBlur={() => {
-                                    markTouched("agencyId");
-                                    validateField("agencyId", agencyId);
-                                }}
-                                className={fieldClass("agencyId")}
-                            >
-                                <option value="">Select agency</option>
-                                {agencies.map((a) => (
-                                    <option key={a.id} value={a.id}>
-                                        {a.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <div ref={agencyDropdownRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setAgencyDropdownOpen(!agencyDropdownOpen);
+                                        if (!agencyDropdownOpen) setAgencySearch("");
+                                    }}
+                                    className={`w-full border rounded px-3 py-2 text-[13px] text-left focus:outline-none focus:ring-1 bg-card flex items-center justify-between ${
+                                        touched.agencyId && errors.agencyId
+                                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                            : "border-border focus:border-accent focus:ring-accent"
+                                    } ${!agencyId ? "text-muted" : "text-text"}`}
+                                >
+                                    <span className="truncate">{selectedAgency?.name || "Select agency"}</span>
+                                    <ChevronDown className={`w-4 h-4 shrink-0 text-muted transition-transform ${agencyDropdownOpen ? "rotate-180" : ""}`} />
+                                </button>
+                                {agencyDropdownOpen && (
+                                    <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-lg shadow-lg max-h-60 flex flex-col">
+                                        <div className="p-2 border-b border-border">
+                                            <div className="relative">
+                                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search agency..."
+                                                    value={agencySearch}
+                                                    onChange={(e) => setAgencySearch(e.target.value)}
+                                                    className="w-full pl-8 pr-3 py-1.5 border border-border rounded text-[12px] focus:outline-none focus:ring-1 focus:ring-accent bg-card text-text"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="overflow-y-auto flex-1">
+                                            {filteredAgencies.length === 0 ? (
+                                                <div className="px-3 py-2 text-[12px] text-muted">No agencies found</div>
+                                            ) : (
+                                                filteredAgencies.map((a) => (
+                                                    <button
+                                                        key={a.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setAgencyId(a.id);
+                                                            setAgencyDropdownOpen(false);
+                                                            setAgencySearch("");
+                                                            if (touched.agencyId) validateField("agencyId", a.id);
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-page transition-colors cursor-pointer ${
+                                                            agencyId === a.id ? "bg-page font-semibold text-text" : "text-text"
+                                                        }`}
+                                                    >
+                                                        {a.name}
+                                                    </button>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         )}
                         {touched.agencyId && errors.agencyId && (
                             <p className="text-[11px] text-red-500">{errors.agencyId}</p>
