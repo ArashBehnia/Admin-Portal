@@ -69,9 +69,9 @@ const CreateBlockPanel = ({
     const reasonOptions = REASON_OPTIONS.filter((opt) => opt.value !== "");
 
     return (
-        <div className="fixed inset-0 z-[9999] flex justify-end">
+        <div className="fixed inset-0 z-drawer flex justify-end">
             <div
-                className="absolute inset-0 bg-black/40"
+                className="overlay"
                 onClick={handleClose}
             />
             <div className="relative w-full max-w-[480px] bg-card shadow-2xl flex flex-col animate-slide-in-right">

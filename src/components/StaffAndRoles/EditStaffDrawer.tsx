@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import { X, AlertTriangle, Loader2, Check } from "lucide-react";
 import { StaffMember, RoleItem } from "@/actions/staffAndRolesActions";
 import { PERMISSION_MATRIX, buildPermissionCategories } from "@/types/permissionTypes";
+import Dropdown from "@/components/Shared/Dropdown";
 
 interface EditStaffDrawerProps {
     isOpen: boolean;
@@ -71,7 +72,7 @@ const EditStaffDrawer = ({
 
     return (
         <div
-            className="fixed inset-0 bg-[#0F1115]/40 backdrop-blur-[2px] z-[999] flex justify-end"
+            className="overlay z-drawer flex justify-end"
             onClick={onClose}
         >
             <div
@@ -216,19 +217,12 @@ const EditStaffDrawer = ({
                                 <label className="text-[13px] text-muted font-medium font-sans">
                                     Role
                                 </label>
-                                <select
+                                <Dropdown
                                     value={formRole}
-                                    onChange={(e) =>
-                                        onRoleChange(e.target.value)
-                                    }
-                                    className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors"
-                                >
-                                    {rolesList.map((role) => (
-                                        <option key={role.id} value={role.slug}>
-                                            {role.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={onRoleChange}
+                                    options={rolesList.map((role) => ({ value: role.slug, label: role.name }))}
+                                    placeholder="Select role"
+                                />
                             </div>
 
                             <div className="flex flex-col gap-1.5 mt-1 select-none">

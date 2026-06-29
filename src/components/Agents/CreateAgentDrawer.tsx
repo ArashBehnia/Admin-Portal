@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { X, Loader2, ChevronDown, Search } from "lucide-react";
 import api from "@/lib/axios";
+import Dropdown from "@/components/Shared/Dropdown";
 
 const ROLES = [
     { value: "owner", label: "Owner" },
@@ -243,12 +244,12 @@ const CreateAgentDrawer = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-text/40 backdrop-blur-[2px] z-99 transition-opacity animate-fade-in"
+                className="overlay z-drawer transition-opacity"
                 onClick={handleClose}
             />
 
             {/* Drawer */}
-            <div className="fixed inset-y-0 right-0 w-full max-w-[520px] bg-card border-l border-border shadow-2xl z-100 flex flex-col animate-slide-left">
+            <div className="fixed inset-y-0 right-0 w-full max-w-[520px] bg-card border-l border-border shadow-2xl z-[101] flex flex-col animate-slide-left">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
                     <h2 className="text-[16px] font-bold text-text">
@@ -452,17 +453,12 @@ const CreateAgentDrawer = ({
                         <label className="block text-[13px] font-semibold text-text">
                             Role
                         </label>
-                        <select
+                        <Dropdown
                             value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
-                        >
-                            {ROLES.map((r) => (
-                                <option key={r.value} value={r.value}>
-                                    {r.label}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setRole}
+                            options={ROLES}
+                            placeholder="Select role"
+                        />
                     </div>
 
                     {error && (

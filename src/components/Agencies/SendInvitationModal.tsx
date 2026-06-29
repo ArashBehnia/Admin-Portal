@@ -25,7 +25,7 @@ const SendInvitationModal = ({ isOpen, onClose }: SendInvitationModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 z-100 bg-black/40 flex items-center justify-center p-4">
+        <div className="overlay z-modal flex items-center justify-center p-4">
             <div className="bg-card rounded shadow-xl w-full max-w-[500px] flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                     <h2 className="text-[16px] font-bold text-text">

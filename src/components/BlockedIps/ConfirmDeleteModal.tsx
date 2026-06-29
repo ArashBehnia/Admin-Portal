@@ -17,7 +17,7 @@ const ConfirmDeleteModal = ({
 
     return (
         <div
-            className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[10000] flex items-center justify-center p-4 select-none animate-fade-in"
+            className="overlay z-modal flex items-center justify-center p-4 select-none"
             onClick={onCancel}
         >
             <div

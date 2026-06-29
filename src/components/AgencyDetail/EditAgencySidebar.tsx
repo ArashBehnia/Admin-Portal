@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import api from "@/lib/axios";
+import Dropdown from "@/components/Shared/Dropdown";
 
 const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 const CRM_OPTIONS = [
@@ -163,9 +164,9 @@ const EditAgencySidebar = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] flex justify-end">
+        <div className="fixed inset-0 z-drawer flex justify-end">
             <div
-                className="absolute inset-0 bg-black/40"
+                className="overlay"
                 onClick={handleClose}
             />
             <div className="relative w-full max-w-[520px] bg-card shadow-2xl flex flex-col animate-slide-in-right">
@@ -248,16 +249,12 @@ const EditAgencySidebar = ({
                                     <label className="block text-[13px] font-semibold text-text">
                                         State
                                     </label>
-                                    <select
+                                    <Dropdown
                                         value={fields.state}
-                                        onChange={(e) => updateField("state", e.target.value)}
-                                        className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
-                                    >
-                                        <option value="">Select</option>
-                                        {STATES.map((s) => (
-                                            <option key={s} value={s}>{s}</option>
-                                        ))}
-                                    </select>
+                                        onChange={(val) => updateField("state", val)}
+                                        options={STATES.map((s) => ({ value: s, label: s }))}
+                                        placeholder="Select"
+                                    />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="block text-[13px] font-semibold text-text">
@@ -278,19 +275,15 @@ const EditAgencySidebar = ({
                                 <label className="block text-[13px] font-semibold text-text">
                                     CRM Selection
                                 </label>
-                                <select
-                                    value={fields.crmSelection}
-                                    onChange={(e) => {
-                                        updateField("crmSelection", e.target.value);
-                                        if (e.target.value !== "Other") updateField("crmName", "");
-                                    }}
-                                    className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
-                                >
-                                    <option value="">Select CRM</option>
-                                    {CRM_OPTIONS.map((c) => (
-                                        <option key={c} value={c}>{c}</option>
-                                    ))}
-                                </select>
+                                    <Dropdown
+                                        value={fields.crmSelection}
+                                        onChange={(val) => {
+                                            updateField("crmSelection", val);
+                                            if (val !== "Other") updateField("crmName", "");
+                                        }}
+                                        options={CRM_OPTIONS.map((c) => ({ value: c, label: c }))}
+                                        placeholder="Select CRM"
+                                    />
                             </div>
 
                             {fields.crmSelection === "Other" && (

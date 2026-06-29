@@ -17,7 +17,7 @@ const PermissionsModal = ({ isOpen, selectedRole, rolesList, onClose }: Permissi
     const categories = buildPermissionCategories(PERMISSION_MATRIX, roleSlugs);
 
     return (
-        <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4 select-none animate-fade-in cursor-pointer" onClick={onClose}>
+        <div className="overlay z-modal flex items-center justify-center p-4 select-none cursor-pointer" onClick={onClose}>
             <div className="bg-card w-full max-w-4xl rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] cursor-default" onClick={(e) => e.stopPropagation()}>
                 <div className="px-6 py-5 flex justify-between items-start bg-card">
                     <div className="flex flex-col gap-0.5">

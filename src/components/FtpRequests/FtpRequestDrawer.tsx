@@ -120,12 +120,12 @@ const FtpRequestDrawer = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-text/40 backdrop-blur-[2px] z-99 transition-opacity animate-fade-in"
+                className="overlay z-drawer transition-opacity"
                 onClick={onClose}
             />
 
             {/* Drawer */}
-            <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card border-l border-border shadow-2xl z-100 flex flex-col animate-slide-left">
+            <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card border-l border-border shadow-2xl z-[101] flex flex-col animate-slide-left">
                 {/* Header */}
                 <div className="p-6 border-b border-border/80 flex items-start justify-between shrink-0">
                     <div className="flex items-center gap-3">
@@ -357,7 +357,7 @@ const FtpRequestDrawer = ({
 
             {/* Confirm Approve Modal */}
             {showConfirmApprove && (
-                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[10000] flex items-center justify-center p-4 select-none animate-fade-in">
+                <div className="overlay z-popover flex items-center justify-center p-4 select-none">
                     <div
                         className="bg-card w-full max-w-[380px] rounded-lg border border-border shadow-2xl p-6 flex flex-col gap-4 animate-slide-up"
                         onClick={(e) => e.stopPropagation()}
@@ -393,7 +393,7 @@ const FtpRequestDrawer = ({
 
             {/* Confirm Reject Modal */}
             {showConfirmReject && (
-                <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[10000] flex items-center justify-center p-4 select-none animate-fade-in">
+                <div className="overlay z-popover flex items-center justify-center p-4 select-none">
                     <div
                         className="bg-card w-full max-w-[380px] rounded-lg border border-border shadow-2xl p-6 flex flex-col gap-4 animate-slide-up"
                         onClick={(e) => e.stopPropagation()}

@@ -65,7 +65,7 @@ const DeleteAgencyModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center p-4 select-none animate-fade-in">
+        <div className="overlay z-modal flex items-center justify-center p-4 select-none">
             <div
                 className="bg-card rounded-lg shadow-xl w-full max-w-[440px] flex flex-col overflow-hidden animate-slide-up"
                 onClick={(e) => e.stopPropagation()}

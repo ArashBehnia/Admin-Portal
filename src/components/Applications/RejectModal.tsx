@@ -36,9 +36,9 @@ const RejectModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center">
+        <div className="overlay z-modal flex items-center justify-center">
             <div
-                className="absolute inset-0 bg-black/50"
+                className="absolute inset-0"
                 onClick={onCancel}
             />
             <div className="relative bg-card rounded-lg shadow-2xl border border-border w-[460px] max-w-[90vw] p-6">

@@ -2,6 +2,7 @@
 
 import { X, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { RoleItem } from '@/actions/staffAndRolesActions';
+import Dropdown from '@/components/Shared/Dropdown';
 
 interface AddStaffModalProps {
     isOpen: boolean;
@@ -41,7 +42,7 @@ const AddStaffModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4">
+        <div className="overlay z-modal flex items-center justify-center p-4">
             <div className="bg-card w-full max-w-[480px] rounded-lg border border-border shadow-2xl overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
                 <div className="px-6 py-5 flex justify-between items-center bg-card">
                     <h3 className="font-bold text-lg text-text font-sans tracking-tight">
@@ -88,12 +89,12 @@ const AddStaffModal = ({
 
                         <div className="flex flex-col gap-1">
                             <label className="text-[13px] text-muted font-medium font-sans">Role <span className="text-accent">*</span></label>
-                            <select value={formRole} onChange={(e) => onRoleChange(e.target.value)}
-                                className="w-full px-3 py-2.5 border border-border bg-card text-text rounded focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium transition-colors">
-                                {rolesList.filter(r => r.slug !== 'superadmin').map((role) => (
-                                    <option key={role.id} value={role.slug}>{role.name}</option>
-                                ))}
-                            </select>
+                            <Dropdown
+                                value={formRole}
+                                onChange={onRoleChange}
+                                options={rolesList.filter(r => r.slug !== 'superadmin').map((role) => ({ value: role.slug, label: role.name }))}
+                                placeholder="Select role"
+                            />
                             <p className="text-[12px] text-muted leading-tight mt-1.5 font-sans">
                                 Superadmin role can only be assigned by existing superadmin after account creation.
                             </p>

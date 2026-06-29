@@ -12,7 +12,7 @@ const ConfirmModal = ({ isOpen, title, description, onCancel, onConfirm }: Confi
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#0F1115]/50 backdrop-blur-[2px] z-[9999] flex items-center justify-center p-4 select-none animate-fade-in">
+        <div className="overlay z-modal flex items-center justify-center p-4 select-none">
             <div className="bg-card w-full max-w-[380px] rounded-lg border border-border shadow-2xl p-6 flex flex-col gap-4 animate-slide-up" onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-col gap-1.5">
                     <h3 className="font-bold text-[16px] text-text font-sans leading-snug">{title}</h3>

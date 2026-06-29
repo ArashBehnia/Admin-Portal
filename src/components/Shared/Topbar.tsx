@@ -344,7 +344,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
       {isSearchOpen && (
         <div
-          className="fixed inset-0 bg-[#0F1115]/50 z-50 flex items-start justify-center pt-20 px-4 transition-opacity animate-fade-in"
+          className="overlay z-modal flex items-start justify-center pt-20 px-4"
           onClick={() => setIsSearchOpen(false)}
         >
           <div

@@ -10,6 +10,7 @@ import {
     CATEGORIES,
 } from "@/actions/emailTemplatesActions";
 import Toast from "@/components/Shared/Toast";
+import Dropdown from "@/components/Shared/Dropdown";
 import ConfirmModal from "./TemplateName/ConfirmModal";
 import EmailTemplatesPagination from "./EmailTemplatesPagination";
 import type { ToastState } from "@/hooks/useTemplateEditor";
@@ -149,17 +150,13 @@ const EmailTemplatesTable = ({
                         <Loader2 className="absolute right-3 top-2.5 h-4 w-4 text-muted animate-spin" />
                     )}
                 </div>
-                <select
+                <Dropdown
                     value={selectedCategory}
+                    onChange={() => {}}
+                    options={CATEGORIES.map((cat) => ({ value: cat, label: cat }))}
                     disabled
-                    className="w-auto bg-card border border-border rounded-md px-3 py-2 text-sm text-muted/50 cursor-not-allowed opacity-50"
-                >
-                    {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                            {cat}
-                        </option>
-                    ))}
-                </select>
+                    className="w-auto"
+                />
             </div>
 
             {/* Table */}

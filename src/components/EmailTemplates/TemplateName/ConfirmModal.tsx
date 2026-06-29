@@ -22,10 +22,10 @@ const ConfirmModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 select-none">
+        <div className="overlay z-modal flex items-center justify-center p-4 select-none">
             <div
                 onClick={onCancel}
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0"
             />
             <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-[420px] p-6 overflow-hidden font-sans">
                 <div className="flex flex-col gap-3">

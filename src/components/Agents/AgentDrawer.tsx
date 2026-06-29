@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { X, Loader2 } from "lucide-react";
 import { Agent, DrawerTab } from "@/types/agentTypes";
 import api from "@/lib/axios";
+import Dropdown from "@/components/Shared/Dropdown";
 
 interface AgentOverview {
     id?: string;
@@ -226,12 +227,12 @@ const AgentDrawer = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-text/40 backdrop-blur-[2px] z-99 transition-opacity animate-fade-in"
+                className="overlay z-drawer transition-opacity"
                 onClick={onClose}
             />
 
             {/* Drawer */}
-            <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card border-l border-border shadow-2xl z-100 flex flex-col animate-slide-left">
+            <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-card border-l border-border shadow-2xl z-[101] flex flex-col animate-slide-left">
                 {/* Header */}
                 <div className="p-6 border-b border-border/80 flex items-start justify-between">
                     <div className="flex items-center gap-4">
@@ -435,16 +436,17 @@ const AgentDrawer = ({
                                 <h3 className="text-sm font-semibold text-text mb-2">Change Role</h3>
                                 {showChangeRole ? (
                                     <div className="space-y-3">
-                                        <select
+                                        <Dropdown
                                             value={selectedRole}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                            className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
-                                        >
-                                            <option value="admin">Admin</option>
-                                            <option value="agent">Agent</option>
-                                            <option value="owner">Owner</option>
-                                            <option value="assistant">Assistant</option>
-                                        </select>
+                                            onChange={setSelectedRole}
+                                            options={[
+                                                { value: "admin", label: "Admin" },
+                                                { value: "agent", label: "Agent" },
+                                                { value: "owner", label: "Owner" },
+                                                { value: "assistant", label: "Assistant" },
+                                            ]}
+                                            placeholder="Select role"
+                                        />
                                         {roleError && (
                                             <p className="text-[12px] text-red-500">{roleError}</p>
                                         )}

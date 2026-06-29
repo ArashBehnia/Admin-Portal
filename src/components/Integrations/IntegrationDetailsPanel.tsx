@@ -117,10 +117,10 @@ const IntegrationDetailsPanel = ({
     return (
         <>
             <div
-                className="fixed inset-0 bg-black/20 z-60 transition-opacity"
+                className="overlay z-drawer transition-opacity"
                 onClick={onClose}
             />
-            <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-card shadow-xl z-60 flex flex-col">
+            <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-card shadow-xl z-[101] flex flex-col">
                 {/* Header */}
                 <div className="flex flex-col gap-2 p-5 border-b border-border">
                     <div className="flex items-start justify-between">

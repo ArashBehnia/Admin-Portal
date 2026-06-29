@@ -29,7 +29,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-text/50 z-40 lg:hidden transition-opacity"
+                    className="overlay z-drawer lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}

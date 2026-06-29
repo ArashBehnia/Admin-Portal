@@ -99,12 +99,12 @@ const ChangePasswordDrawer = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black/20 z-[60] transition-opacity"
+                className="overlay z-drawer transition-opacity"
                 onClick={onClose}
             />
 
             {/* Drawer */}
-            <div className="fixed top-0 right-0 h-full w-full max-w-[450px] bg-card shadow-2xl z-[60] flex flex-col border-l border-border overflow-hidden animate-slide-left">
+            <div className="fixed top-0 right-0 h-full w-full max-w-[450px] bg-card shadow-2xl z-[101] flex flex-col border-l border-border overflow-hidden animate-slide-left">
                 {/* Header */}
                 <div className="px-6 py-5 border-b border-border relative">
                     <button

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import Dropdown from "@/components/Shared/Dropdown";
 
 interface AddIntegrationModalProps {
     isOpen: boolean;
@@ -13,11 +14,13 @@ const SYNC_OPTIONS = ["Every 15 min", "1 hour", "4 hours", "Daily"] as const;
 const AddIntegrationModal = ({ isOpen, onClose }: AddIntegrationModalProps) => {
     const [selectedSync, setSelectedSync] = useState("Every 15 min");
     const [skipTest, setSkipTest] = useState(false);
+    const [crmProvider, setCrmProvider] = useState("Box+Dice");
+    const [connectionType, setConnectionType] = useState("REAXML");
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="overlay z-modal flex items-end sm:items-center justify-center sm:p-4">
             <div className="bg-card rounded-t-xl sm:rounded shadow-xl w-full sm:w-[480px] max-h-[92vh] sm:max-h-[90vh] flex flex-col">
                 <div className="flex items-center justify-between px-5 py-3.5 border-b border-border shrink-0">
                     <h2 className="text-[15px] font-semibold text-text">
@@ -55,24 +58,33 @@ const AddIntegrationModal = ({ isOpen, onClose }: AddIntegrationModalProps) => {
                         </div>
                     ))}
 
-                    {[
-                        {
-                            label: "CRM provider",
-                            opts: ["Box+Dice", "VaultRE", "AgentBox"],
-                        },
-                        { label: "Connection type", opts: ["REAXML", "API"] },
-                    ].map(({ label, opts }) => (
-                        <div key={label} className="space-y-1">
-                            <label className="block text-[12px] font-semibold text-muted">
-                                {label}
-                            </label>
-                            <select className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent bg-card text-text">
-                                {opts.map((o) => (
-                                    <option key={o}>{o}</option>
-                                ))}
-                            </select>
-                        </div>
-                    ))}
+                    <div className="space-y-1">
+                        <label className="block text-[12px] font-semibold text-muted">
+                            CRM provider
+                        </label>
+                        <Dropdown
+                            value={crmProvider}
+                            onChange={setCrmProvider}
+                            options={[
+                                { value: "Box+Dice", label: "Box+Dice" },
+                                { value: "VaultRE", label: "VaultRE" },
+                                { value: "AgentBox", label: "AgentBox" },
+                            ]}
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="block text-[12px] font-semibold text-muted">
+                            Connection type
+                        </label>
+                        <Dropdown
+                            value={connectionType}
+                            onChange={setConnectionType}
+                            options={[
+                                { value: "REAXML", label: "REAXML" },
+                                { value: "API", label: "API" },
+                            ]}
+                        />
+                    </div>
 
                     <div className="space-y-1">
                         <label className="block text-[12px] font-semibold text-muted">

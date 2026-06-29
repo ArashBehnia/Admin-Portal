@@ -60,6 +60,47 @@
     background-color: #94a3b8;
 }
 
+@keyframes dropdown-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-enter {
+    animation: dropdown-enter 0.12s ease-out;
+}
+
+.scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Overlay system ────────────────────────────────────────── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 21, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity 0.15s ease;
+}
+
+/* ── Z-index layers ────────────────────────────────────────── */
+.z-dropdown { z-index: 50; }
+.z-drawer   { z-index: 100; }
+.z-modal    { z-index: 200; }
+.z-popover  { z-index: 300; }
+.z-toast    { z-index: 400; }
+
 body {
     font-family: var(--font-inter), Inter, sans-serif;
 }

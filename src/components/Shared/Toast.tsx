@@ -36,7 +36,7 @@ const Toast = ({
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl px-4 py-3.5 max-w-sm animate-slide-left select-none">
+        <div className="fixed bottom-6 right-6 z-toast flex items-center gap-3 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl px-4 py-3.5 max-w-sm animate-slide-left select-none">
             <div
                 className={`p-1.5 rounded-full shrink-0 flex items-center justify-center ${iconColors[type] ?? iconColors.success}`}
             >

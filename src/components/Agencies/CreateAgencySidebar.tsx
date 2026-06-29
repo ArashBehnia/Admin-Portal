@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import api from "@/lib/axios";
+import Dropdown from "@/components/Shared/Dropdown";
 
 const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 const CRM_OPTIONS = [
@@ -229,9 +230,9 @@ const CreateAgencySidebar = ({
         }`;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex justify-end">
+        <div className="fixed inset-0 z-drawer flex justify-end">
             <div
-                className="absolute inset-0 bg-black/40"
+                className="overlay"
                 onClick={handleClose}
             />
             <div className="relative w-full max-w-[520px] bg-card shadow-2xl flex flex-col animate-slide-in-right">
@@ -347,23 +348,16 @@ const CreateAgencySidebar = ({
                             <label className="block text-[13px] font-semibold text-text">
                                 State
                             </label>
-                            <select
+                            <Dropdown
                                 value={state}
-                                onChange={(e) => {
-                                    setState(e.target.value);
-                                    if (touched.state) validateField("state", e.target.value);
+                                onChange={(val) => {
+                                    setState(val);
+                                    if (touched.state) validateField("state", val);
                                 }}
-                                onBlur={() => {
-                                    markTouched("state");
-                                    validateField("state", state);
-                                }}
-                                className={fieldClass("state")}
-                            >
-                                <option value="">Select</option>
-                                {STATES.map((s) => (
-                                    <option key={s} value={s}>{s}</option>
-                                ))}
-                            </select>
+                                options={STATES.map((s) => ({ value: s, label: s }))}
+                                placeholder="Select"
+                                className={fieldClass("state").includes("border-red") ? "border-red-500" : ""}
+                            />
                             {touched.state && errors.state && (
                                 <p className="text-[11px] text-red-500">{errors.state}</p>
                             )}
@@ -398,24 +392,17 @@ const CreateAgencySidebar = ({
                         <label className="block text-[13px] font-semibold text-text">
                             CRM Selection
                         </label>
-                        <select
+                        <Dropdown
                             value={crmSelection}
-                            onChange={(e) => {
-                                setCrmSelection(e.target.value);
-                                if (e.target.value !== "Other") setCrmName("");
-                                if (touched.crmSelection) validateField("crmSelection", e.target.value);
+                            onChange={(val) => {
+                                setCrmSelection(val);
+                                if (val !== "Other") setCrmName("");
+                                if (touched.crmSelection) validateField("crmSelection", val);
                             }}
-                            onBlur={() => {
-                                markTouched("crmSelection");
-                                validateField("crmSelection", crmSelection);
-                            }}
-                            className={fieldClass("crmSelection")}
-                        >
-                            <option value="">Select CRM</option>
-                            {CRM_OPTIONS.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
+                            options={CRM_OPTIONS.map((c) => ({ value: c, label: c }))}
+                            placeholder="Select CRM"
+                            className={fieldClass("crmSelection").includes("border-red") ? "border-red-500" : ""}
+                        />
                         {touched.crmSelection && errors.crmSelection && (
                             <p className="text-[11px] text-red-500">{errors.crmSelection}</p>
                         )}
