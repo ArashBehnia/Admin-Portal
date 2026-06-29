@@ -134,11 +134,11 @@ interface SidebarProps {
 const Sidebar = ({ onClose }: SidebarProps) => {
     const currentPath = usePathname();
     const user = useUser();
-    const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
+    const { role = "" } = user || {};
 
     const hasAccess = (item: SidebarItemType) => {
         if (!item.roles || item.roles.length === 0) return true;
-        return item.roles.includes(sessionRole);
+        return item.roles.includes(role);
     };
 
     return (
@@ -255,7 +255,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             </nav>
 
             <div className="p-4 border-t border-border shrink-0 text-xs text-muted">
-                v0.1 · {sessionRole.charAt(0).toUpperCase() + sessionRole.slice(1)}
+                v0.1 {role ? `· ${role.charAt(0).toUpperCase() + role.slice(1)}` : ""}
             </div>
         </div>
     );

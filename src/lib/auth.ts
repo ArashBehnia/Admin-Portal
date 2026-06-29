@@ -33,13 +33,15 @@ export async function getUser(): Promise<User | null> {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/admin/user/own`, {
+        const response = await fetch(`${BACKEND_URL}/admin/me`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Content-Type": "application/json",
             },
             cache: "no-store",
         });
+
+        // console.log("response", response);
 
         if (!response.ok) {
             return null;
@@ -50,30 +52,30 @@ export async function getUser(): Promise<User | null> {
         // console.log("login user data", json);
 
         // If backend returns a single user object
-        if (json.id || json.email) {
-            return json.data || json.user || json;
-        }
+        // if (json.id || json.email) {
+        //     return json.data || json.user || json;
+        // }
 
-        // If backend returns a paginated list, extract logged-in user from JWT
-        if (json.content && Array.isArray(json.content)) {
-            const payload = decodeJwtPayload(accessToken);
-            const userId =
-                (payload?.sub as string) ||
-                (payload?.userId as string) ||
-                (payload?.id as string);
+        // // If backend returns a paginated list, extract logged-in user from JWT
+        // if (json.content && Array.isArray(json.content)) {
+        //     const payload = decodeJwtPayload(accessToken);
+        //     const userId =
+        //         (payload?.sub as string) ||
+        //         (payload?.userId as string) ||
+        //         (payload?.id as string);
 
-            if (userId) {
-                const found = json.content.find(
-                    (u: User) => String(u.id) === String(userId),
-                );
-                if (found) return found;
-            }
+        //     if (userId) {
+        //         const found = json.content.find(
+        //             (u: User) => String(u.id) === String(userId),
+        //         );
+        //         if (found) return found;
+        //     }
 
-            // Fallback: return first user if JWT decode fails
-            return json.content[0] || null;
-        }
+        //     // Fallback: return first user if JWT decode fails
+        //     return json.content[0] || null;
+        // }
 
-        return json;
+        return json?.user;
     } catch {
         return null;
     }

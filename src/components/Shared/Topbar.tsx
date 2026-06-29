@@ -123,18 +123,14 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
     const profileRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    const sessionName = typeof window !== "undefined" ? sessionStorage.getItem("userName") || "" : "";
-    const sessionEmail = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") || "" : "";
-    const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
+    // const sessionName = typeof window !== "undefined" ? sessionStorage.getItem("userName") || "" : "";
+    // const sessionEmail = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") || "" : "";
+    // const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
 
-    const name = sessionName ||
-        (user
-            ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-              user.email ||
-              "Admin"
-            : "Admin");
-    const role = (user?.role as string) || "user";
-    const userEmail = sessionEmail || user?.email || "admin@homeby.com.au";
+    // console.log("user",user)
+
+    const {firstName, lastName, email, role} = user || {};
+    const name = `${firstName} ${lastName}`;
     const userInitials = name
         ? name
               .split(" ")
@@ -307,13 +303,13 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                             <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-md shadow-lg py-1 z-50 text-sm">
                                 <div className="px-4 py-2 border-b border-border/60">
                                     <p className="font-semibold text-text truncate">
-                                        {name || "Admin"}
+                                        {name || " "}
                                     </p>
                                     <p className="text-xs text-muted truncate">
-                                        {userEmail}
+                                        {email}
                                     </p>
                                     <span className="inline-block mt-1 text-[10px] font-semibold bg-page text-accent px-1.5 py-0.5 rounded capitalize">
-                                        {sessionRole}
+                                        {role}
                                     </span>
                                 </div>
 

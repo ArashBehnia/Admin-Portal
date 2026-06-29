@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 
 type LoginStep = "password" | "mfa" | "forgot_password";
 
 export default function LoginPage() {
     const router = useRouter();
+    const user = useUser();
 
 
     const [step, setStep] = useState<LoginStep>("password");
@@ -35,6 +37,12 @@ export default function LoginPage() {
             setTimeout(() => otpRefs.current[0]?.focus(), 100);
         }
     }, [step]);
+
+    useEffect(() => {
+        if (user) {
+            router.push("/dashboard");
+        }
+    }, [user, router]);
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -155,13 +163,8 @@ export default function LoginPage() {
                 return;
             }
 
-            // Save user info to sessionStorage for Topbar
-            const user = data.user || data;
-            const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Admin";
-            sessionStorage.setItem("userName", fullName);
-            sessionStorage.setItem("userEmail", user.email || "");
-            sessionStorage.setItem("userRole", user.role || "");
-
+            // User is fetched via context on next refresh
+            // We just need to trigger the refresh and navigation
             router.refresh();
             router.push("/dashboard");
         } catch {
