@@ -73,7 +73,7 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // ─── Pagination State ────────────────────────────────────────────
-    const [pageSize, setPageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
     pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);

@@ -68,6 +68,7 @@ HomeBy Admin Portal is the internal operations dashboard for HomeBy, an Australi
 - Roles list with permission matrix
 - Permissions modal (role-based access control view)
 - Staff activity log
+- Groups management (CRUD)
 
 ### Email Templates
 - Template list with category filters and search
@@ -148,6 +149,7 @@ homeby-admin-next/
 │   │   ├── layout.tsx                # Root layout (Inter font, Providers, AppLayout)
 │   │   ├── page.tsx                  # Root redirect to /dashboard
 │   │   ├── not-found.tsx             # 404 page
+│   │   ├── favicon.ico                 # Favicon
 │   │   ├── globals.css               # Global styles and Tailwind theme tokens
 │   │   ├── login/
 │   │   │   └── page.tsx              # Login with MFA and forgot password
@@ -183,6 +185,7 @@ homeby-admin-next/
 │   │       │   ├── verify-2fa/       # POST: verify 2FA code
 │   │       │   ├── refresh/          # POST: refresh tokens
 │   │       │   ├── logout/           # POST: logout
+│   │       │   ├── me/               # GET: current user info
 │   │       │   └── forgot-password/  # POST: send reset email
 │   │       ├── dashboard/            # Dashboard data endpoints
 │   │       ├── agencies/             # Agency CRUD endpoints
@@ -242,13 +245,13 @@ homeby-admin-next/
 │   │
 │   ├── lib/                          # Utility libraries and services
 │   │   ├── api.ts                    # Server-side backend fetch helper
-│   │   ├── auth.ts                   # Server-side authentication (getUser)
+│   │   ├── auth.ts                   # Server-side authentication (getUser via /admin/me)
 │   │   ├── axios.ts                  # Client-side Axios instance with interceptors
 │   │   ├── dashboard-service.ts      # Dashboard API service
 │   │   ├── agency-service.ts         # Agency API service
 │   │   ├── agent-service.ts          # Agent API service
 │   │   ├── application-service.ts    # Application API service
-│   │   ├── staff-service.ts          # Staff API service
+│   │   ├── staff-service.ts          # Staff & Groups API service
 │   │   ├── email-templates-service.ts # Email template API service
 │   │   ├── integration-service.ts    # Integration API service
 │   │   ├── blocked-ip-service.ts     # Blocked IP API service
@@ -281,7 +284,6 @@ homeby-admin-next/
 │   └── middleware.ts                  # Next.js middleware (route protection)
 │
 ├── public/                            # Static assets
-│   ├── favicon.ico
 │   ├── file.svg
 │   ├── globe.svg
 │   ├── next.svg
@@ -467,6 +469,7 @@ npm run start
 | `/api/auth/verify-2fa` | POST | Verify 2FA code (returns tokens) |
 | `/api/auth/refresh` | POST | Refresh access token |
 | `/api/auth/logout` | POST | Logout and clear cookies |
+| `/api/auth/me` | GET | Get current user info |
 | `/api/auth/forgot-password` | POST | Send password reset email |
 | `/api/dashboard/*` | GET | Dashboard data endpoints |
 | `/api/agencies/*` | GET, POST, PUT, DELETE | Agency CRUD endpoints |
@@ -483,6 +486,7 @@ npm run start
 
 Middleware-based route protection:
 - Public paths: `/login`, `/api/auth/*`
+- Authenticated users on `/login` are redirected to `/dashboard`
 - All other paths require `access-token` cookie
 - Redirects to `/login` if no token found
 - Matches all paths except static files (`_next/static`, `_next/image`, `favicon.ico`, `*.*`)
@@ -680,6 +684,7 @@ All client-side API calls route through Next.js API routes (`/api/*`), which:
 | `EditAgencySidebar` | `AgencyDetail/EditAgencySidebar.tsx` | Edit agency panel |
 | `DeleteAgencyModal` | `AgencyDetail/DeleteAgencyModal.tsx` | Delete confirmation |
 | `SuspendAgencyModal` | `AgencyDetail/SuspendAgencyModal.tsx` | Suspend confirmation |
+| `ComingSoon` | `AgencyDetail/ComingSoon.tsx` | Placeholder for unbuilt tabs |
 
 ### Agent Components
 
@@ -1135,16 +1140,16 @@ If testing is added in the future:
 
 | Metric | Count |
 |---|---|
-| Total Pages | 14 |
-| Total Components | 88 |
+| Total Pages | 15 |
+| Total Components | 90 |
 | Shared Components | 5 |
-| Feature Components | 83 |
+| Feature Components | 85 |
 | Layouts | 1 (AppLayout) |
-| Routes | 14 page routes + 43 API routes |
-| Feature Modules | 10 |
+| Routes | 15 page routes + 47 API routes |
+| Feature Modules | 12 |
 | Custom Hooks | 12 |
 | Contexts | 2 (User, Breadcrumb) |
-| Services | 11 |
+| Services | 13 |
 | Type Files | 8 |
 | Server Actions | 11 |
 

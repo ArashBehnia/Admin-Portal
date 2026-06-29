@@ -48,7 +48,7 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
     );
     const [totalCount, setTotalCount] = useState(initialData?.total ?? 0);
     const [isLoading, setIsLoading] = useState(false);
-    const [pageSize, setPageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
     pageSizeRef.current = pageSize;
     const [currentPage, setCurrentPage] = useState(1);

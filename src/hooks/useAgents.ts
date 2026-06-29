@@ -33,7 +33,7 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     // ─── Pagination State ─────────────────────────────────────────────
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
     pageSizeRef.current = pageSize;
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
