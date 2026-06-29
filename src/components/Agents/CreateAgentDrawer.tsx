@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { X, Loader2, ChevronDown, Search } from "lucide-react";
+import { X, Loader2, ChevronDown, Search, Eye, EyeOff, Check } from "lucide-react";
 import api from "@/lib/axios";
 import Dropdown from "@/components/Shared/Dropdown";
 
@@ -10,6 +10,22 @@ const ROLES = [
     { value: "agent", label: "Agent" },
     { value: "admin", label: "Admin" },
     { value: "assistant", label: "Assistant" },
+];
+
+interface PasswordRule {
+    label: string;
+    test: (pw: string) => boolean;
+}
+
+const passwordRules: PasswordRule[] = [
+    { label: "At least 8 characters", test: (pw) => pw.length >= 8 },
+    { label: "One uppercase letter", test: (pw) => /[A-Z]/.test(pw) },
+    { label: "One lowercase letter", test: (pw) => /[a-z]/.test(pw) },
+    { label: "One number", test: (pw) => /\d/.test(pw) },
+    {
+        label: "One special character (!@#$%^&*)",
+        test: (pw) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw),
+    },
 ];
 
 interface AgencyOption {
@@ -78,6 +94,7 @@ const CreateAgentDrawer = ({
     const [email, setEmail] = useState("");
     const [mobile, setMobile] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState("agent");
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -429,22 +446,79 @@ const CreateAgentDrawer = ({
                         <label className="block text-[13px] font-semibold text-text">
                             Password
                         </label>
-                        <input
-                            type="password"
-                            placeholder="Minimum 8 characters"
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                if (touched.password) validateField("password", e.target.value);
-                            }}
-                            onBlur={() => {
-                                markTouched("password");
-                                validateField("password", password);
-                            }}
-                            className={fieldClass("password")}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter password"
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (touched.password) validateField("password", e.target.value);
+                                }}
+                                onBlur={() => {
+                                    markTouched("password");
+                                    validateField("password", password);
+                                }}
+                                className={`w-full px-3 py-2 pr-10 border rounded-md text-[13px] text-text focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent ${
+                                    touched.password && errors.password
+                                        ? "border-red-300"
+                                        : "border-border"
+                                }`}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text cursor-pointer"
+                            >
+                                {showPassword ? (
+                                    <Eye className="w-4 h-4" />
+                                ) : (
+                                    <EyeOff className="w-4 h-4" />
+                                )}
+                            </button>
+                        </div>
                         {touched.password && errors.password && (
                             <p className="text-[11px] text-red-500">{errors.password}</p>
+                        )}
+
+                        {/* Password Rules */}
+                        {password.length > 0 && (
+                            <div className="space-y-1.5 pt-1">
+                                <p className="text-[11px] font-medium text-muted uppercase tracking-wide">
+                                    Password must contain:
+                                </p>
+                                <div className="grid grid-cols-1 gap-1">
+                                    {passwordRules.map((rule) => {
+                                        const passes = rule.test(password);
+                                        return (
+                                            <div
+                                                key={rule.label}
+                                                className={`flex items-center gap-2 text-[12px] ${
+                                                    passes
+                                                        ? "text-green-600"
+                                                        : "text-muted"
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`w-4 h-4 rounded-full flex items-center justify-center border ${
+                                                        passes
+                                                            ? "bg-green-100 border-green-300"
+                                                            : "bg-page border-border"
+                                                    }`}
+                                                >
+                                                    {passes && (
+                                                        <Check
+                                                            className="w-2.5 h-2.5"
+                                                            strokeWidth={3}
+                                                        />
+                                                    )}
+                                                </div>
+                                                {rule.label}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         )}
                     </div>
 

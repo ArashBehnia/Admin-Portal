@@ -157,9 +157,9 @@ const ChangePasswordDrawer = ({
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text cursor-pointer"
                                 >
                                     {showNewPassword ? (
-                                        <EyeOff className="w-4 h-4" />
-                                    ) : (
                                         <Eye className="w-4 h-4" />
+                                    ) : (
+                                        <EyeOff className="w-4 h-4" />
                                     )}
                                 </button>
                             </div>
@@ -241,9 +241,9 @@ const ChangePasswordDrawer = ({
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text cursor-pointer"
                                 >
                                     {showConfirmPassword ? (
-                                        <EyeOff className="w-4 h-4" />
-                                    ) : (
                                         <Eye className="w-4 h-4" />
+                                    ) : (
+                                        <EyeOff className="w-4 h-4" />
                                     )}
                                 </button>
                             </div>
