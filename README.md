@@ -6,20 +6,6 @@ A production-grade administrative dashboard for managing the HomeBy real estate 
 
 HomeBy Admin Portal is the internal operations dashboard for HomeBy, an Australian real estate platform. It serves as the central control panel for platform administrators, support staff, and content editors to manage agencies, agents, property listings, and system operations.
 
-**Business Purpose:**
-- Manage real estate agency onboarding and lifecycle
-- Oversee agent registrations and application moderation
-- Monitor platform integrations and data feed health
-- Configure email templates and system communications
-- Administer staff roles and permissions
-- Track platform health and operational metrics
-
-**Target Users:**
-- Platform administrators ( admin)
-- Support staff
-- Content editors
-- Review moderators
-
 ## Features
 
 ### Authentication
@@ -152,35 +138,6 @@ HomeBy Admin Portal is the internal operations dashboard for HomeBy, an Australi
 | Linting | ESLint | ^9.0.0 |
 | PostCSS | @tailwindcss/postcss | ^4.3.0 |
 | Font | Inter (Google Fonts) | Variable |
-
-## Screenshots
-
-### Dashboard
-![Dashboard](screenshots/dashboard.png)
-
-### Login
-![Login](screenshots/login.png)
-
-### Agencies
-![Agencies](screenshots/agencies.png)
-
-### Agency Detail
-![Agency Detail](screenshots/agency-detail.png)
-
-### Agents
-![Agents](screenshots/agents.png)
-
-### Applications
-![Applications](screenshots/applications.png)
-
-### Staff & Roles
-![Staff & Roles](screenshots/staff.png)
-
-### Email Templates
-![Email Templates](screenshots/email-templates.png)
-
-### Integrations
-![Integrations](screenshots/integrations.png)
 
 ## Folder Structure
 
@@ -331,8 +288,6 @@ homeby-admin-next/
 │   ├── vercel.svg
 │   └── window.svg
 │
-├── .env.example                       # Environment variable template
-├── .env                               # Local environment variables
 ├── next.config.ts                     # Next.js configuration
 ├── tailwind.config.ts                 # Tailwind CSS configuration
 ├── tsconfig.json                      # TypeScript configuration
@@ -404,14 +359,6 @@ The application uses a Backend-for-Frontend (BFF) pattern:
 2. **Client-side:** Axios instance with interceptors that routes through Next.js API routes (`/api/*`)
 3. **API Routes:** Next.js serverless functions that proxy requests to the admin backend, handling token injection and cookie management
 
-### State Management
-
-- **Server State:** TanStack React Query with 60-second stale time, no refetch on window focus
-- **User State:** React Context (`UserContext`) for current user data
-- **Breadcrumb State:** React Context (`BreadcrumbContext`) for dynamic page titles
-- **Form State:** Local component state (`useState`)
-- **Session Data:** `sessionStorage` for user name, email, and role (post-login)
-
 ### Routing Strategy
 
 - **File-based routing** via Next.js App Router
@@ -445,28 +392,6 @@ pnpm install
 # or
 bun install
 ```
-
-### Environment Variables
-
-Create a `.env` file based on `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-
-```env
-ADMIN_API_URL=https://admin-api.homeby.com.au
-```
-
-## Environment Variables
-
-| Variable | Purpose | Required | Default Value |
-|---|---|---|---|
-| `ADMIN_API_URL` | Admin backend API base URL | Yes | `https://admin-api.homeby.com.au` |
-| `NEXT_PUBLIC_API_URL` | Client-side API base URL (for Axios) | No | (empty — uses relative paths) |
-| `NODE_ENV` | Environment mode (development/production) | No | `development` |
 
 ## Running the Project
 
@@ -562,37 +487,6 @@ Middleware-based route protection:
 - Redirects to `/login` if no token found
 - Matches all paths except static files (`_next/static`, `_next/image`, `favicon.ico`, `*.*`)
 
-## State Management
-
-### TanStack React Query
-
-Used for all server state management with the following configuration:
-
-```typescript
-new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,      // 60 seconds
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-```
-
-### React Context
-
-| Context | Purpose | Provider Location |
-|---|---|---|
-| `UserContext` | Current authenticated user state | `Providers.tsx` |
-| `BreadcrumbContext` | Dynamic breadcrumb text for detail pages | `Providers.tsx` |
-
-### Session Storage
-
-Post-login user data stored in `sessionStorage`:
-- `userName` — Full name
-- `userEmail` — Email address
-- `userRole` — User role (superadmin, admin, etc.)
-
 ## API Integration
 
 ### Client-Side (Axios)
@@ -600,7 +494,7 @@ Post-login user data stored in `sessionStorage`:
 ```typescript
 // src/lib/axios.ts
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "",
+  baseURL: "",
 });
 
 // Request interceptor: cookies handled by Next.js API routes
@@ -650,7 +544,7 @@ All client-side API calls route through Next.js API routes (`/api/*`), which:
 - **Access Token:** HttpOnly cookie, 1-hour expiry
 - **Refresh Token:** HttpOnly cookie, 7-day expiry
 - **OTP Token:** HttpOnly cookie, 5-minute expiry (temporary, cleared after 2FA verification)
-- **Storage:** HttpOnly, Secure, SameSite=Lax cookies (not localStorage/sessionStorage)
+- **Storage:** HttpOnly, Secure, SameSite=Lax cookies
 
 ## Authentication Flow
 
@@ -673,8 +567,7 @@ All client-side API calls route through Next.js API routes (`/api/*`), which:
 │     Sets: access-token (1hr), refresh-token (7d)                │
 │     Clears: otp-token                                           │
 │     ↓                                                           │
-│  5. Store user data in sessionStorage                           │
-│     Redirect to /dashboard                                      │
+│  5. Redirect to /dashboard                                      │
 │     ↓                                                           │
 │  6. Protected Routes                                            │
 │     Middleware checks access-token cookie                       │
@@ -1238,45 +1131,6 @@ If testing is added in the future:
 - **E2E Testing:** Playwright
 - **Coverage:** V8 provider
 
-## Build & Deployment
-
-### Build Configuration
-
-```typescript
-// next.config.ts
-const nextConfig = {}; // Default configuration
-```
-
-### Build Commands
-
-```bash
-# Development
-npm run dev        # Starts dev server on port 3000
-
-# Production
-npm run build      # Creates optimized production build
-npm run start      # Starts production server
-
-# Linting
-npm run lint       # Runs ESLint
-```
-
-### Deployment Options
-
-| Platform | Configuration | Status |
-|---|---|---|
-| Vercel | Automatic (Next.js optimized) | Recommended |
-| Docker | Custom Dockerfile required | Not configured |
-| AWS | ECS/EKS with Node.js | Not configured |
-| Self-hosted | `npm run build && npm run start` | Supported |
-
-### Environment Variables for Production
-
-```env
-ADMIN_API_URL=https://admin-api.homeby.com.au
-NODE_ENV=production
-```
-
 ## Project Statistics
 
 | Metric | Count |
@@ -1301,11 +1155,10 @@ NODE_ENV=production
 3. **No Error Boundaries:** Unhandled errors may crash the entire app
 4. **No Unit Tests:** No test coverage or testing framework configured
 5. **No E2E Tests:** No end-to-end testing setup
-6. **Session Storage for User Data:** User info stored in sessionStorage (cleared on tab close)
-7. **No Offline Support:** No service worker or offline functionality
-8. **No i18n:** English-only interface
-9. **No Animation System:** Minimal transitions (150ms only)
-10. **Notification Bell Disabled:** Placeholder UI only, not connected to backend
+6. **No Offline Support:** No service worker or offline functionality
+7. **No i18n:** English-only interface
+8. **No Animation System:** Minimal transitions (150ms only)
+9. **Notification Bell Disabled:** Placeholder UI only, not connected to backend
 
 ## Future Improvements
 
