@@ -49,6 +49,18 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
     // ─── Derived / Computed ───────────────────────────────────────────
     const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null;
 
+    const searchLower = searchQuery.trim().toLowerCase();
+    const filteredAgents = searchLower
+        ? agents.filter(
+              (a) =>
+                  a.name.toLowerCase().includes(searchLower) ||
+                  a.email.toLowerCase().includes(searchLower) ||
+                  a.agency.toLowerCase().includes(searchLower) ||
+                  a.role.toLowerCase().includes(searchLower) ||
+                  a.licence.toLowerCase().includes(searchLower),
+          )
+        : agents;
+
     // ─── Fetch summary on mount ───────────────────────────────────────
     useEffect(() => {
         const fetchSummary = async () => {
@@ -75,10 +87,12 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
             setIsLoading(true);
             try {
                 const p = page ?? 1;
-                const offset = (p - 1) * pageSizeRef.current;
+                const isSearch = !!keywords?.trim();
+                const offset = isSearch ? 0 : (p - 1) * pageSizeRef.current;
+                const limit = isSearch ? 200 : pageSizeRef.current;
                 const params = new URLSearchParams({
                     offset: String(offset),
-                    limit: String(pageSizeRef.current),
+                    limit: String(limit),
                 });
                 if (keywords) params.set("keywords", keywords);
 
@@ -138,14 +152,15 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     useEffect(() => {
         setCurrentPage(1);
-        if (!searchQuery) {
+        if (!searchQuery.trim()) {
+            setIsSearching(false);
             loadPage(1);
             return;
         }
         setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(1, searchQuery).finally(() => setIsSearching(false));
-        }, 400);
+            loadPage(1, searchQuery.trim()).finally(() => setIsSearching(false));
+        }, 250);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
@@ -186,11 +201,12 @@ const useAgents = ({ initialAgents, initialTotal }: UseAgentsProps) => {
 
     return {
         // Data
-        agents,
+        agents: filteredAgents,
         selectedAgent,
         totalCount,
         summary,
-        isLoading: isLoading || isSearching,
+        isLoading,
+        isSearching,
         currentPage,
         totalPages,
         pageSize,

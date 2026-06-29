@@ -17,6 +17,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
         stats,
         filteredAgencies,
         isLoading,
+        isSearching,
         currentPage,
         totalPages,
         totalCount,
@@ -70,6 +71,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
             <AgenciesTable
                 filteredAgencies={filteredAgencies}
                 isLoading={isLoading}
+                isSearching={isSearching}
                 searchQuery={searchQuery}
                 activeFilter={activeFilter}
                 openMenuId={openMenuId}

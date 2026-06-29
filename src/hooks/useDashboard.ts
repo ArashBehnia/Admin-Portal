@@ -1,15 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import {
     OverviewData,
     AttentionItem,
     OnboardingPipeline,
     UserActivityPoint,
     Hotspot,
-    Timeframe,
-    TIMEFRAME_DAYS,
 } from "@/actions/dashboardActions";
 
 function toArray<T>(value: unknown): T[] {
@@ -25,8 +22,6 @@ function toArray<T>(value: unknown): T[] {
     }
     return [];
 }
-
-const TIMEFRAMES: Timeframe[] = ["7d", "30d", "90d", "YTD"];
 
 async function fetchJson<T>(url: string): Promise<T> {
     const res = await fetch(url);
@@ -51,19 +46,7 @@ async function fetchJson<T>(url: string): Promise<T> {
     return res.json();
 }
 
-function daysForTimeframe(tf: Timeframe): number {
-    if (tf === "YTD") {
-        const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        return Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-    }
-    return TIMEFRAME_DAYS[tf];
-}
-
 export default function useDashboard() {
-    const [timeframe, setTimeframe] = useState<Timeframe>("30d");
-    const days = daysForTimeframe(timeframe);
-
     const overview = useQuery<OverviewData>({
         queryKey: ["dashboard", "overview"],
         queryFn: () => fetchJson("/api/dashboard/overview"),
@@ -81,15 +64,15 @@ export default function useDashboard() {
     });
 
     const userActivity = useQuery({
-        queryKey: ["dashboard", "user-activity", days],
-        queryFn: () => fetchJson(`/api/dashboard/user-activity?days=${days}`),
+        queryKey: ["dashboard", "user-activity"],
+        queryFn: () => fetchJson(`/api/dashboard/user-activity?days=30`),
         select: (data) => toArray<UserActivityPoint>(data),
     });
 
     const hotspots = useQuery({
-        queryKey: ["dashboard", "hotspots", days],
+        queryKey: ["dashboard", "hotspots"],
         queryFn: () =>
-            fetchJson(`/api/dashboard/demand-hotspots?days=${days}&limit=10`),
+            fetchJson(`/api/dashboard/demand-hotspots?days=30&limit=10`),
         select: (data) => toArray<Hotspot>(data),
     });
 
@@ -141,9 +124,6 @@ export default function useDashboard() {
         hotspots: hotspots.data,
         isLoading,
         isError,
-        timeframe,
-        setTimeframe,
-        TIMEFRAMES,
         getTrendClass,
         getAttentionLink,
     };

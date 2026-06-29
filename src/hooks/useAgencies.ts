@@ -108,6 +108,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const searchQueryRef = useRef(searchQuery);
+    searchQueryRef.current = searchQuery;
     const [activeFilter, setActiveFilter] = useState<AgencyFilter>("All");
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -154,21 +156,22 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
 
     useEffect(() => {
         setCurrentPage(1);
-        if (!searchQuery) {
+        const trimmed = searchQuery.trim();
+        if (!trimmed) {
             loadPage(1);
             return;
         }
         setIsSearching(true);
         const timer = setTimeout(() => {
-            loadPage(1, searchQuery).finally(() => setIsSearching(false));
-        }, 400);
+            loadPage(1, trimmed).finally(() => setIsSearching(false));
+        }, 250);
         return () => clearTimeout(timer);
     }, [searchQuery, loadPage]);
 
     useEffect(() => {
         setCurrentPage(1);
-        loadPage(1, searchQuery || undefined);
-    }, [pageSize, loadPage, searchQuery]);
+        loadPage(1, searchQueryRef.current || undefined);
+    }, [pageSize, loadPage]);
 
     const filteredAgencies = agencies.filter((agency) => {
         const matchesFilter = (() => {
@@ -204,7 +207,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         stats,
         filteredAgencies,
         totalCount,
-        isLoading: isLoading || isSearching,
+        isLoading,
+        isSearching,
         currentPage,
         totalPages,
         pageSize,

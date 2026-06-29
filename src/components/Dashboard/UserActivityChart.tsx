@@ -14,7 +14,6 @@ import { UserActivityPoint } from "@/actions/dashboardActions";
 
 interface UserActivityChartProps {
     data: UserActivityPoint[];
-    timeframe: string;
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -33,11 +32,11 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null;
 };
 
-const UserActivityChart = ({ data, timeframe }: UserActivityChartProps) => {
+const UserActivityChart = ({ data }: UserActivityChartProps) => {
     return (
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm flex flex-col">
             <h2 className="text-[15px] font-bold text-text">
-                User activity ({timeframe})
+                User activity (30d)
             </h2>
             <div className="h-60 w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Agent } from "@/types/agentTypes";
 import AgentsPagination from "./AgentsPagination";
 
@@ -18,6 +18,7 @@ interface AgentsTableProps {
     onViewClick: (agentId: string) => void;
     getStatusClasses: (status: Agent["status"]) => string;
     isLoading?: boolean;
+    isSearching?: boolean;
 }
 
 const AgentsTable = ({
@@ -34,6 +35,7 @@ const AgentsTable = ({
     onViewClick,
     getStatusClasses,
     isLoading = false,
+    isSearching = false,
 }: AgentsTableProps) => {
     return (
         <div className="flex flex-col gap-6">
@@ -47,6 +49,9 @@ const AgentsTable = ({
                     onChange={(e) => onSearchChange(e.target.value)}
                     className="pl-9 pr-4 py-2 w-full bg-card border border-border rounded-md text-[12px] text-text placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-colors"
                 />
+                {isSearching && (
+                    <Loader2 className="absolute right-3 top-2.5 h-4 w-4 text-muted animate-spin" />
+                )}
             </div>
 
             {/* Table */}

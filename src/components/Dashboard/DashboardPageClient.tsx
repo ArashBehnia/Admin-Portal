@@ -1,7 +1,6 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
-import { Timeframe } from "@/actions/dashboardActions";
 import useDashboard from "@/hooks/useDashboard";
 import KPICards from "./KPICards";
 import AttentionAlerts from "./AttentionAlerts";
@@ -19,9 +18,6 @@ const DashboardPageClient = () => {
         hotspots,
         isLoading,
         isError,
-        timeframe,
-        setTimeframe,
-        TIMEFRAMES,
         getTrendClass,
         getAttentionLink,
     } = useDashboard();
@@ -55,7 +51,7 @@ const DashboardPageClient = () => {
 
     return (
         <div className="flex flex-col gap-8 w-full max-w-content mx-auto">
-            {/* Header + Timeframe */}
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
                     <h1 className="text-[18px] sm:text-[20px] font-bold text-text leading-snug">Dashboard</h1>
@@ -63,30 +59,13 @@ const DashboardPageClient = () => {
                         Overview of platform activity and operational health.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                    <div className="flex items-center bg-card border border-border rounded-lg p-0.5 shadow-sm">
-                        {TIMEFRAMES.map((tf: Timeframe) => (
-                            <button
-                                key={tf}
-                                onClick={() => setTimeframe(tf)}
-                                className={`px-3 py-1 text-xs font-bold rounded transition-all cursor-pointer ${
-                                    timeframe === tf
-                                        ? "bg-text text-card shadow-sm"
-                                        : "text-muted hover:text-text"
-                                }`}
-                            >
-                                {tf}
-                            </button>
-                        ))}
-                    </div>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
-                        title="Refresh"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                    </button>
-                </div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                    title="Refresh"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             {isLoading ? (
@@ -109,7 +88,7 @@ const DashboardPageClient = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {pipeline && <OnboardingPipeline pipeline={pipeline} />}
-                        {userActivity && <UserActivityChart data={userActivity} timeframe={timeframe} />}
+                        {userActivity && <UserActivityChart data={userActivity} />}
                     </div>
 
                     {hotspots && <DemandHotspots hotspots={hotspots} />}

@@ -20,6 +20,7 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
         totalCount,
         summary,
         isLoading,
+        isSearching,
         currentPage,
         totalPages,
         pageSize,
@@ -105,6 +106,7 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
                 onViewClick={openDrawer}
                 getStatusClasses={getStatusClasses}
                 isLoading={isLoading}
+                isSearching={isSearching}
             />
 
             {selectedAgent && (

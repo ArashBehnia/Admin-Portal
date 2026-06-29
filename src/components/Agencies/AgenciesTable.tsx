@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Search, MoreHorizontal } from "lucide-react";
+import { Search, MoreHorizontal, Loader2 } from "lucide-react";
 import {
     Agency,
     AGENCY_FILTERS,
@@ -20,6 +20,7 @@ import DeleteAgencyModal from "../AgencyDetail/DeleteAgencyModal";
 interface AgenciesTableProps {
     filteredAgencies: Agency[];
     isLoading?: boolean;
+    isSearching?: boolean;
     searchQuery: string;
     activeFilter: AgencyFilter;
     openMenuId: string | null;
@@ -33,6 +34,7 @@ interface AgenciesTableProps {
 const AgenciesTable = ({
     filteredAgencies,
     isLoading,
+    isSearching,
     searchQuery,
     activeFilter,
     openMenuId,
@@ -60,6 +62,9 @@ const AgenciesTable = ({
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="w-full pl-9 pr-3 py-1.5 border border-border rounded text-[12px] focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-muted bg-card text-text shadow-sm"
                     />
+                    {isSearching && (
+                        <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted animate-spin" />
+                    )}
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden">
                     {AGENCY_FILTERS.map((filter) => (
