@@ -125,7 +125,6 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
     const sessionName = typeof window !== "undefined" ? sessionStorage.getItem("userName") || "" : "";
     const sessionEmail = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") || "" : "";
-    const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
 
     const name = sessionName ||
         (user
@@ -133,7 +132,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
               user.email ||
               "Admin"
             : "Admin");
-    const role = sessionRole || (user?.role as string) || "user";
+    const role = (user?.role as string) || "user";
     const userEmail = sessionEmail || user?.email || "admin@homeby.com.au";
     const userInitials = name
         ? name

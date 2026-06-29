@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { useSetUser } from "@/contexts/UserContext";
+
 
 type LoginStep = "password" | "mfa" | "forgot_password";
 
 export default function LoginPage() {
     const router = useRouter();
-    const setUser = useSetUser();
+
 
     const [step, setStep] = useState<LoginStep>("password");
 
@@ -155,17 +155,11 @@ export default function LoginPage() {
                 return;
             }
 
-            const meRes = await fetch("/api/auth/me");
-            const meData = await meRes.json();
-            console.log("User data after login:", meData);
-
             // Save user info to sessionStorage for Topbar
-            const fullName = [meData.firstName, meData.lastName].filter(Boolean).join(" ") || meData.email || "Admin";
+            const user = data.user || data;
+            const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Admin";
             sessionStorage.setItem("userName", fullName);
-            sessionStorage.setItem("userEmail", meData.email || "");
-            sessionStorage.setItem("userRole", meData.role || "");
-
-            setUser(meData);
+            sessionStorage.setItem("userEmail", user.email || "");
 
             router.refresh();
             router.push("/dashboard");
