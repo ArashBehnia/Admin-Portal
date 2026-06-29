@@ -81,7 +81,7 @@ const FeedsTable = ({
                                         : ""
                                 }`}
                             >
-                                <td className="py-2.5 px-3 font-semibold text-text">
+                                <td className="py-2.5 px-6 font-semibold text-text">
                                     <span
                                         className="block truncate"
                                         title={feed?.agencyName}
@@ -89,28 +89,28 @@ const FeedsTable = ({
                                         {feed?.agencyName}
                                     </span>
                                 </td>
-                                <td className="py-2.5 px-2 text-muted">
+                                <td className="py-2.5 px-6 text-muted">
                                     <span className="block truncate">
                                         {feed?.crm}
                                     </span>
                                 </td>
-                                <td className="py-2.5 px-2">
+                                <td className="py-2.5 px-6">
                                     <MethodBadge method={feed?.method ?? ""} />
                                 </td>
-                                <td className="py-2.5 px-2">
+                                <td className="py-2.5 px-6">
                                     <StatusBadge status={feed?.status ?? ""} />
                                 </td>
-                                <td className="py-2.5 px-2 text-muted">
+                                <td className="py-2.5 px-6 text-muted">
                                     <span className="block truncate">
                                         {feed?.lastSync}
                                     </span>
                                 </td>
-                                <td className="py-2.5 px-2 text-center text-text">
+                                <td className="py-2.5 px-6 text-center text-text">
                                     {feed?.listings24h === 0
                                         ? "0"
                                         : (feed?.listings24h ?? "—")}
                                 </td>
-                                <td className="py-2.5 px-2">
+                                <td className="py-2.5 px-6">
                                     <div className="flex items-center justify-center gap-1">
                                         {feed?.errors24h !== null && (
                                             <div
@@ -130,17 +130,17 @@ const FeedsTable = ({
                                         </span>
                                     </div>
                                 </td>
-                                <td className="py-2.5 px-2 text-text">
+                                <td className="py-2.5 px-6 text-text">
                                     <span className="block truncate">
                                         {feed?.distribution ?? "—"}
                                     </span>
                                 </td>
-                                <td className="py-2.5 px-2">
+                                <td className="py-2.5 px-6">
                                     <OnboardingBadge
                                         value={feed?.onboarding ?? ""}
                                     />
                                 </td>
-                                <td className="py-2.5 px-3 text-right">
+                                <td className="py-2.5 px-6 text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <button
                                             onClick={() => onViewDetails(feed)}

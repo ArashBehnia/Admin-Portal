@@ -92,7 +92,7 @@ const AgenciesTable = ({
                                 <th className="px-6 py-4">Feed</th>
                                 <th className="px-6 py-4 text-right">MRR</th>
                                 <th className="px-6 py-4">Last activity</th>
-                                <th className="px-6 py-4 text-right"></th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
@@ -133,7 +133,7 @@ const AgenciesTable = ({
                                                   : ""
                                         }`}
                                     >
-                                        <td className="py-2.5 px-4">
+                                        <td className="py-2.5 px-6">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-text leading-tight">
                                                     {agency?.name}
@@ -143,38 +143,38 @@ const AgenciesTable = ({
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="py-2.5 px-3">
+                                        <td className="py-2.5 px-6">
                                             <SubscriptionBadge
                                                 type={
                                                     agency?.subscription ?? ""
                                                 }
                                             />
                                         </td>
-                                        <td className="py-2.5 px-3">
+                                        <td className="py-2.5 px-6">
                                             <OnboardingBadge
                                                 status={
                                                     agency?.onboarding ?? ""
                                                 }
                                             />
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-text font-medium">
+                                        <td className="py-2.5 px-6 text-right text-text font-medium">
                                             {agency?.listings}
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-text font-medium">
+                                        <td className="py-2.5 px-6 text-right text-text font-medium">
                                             {agency?.agents}
                                         </td>
-                                        <td className="py-2.5 px-3">
+                                        <td className="py-2.5 px-6">
                                             <FeedStatusBadge
                                                 status={agency?.feed ?? ""}
                                             />
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-text font-medium">
+                                        <td className="py-2.5 px-6 text-right text-text font-medium">
                                             {agency?.mrr}
                                         </td>
-                                        <td className="py-2.5 px-3 text-left text-muted font-medium">
+                                        <td className="py-2.5 px-6 text-left text-muted font-medium">
                                             {agency?.lastActivity}
                                         </td>
-                                        <td className="py-2.5 px-4 text-right">
+                                        <td className="py-2.5 px-6 text-right">
                                             <div className="flex items-center justify-end gap-3 relative">
                                                 <Link
                                                     href={`/agencies/${agency?.id}`}
