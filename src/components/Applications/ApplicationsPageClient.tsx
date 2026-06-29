@@ -41,8 +41,8 @@ const ApplicationsPageClient = ({
     initialApplications,
     initialStats,
 }: ApplicationsPageClientProps) => {
-    console.log("[ApplicationsPageClient] initialApplications:", JSON.stringify(initialApplications).slice(0, 1000));
-    console.log("[ApplicationsPageClient] initialStats:", JSON.stringify(initialStats));
+    // console.log("[ApplicationsPageClient] initialApplications:", JSON.stringify(initialApplications).slice(0, 1000));
+    // console.log("[ApplicationsPageClient] initialStats:", JSON.stringify(initialStats));
 
     const mappedApplications = initialApplications.map((item) => {
         const raw = item as unknown as Record<string, unknown>;

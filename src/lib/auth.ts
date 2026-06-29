@@ -33,7 +33,7 @@ export async function getUser(): Promise<User | null> {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/admin/user/count`, {
+        const response = await fetch(`${BACKEND_URL}/admin/user/own`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export async function getUser(): Promise<User | null> {
 
         const json = await response.json();
 
-        console.log("login user data", json);
+        // console.log("login user data", json);
 
         // If backend returns a single user object
         if (json.id || json.email) {

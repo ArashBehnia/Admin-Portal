@@ -125,6 +125,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
     const sessionName = typeof window !== "undefined" ? sessionStorage.getItem("userName") || "" : "";
     const sessionEmail = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") || "" : "";
+    const sessionRole = typeof window !== "undefined" ? sessionStorage.getItem("userRole") || "" : "";
 
     const name = sessionName ||
         (user
@@ -312,7 +313,7 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
                                         {userEmail}
                                     </p>
                                     <span className="inline-block mt-1 text-[10px] font-semibold bg-page text-accent px-1.5 py-0.5 rounded capitalize">
-                                        {role}
+                                        {sessionRole}
                                     </span>
                                 </div>
 

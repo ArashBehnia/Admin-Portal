@@ -160,6 +160,7 @@ export default function LoginPage() {
             const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Admin";
             sessionStorage.setItem("userName", fullName);
             sessionStorage.setItem("userEmail", user.email || "");
+            sessionStorage.setItem("userRole", user.role || "");
 
             router.refresh();
             router.push("/dashboard");
