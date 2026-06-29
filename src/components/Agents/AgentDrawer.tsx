@@ -79,7 +79,7 @@ const AgentDrawer = ({
     const [passwordError, setPasswordError] = useState("");
 
     const [showChangeRole, setShowChangeRole] = useState(false);
-    const [selectedRole, setSelectedRole] = useState("agent");
+    const [selectedRole, setSelectedRole] = useState("standard");
     const [isChangingRole, setIsChangingRole] = useState(false);
     const [roleError, setRoleError] = useState("");
 
@@ -137,6 +137,19 @@ const AgentDrawer = ({
 
     const isActive = overview?.isActive ?? selectedAgent.status === "Active";
 
+    const buildStaffPayload = (overrides: Record<string, unknown> = {}) => ({
+        id: selectedAgent.id,
+        email: overview?.email ?? selectedAgent.email,
+        mobile: overview?.mobile ?? selectedAgent.phone,
+        role: overview?.role ?? selectedAgent.role,
+        isActive: overview?.isActive ?? selectedAgent.status === "Active",
+        contact: {
+            firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0],
+            lastName: overview?.lastName ?? selectedAgent.name.split(" ").slice(1).join(" "),
+        },
+        ...overrides,
+    });
+
     const handleResetPassword = async () => {
         if (!newPassword.trim()) {
             setPasswordError("Password is required");
@@ -151,7 +164,7 @@ const AgentDrawer = ({
         try {
             const res = await api.put(
                 `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
-                { password: newPassword, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
+                buildStaffPayload({ password: newPassword }),
             );
             if (res.data?.success) {
                 setShowResetPassword(false);
@@ -172,7 +185,7 @@ const AgentDrawer = ({
         try {
             const res = await api.put(
                 `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
-                { role: selectedRole, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
+                buildStaffPayload({ role: selectedRole }),
             );
             if (res.data?.success) {
                 setShowChangeRole(false);
@@ -194,7 +207,7 @@ const AgentDrawer = ({
         try {
             const res = await api.put(
                 `/api/agents/staff?id=${selectedAgent.id}&agencyId=${overview?.agencyId || selectedAgent.agencyId}`,
-                { isActive: !isActive, contact: { firstName: overview?.firstName ?? selectedAgent.name.split(" ")[0], lastName: overview?.lastName ?? "" } },
+                buildStaffPayload({ isActive: !isActive }),
             );
             if (res.data?.success) {
                 setOverview((prev) => prev ? { ...prev, isActive: !prev.isActive } : null);
@@ -427,9 +440,9 @@ const AgentDrawer = ({
                                             onChange={(e) => setSelectedRole(e.target.value)}
                                             className="w-full border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent bg-card text-text"
                                         >
-                                            <option value="owner">Owner</option>
-                                            <option value="agent">Agent</option>
                                             <option value="admin">Admin</option>
+                                            <option value="agent">Agent</option>
+                                            <option value="owner">Owner</option>
                                             <option value="assistant">Assistant</option>
                                         </select>
                                         {roleError && (

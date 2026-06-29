@@ -110,21 +110,17 @@ export async function PUT(request: Request) {
         const body = await request.json();
 
         const payload: Record<string, unknown> = {};
-        if (body.password) payload.password = body.password;
+        if (body.id) payload.id = body.id;
+        if (body.email) payload.email = body.email;
+        if (body.mobile) payload.mobile = body.mobile;
         if (body.role) payload.role = body.role;
         if (typeof body.isActive === "boolean") payload.isActive = body.isActive;
+        if (body.password) payload.password = body.password;
         if (body.contact) {
             payload.contact = {
                 firstName: body.contact.firstName ?? "",
                 lastName: body.contact.lastName ?? "",
             };
-        }
-
-        if (Object.keys(payload).length === 0) {
-            return NextResponse.json(
-                { success: false, error: "No fields to update" },
-                { status: 400 },
-            );
         }
 
         try {
