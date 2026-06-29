@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const publicPaths = ["/login", "/api/auth"];
-
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Allow public paths and API auth routes
-    if (
-        publicPaths.some(
-            (path) => pathname === path || pathname.startsWith(path + "/"),
-        )
-    ) {
+    const accessToken = request.cookies.get("access-token")?.value;
+
+    // Allow API auth routes regardless of auth state
+    if (pathname.startsWith("/api/auth")) {
         return NextResponse.next();
     }
 
-    // Check for access token cookie
-    const accessToken = request.cookies.get("access-token")?.value;
+    // Redirect authenticated users away from /login to /dashboard
+    if (pathname === "/login") {
+        if (accessToken) {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+        return NextResponse.next();
+    }
 
+    // Protect all other routes: redirect to /login if not authenticated
     if (!accessToken) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
