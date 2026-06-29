@@ -75,7 +75,11 @@ export async function getUser(): Promise<User | null> {
         //     return json.content[0] || null;
         // }
 
-        return json?.user;
+        if (json?.user) return json.user;
+        if (json?.data?.user) return json.data.user;
+        if (json?.data?.id || json?.data?.email) return json.data;
+        if (json?.id || json?.email) return json;
+        return null;
     } catch {
         return null;
     }

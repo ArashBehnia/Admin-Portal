@@ -129,8 +129,11 @@ export const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
     // console.log("user",user)
 
-    const {firstName, lastName, email, role} = user || {};
-    const name = `${firstName} ${lastName}`;
+    const firstName = user?.firstName ?? "";
+    const lastName = user?.lastName ?? "";
+    const email = user?.email ?? "";
+    const role = user?.role ?? "";
+    const name = firstName || lastName ? `${firstName} ${lastName}`.trim() : "";
     const userInitials = name
         ? name
               .split(" ")

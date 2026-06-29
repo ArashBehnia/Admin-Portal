@@ -19,9 +19,9 @@ export function UserProvider({
 }) {
     const [user, setUser] = useState<User | null>(initialUser);
 
-    // useEffect(() => {
-    //     setUser(initialUser);
-    // }, [initialUser]);
+    useEffect(() => {
+        setUser(initialUser);
+    }, [initialUser]);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>

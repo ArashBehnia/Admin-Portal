@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { useUser } from "@/contexts/UserContext";
+import { useUser, useSetUser } from "@/contexts/UserContext";
 
 
 type LoginStep = "password" | "mfa" | "forgot_password";
@@ -11,6 +11,7 @@ type LoginStep = "password" | "mfa" | "forgot_password";
 export default function LoginPage() {
     const router = useRouter();
     const user = useUser();
+    const setUser = useSetUser();
 
 
     const [step, setStep] = useState<LoginStep>("password");
@@ -163,10 +164,14 @@ export default function LoginPage() {
                 return;
             }
 
-            // User is fetched via context on next refresh
-            // We just need to trigger the refresh and navigation
-            router.refresh();
-            router.push("/dashboard");
+            // Fetch user data before redirecting
+            const meRes = await fetch("/api/auth/me");
+            if (meRes.ok) {
+                const { user: userData } = await meRes.json();
+                if (userData) {
+                    setUser(userData);
+                }
+            }
         } catch {
             setError("Network error. Please try again.");
         } finally {
