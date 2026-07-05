@@ -129,6 +129,36 @@ const useEmailTemplates = () => {
         [loadPage],
     );
 
+    const refetch = useCallback(async () => {
+        const offset = (currentPage - 1) * pageSizeRef.current;
+        const limit = pageSizeRef.current;
+        const params = new URLSearchParams({
+            offset: String(offset),
+            limit: String(limit),
+        });
+        const filter = searchQueryRef.current || undefined;
+        if (filter) params.set("filter", filter);
+
+        try {
+            const res = await fetch(
+                `/api/email-templates?${params.toString()}`,
+            );
+            if (!res.ok) return;
+            const json = await res.json();
+            const items: Template[] = Array.isArray(json)
+                ? json
+                : Array.isArray(json.data)
+                  ? json.data
+                  : [];
+            const total =
+                typeof json.total === "number" ? json.total : items.length;
+            setTemplates(items);
+            setTotalCount(total);
+        } catch {
+            // silent fail on refetch
+        }
+    }, [currentPage]);
+
     // Client-side filtering fallback
     const searchLower = searchQuery.trim().toLowerCase();
     const filteredTemplates = searchLower
@@ -162,6 +192,7 @@ const useEmailTemplates = () => {
     return {
         filteredTemplates,
         allFilteredCount: totalCount,
+        refetch,
         currentPage,
         totalPages,
         pageSize,

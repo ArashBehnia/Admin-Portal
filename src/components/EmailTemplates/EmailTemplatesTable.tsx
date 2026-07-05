@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
 import { Search, Trash2, Loader2 } from "lucide-react";
 import {
     Template,
@@ -67,6 +66,7 @@ interface EmailTemplatesTableProps {
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rows: number) => void;
     isSearching?: boolean;
+    onRefetch?: () => void;
 }
 
 const EmailTemplatesTable = ({
@@ -82,8 +82,8 @@ const EmailTemplatesTable = ({
     onPageChange,
     onRowsPerPageChange,
     isSearching = false,
+    onRefetch,
 }: EmailTemplatesTableProps) => {
-    const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
     const [toast, setToast] = useState<ToastState>({
@@ -100,6 +100,14 @@ const EmailTemplatesTable = ({
     ) => {
         setToast({ title, message, type, visible: true });
     };
+
+    useEffect(() => {
+        if (!toast.visible) return;
+        const timer = setTimeout(() => {
+            setToast((prev) => ({ ...prev, visible: false }));
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [toast.visible]);
 
     const handleDeleteClick = (template: Template) => {
         setDeleteTarget(template);
@@ -123,7 +131,7 @@ const EmailTemplatesTable = ({
             }
 
             showToast("Template Deleted", `"${displayName}" has been deleted.`);
-            await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            onRefetch?.();
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : "Failed to delete template";
