@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,8 +12,8 @@ export async function POST(request: NextRequest) {
                 { status: 400 },
             );
         }
-
-        const response = await fetch(`${BACKEND_URL}/auth/admin/login`, {
+        
+        const response = await fetch(buildBackendUrl("/auth/admin/login"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -26,20 +24,26 @@ export async function POST(request: NextRequest) {
             }),
         });
 
-        const data = await response.json();
+        let data: any = {};
+        try {
+            data = await response.json();
+        } catch {
+            // Fallback for non-JSON responses
+        }
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.message || "Login failed" },
+                { error: data.message || data.error || `Backend returned status ${response.status}` },
                 { status: response.status },
             );
         }
 
         // Store the OTP token in an httponly cookie
-        const cookieMaxAge = 5 * 60; // 5 minutes for OTP token
-        const res = NextResponse.json(data);
+        const cookieMaxAge = data.expires || 10 * 60; // Align with backend expiry (e.g. 10 minutes)
+        const { token, ...safeData } = data;
+        const res = NextResponse.json({ success: true, ...safeData });
 
-        res.cookies.set("otp-token", data.token, {
+        res.cookies.set("otp-token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",

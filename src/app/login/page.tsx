@@ -28,9 +28,14 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
+    const [otpTimeLeft, setOtpTimeLeft] = useState<number | null>(null);
+
     const goToStep = (next: LoginStep) => {
         setError(null);
         setStep(next);
+        if (next !== "mfa") {
+            setOtpTimeLeft(null);
+        }
     };
 
     useEffect(() => {
@@ -38,6 +43,25 @@ export default function LoginPage() {
             setTimeout(() => otpRefs.current[0]?.focus(), 100);
         }
     }, [step]);
+
+    useEffect(() => {
+        if (step !== "mfa" || otpTimeLeft === null) return;
+        if (otpTimeLeft <= 0) {
+            setError("Verification code has expired. Please log in again.");
+            goToStep("password");
+            return;
+        }
+        const timer = setTimeout(() => {
+            setOtpTimeLeft(otpTimeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [otpTimeLeft, step]);
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const s = (seconds % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+    };
 
     useEffect(() => {
         if (user) {
@@ -56,6 +80,8 @@ export default function LoginPage() {
         setError(null);
 
         try {
+            console.log("/api/auth/admin/login");
+            
             const res = await fetch("/api/auth/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -76,12 +102,15 @@ export default function LoginPage() {
                 return;
             }
 
-            if (data.token) {
+            if (data.success) {
+                setOtpTimeLeft(data.expires || 600);
                 goToStep("mfa");
             } else {
                 setError("MFA is required for admin accounts");
             }
-        } catch {
+        } catch(error) {
+            console.log(error,"ssssssss");
+            
             setError("Network error. Please try again.");
         } finally {
             setLoading(false);
@@ -330,6 +359,12 @@ export default function LoginPage() {
                                 />
                             ))}
                         </div>
+
+                        {otpTimeLeft !== null && (
+                            <div className="text-center text-xs text-muted mb-4">
+                                Code expires in <span className="font-semibold text-text">{formatTime(otpTimeLeft)}</span>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <button

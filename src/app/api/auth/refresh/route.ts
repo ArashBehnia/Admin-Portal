@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     const refreshToken = request.cookies.get("refresh-token")?.value;
@@ -14,19 +12,29 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/auth/token/refresh`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ "refresh-token": refreshToken }),
-        });
+        const response = await fetch(
+            buildBackendUrl(`/auth/refresh-token?token=${encodeURIComponent(refreshToken)}`),
+            {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            }
+        );
 
-        const data = await response.json();
+        let data: any = {};
+        try {
+            data = await response.json();
+        } catch {
+            // Fallback for non-JSON responses
+        }
 
         if (!response.ok) {
-            return NextResponse.json(
-                { error: data.message || "Token refresh failed" },
+            const res = NextResponse.json(
+                { error: data.message || data.error || "Token refresh failed" },
                 { status: response.status },
             );
+            res.cookies.set("access-token", "", { maxAge: 0, path: "/" });
+            res.cookies.set("refresh-token", "", { maxAge: 0, path: "/" });
+            return res;
         }
 
         const res = NextResponse.json({ success: true });
@@ -34,7 +42,10 @@ export async function POST(request: NextRequest) {
         const accessTokenMaxAge = 60 * 60;
         const refreshTokenMaxAge = 7 * 24 * 60 * 60;
 
-        res.cookies.set("access-token", data["access-token"], {
+        const newAccessToken = data.accessToken || data["access-token"];
+        const newRefreshToken = data.refreshToken || data["refresh-token"];
+
+        res.cookies.set("access-token", newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
@@ -42,7 +53,7 @@ export async function POST(request: NextRequest) {
             path: "/",
         });
 
-        res.cookies.set("refresh-token", data["refresh-token"], {
+        res.cookies.set("refresh-token", newRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",

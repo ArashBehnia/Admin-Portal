@@ -1,7 +1,21 @@
 import { cookies } from "next/headers";
 
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+export function buildBackendUrl(path: string): string {
+    const base = (process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au").trim();
+    
+    // Remove trailing slashes from base
+    let normalizedBase = base.replace(/\/+$/, "");
+
+    // If normalizedBase does not end with '/api', append it
+    if (!normalizedBase.endsWith("/api")) {
+        normalizedBase = `${normalizedBase}/api`;
+    }
+
+    // Ensure path starts with a single slash
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+    return `${normalizedBase}${cleanPath}`;
+}
 
 export class BackendError extends Error {
     status: number;
@@ -23,7 +37,9 @@ export async function backendFetch<T>(
         throw new BackendError("Not authenticated", 401);
     }
 
-    const response = await fetch(`${BACKEND_URL}${path}`, {
+    const url = buildBackendUrl(path);
+
+    const response = await fetch(url, {
         ...options,
         headers: {
             Authorization: `Bearer ${accessToken}`,

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,7 +14,7 @@ export async function POST(request: NextRequest) {
         }
 
         const response = await fetch(
-            `${BACKEND_URL}/auth/password/reset/request`,
+            buildBackendUrl("/auth/forgot-password"),
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -24,16 +22,23 @@ export async function POST(request: NextRequest) {
             },
         );
 
-        const data = await response.json();
+        let data: any = {};
+        try {
+            data = await response.json();
+        } catch {
+            // Fallback for non-JSON responses
+        }
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.message || "Failed to send reset link" },
+                { error: data.message || data.error || `Backend returned status ${response.status}` },
                 { status: response.status },
             );
         }
 
-        return NextResponse.json(data);
+        // Strip the token from the response body to avoid browser exposure
+        const { token, ...safeData } = data;
+        return NextResponse.json({ success: true, ...safeData });
     } catch {
         return NextResponse.json(
             { error: "Internal server error" },

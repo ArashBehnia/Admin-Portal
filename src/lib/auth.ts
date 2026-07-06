@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "./api";
 
 export interface User {
     id: string;
@@ -33,7 +31,7 @@ export async function getUser(): Promise<User | null> {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/admin/me`, {
+        const response = await fetch(buildBackendUrl("/admin/me"), {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Content-Type": "application/json",
@@ -41,7 +39,7 @@ export async function getUser(): Promise<User | null> {
             cache: "no-store",
         });
 
-        // console.log("response", response);
+        console.log("response", response);
 
         if (!response.ok) {
             return null;

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -25,7 +23,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const response = await fetch(`${BACKEND_URL}/auth/verify-2fa`, {
+        const response = await fetch(buildBackendUrl("/auth/verify-2fa"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -34,22 +32,28 @@ export async function POST(request: NextRequest) {
             }),
         });
 
-        const data = await response.json();
+        let data: any = {};
+        try {
+            data = await response.json();
+        } catch {
+            // Fallback for non-JSON responses
+        }
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.message || "OTP verification failed" },
+                { error: data.message || data.error || `Backend returned status ${response.status}` },
                 { status: response.status },
             );
         }
 
         // Store access and refresh tokens in httponly cookies
-        const res = NextResponse.json(data);
+        const { accessToken, refreshToken, ...safeData } = data;
+        const res = NextResponse.json({ success: true, ...safeData });
 
         const accessTokenMaxAge = 60 * 60; // 1 hour
         const refreshTokenMaxAge = 7 * 24 * 60 * 60; // 7 days
 
-        res.cookies.set("access-token", data.accessToken, {
+        res.cookies.set("access-token", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
@@ -57,7 +61,7 @@ export async function POST(request: NextRequest) {
             path: "/",
         });
 
-        res.cookies.set("refresh-token", data.refreshToken, {
+        res.cookies.set("refresh-token", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",

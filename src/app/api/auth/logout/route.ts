@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-
-const BACKEND_URL =
-    process.env.ADMIN_API_URL || "https://admin-api.homeby.com.au";
+import { buildBackendUrl } from "@/lib/api";
 
 export async function POST() {
     const cookieStore = await cookies();
@@ -11,7 +9,7 @@ export async function POST() {
 
     if (refreshToken && accessToken) {
         try {
-            await fetch(`${BACKEND_URL}/auth/logout`, {
+            await fetch(buildBackendUrl("/auth/logout"), {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
