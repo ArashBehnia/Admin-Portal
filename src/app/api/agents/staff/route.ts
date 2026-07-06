@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 export async function POST(request: Request) {
     try {
@@ -63,28 +63,10 @@ export async function POST(request: Request) {
             });
             return NextResponse.json({ success: true, data: raw });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error && "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const message =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-            console.error(`[API /agents/staff] POST backend error ${status}:`, message);
-            return NextResponse.json(
-                { success: false, error: message },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "agents/staff");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agents/staff] POST error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agents/staff");
     }
 }
 
@@ -133,27 +115,9 @@ export async function PUT(request: Request) {
             );
             return NextResponse.json({ success: true, data: raw });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error && "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const message =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-            console.error(`[API /agents/staff] Backend error ${status}:`, message);
-            return NextResponse.json(
-                { success: false, error: message },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "agents/staff");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agents/staff] PUT error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agents/staff");
     }
 }

@@ -18,6 +18,8 @@ const DashboardPageClient = () => {
         hotspots,
         isLoading,
         isError,
+        isRefetching,
+        refresh,
         getTrendClass,
         getAttentionLink,
     } = useDashboard();
@@ -33,11 +35,12 @@ const DashboardPageClient = () => {
                         </p>
                     </div>
                     <button
-                        onClick={() => window.location.reload()}
-                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                        onClick={refresh}
+                        disabled={isRefetching}
+                        className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer disabled:opacity-50"
                         title="Refresh"
                     >
-                        <RefreshCw className="w-4 h-4" />
+                        <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
                     </button>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-12 text-center">
@@ -60,11 +63,12 @@ const DashboardPageClient = () => {
                     </p>
                 </div>
                 <button
-                    onClick={() => window.location.reload()}
-                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
+                    onClick={refresh}
+                    disabled={isRefetching}
+                    className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer disabled:opacity-50"
                     title="Refresh"
                 >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
                 </button>
             </div>
 

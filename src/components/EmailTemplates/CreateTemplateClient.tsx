@@ -147,6 +147,7 @@ const CreateTemplateClient = () => {
             );
 
             await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            router.refresh();
 
             setTimeout(() => {
                 router.push(`/email-templates/${name}`);

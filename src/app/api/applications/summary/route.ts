@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchApplicationsSummary } from "@/lib/application-service";
 
@@ -22,9 +23,6 @@ export async function GET() {
         // console.log("[API /applications/summary] mapped data:", JSON.stringify(data));
         return NextResponse.json(data);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        // console.error("[API /applications/summary] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "applications/summary");
     }
 }

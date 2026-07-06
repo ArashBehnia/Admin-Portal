@@ -75,6 +75,7 @@ const AgencyDetailClient = ({
       <AgencyHeader
         agency={agency}
         agencyId={agencyId}
+        status={currentDetailData?.status}
         abn={currentDetailData?.abn ?? ""}
         memberSince={currentDetailData?.memberSince ?? ""}
         activeListings={currentDetailData?.activeListings ?? 0}

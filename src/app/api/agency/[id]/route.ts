@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 export async function PUT(
     request: Request,
@@ -55,44 +55,9 @@ export async function PUT(
             });
             return NextResponse.json({ success: true, data: raw });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error && "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const rawMsg =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-
-            let detail = rawMsg;
-            try {
-                const parsed = JSON.parse(rawMsg);
-                detail = parsed.message || parsed.error || rawMsg;
-            } catch {
-                // not JSON
-            }
-
-            console.error(`[API /agency/[id]] Backend error ${status}:`, detail);
-
-            const userFriendly =
-                status === 400
-                    ? "Invalid request. Please check all fields and try again."
-                    : status === 401 || status === 403
-                      ? "You do not have permission to perform this action."
-                      : detail;
-
-            return NextResponse.json(
-                { success: false, error: userFriendly, detail },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "agency/[id]");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agency/[id]] PUT error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agency/[id]");
     }
 }

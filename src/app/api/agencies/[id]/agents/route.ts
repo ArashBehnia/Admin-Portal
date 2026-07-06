@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 function toArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) return value;
@@ -56,10 +56,7 @@ export async function GET(
 
         return NextResponse.json({ agents });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agencies/agents] GET error:", message);
-        return NextResponse.json({ agents: [] });
+        return handleBffError(error, "agencies/[id]/agents");
     }
 }
 

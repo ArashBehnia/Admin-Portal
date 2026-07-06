@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useUser, useSetUser } from "@/contexts/UserContext";
 
 
 type LoginStep = "password" | "mfa" | "forgot_password";
 
-export default function LoginPage() {
+function LoginPageContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const user = useUser();
     const setUser = useSetUser();
-
 
     const [step, setStep] = useState<LoginStep>("password");
 
@@ -29,6 +29,72 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
 
     const [otpTimeLeft, setOtpTimeLeft] = useState<number | null>(null);
+    const [resendCooldown, setResendCooldown] = useState(60);
+
+    useEffect(() => {
+        if (step === "mfa") {
+            setResendCooldown(60);
+        }
+    }, [step]);
+
+    useEffect(() => {
+        if (step !== "mfa" || resendCooldown <= 0) return;
+        const timer = setTimeout(() => {
+            setResendCooldown(resendCooldown - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [resendCooldown, step]);
+
+    const handleResendCode = async () => {
+        if (resendCooldown > 0) return;
+        setLoading(true);
+        setError(null);
+        setOtp(Array(6).fill(""));
+
+        try {
+            const res = await fetch("/api/auth/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: email,
+                    password,
+                    rememberMe: false,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Failed to resend verification code. Please try again.");
+                return;
+            }
+
+            if (data.success) {
+                setOtpTimeLeft(data.expires || 600);
+                setResendCooldown(60);
+                
+                // Show verification code resent success message
+                const successMsg = document.createElement("div");
+                successMsg.className = "fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg text-xs font-semibold z-50 transition-all duration-300";
+                successMsg.innerText = "Verification code resent successfully!";
+                document.body.appendChild(successMsg);
+                setTimeout(() => successMsg.remove(), 3000);
+            }
+        } catch {
+            setError("Network error. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const errorParam = searchParams.get("error");
+        if (errorParam === "blocked") {
+            setError("Your IP has been blocked. Access denied.");
+        } else if (errorParam) {
+            setError(errorParam);
+        }
+    }, [searchParams]);
 
     const goToStep = (next: LoginStep) => {
         setError(null);
@@ -201,6 +267,7 @@ export default function LoginPage() {
                     setUser(userData);
                 }
             }
+            window.location.href = "/dashboard";
         } catch {
             setError("Network error. Please try again.");
         } finally {
@@ -331,8 +398,8 @@ export default function LoginPage() {
                                 Two-Factor Verification
                             </h2>
                             <p className="text-xs text-muted leading-normal px-1">
-                                Enter the 6-digit verification code from your
-                                authenticator app.
+                                Enter the 6-digit verification code sent to your
+                                email.
                             </p>
                         </div>
 
@@ -360,11 +427,26 @@ export default function LoginPage() {
                             ))}
                         </div>
 
-                        {otpTimeLeft !== null && (
-                            <div className="text-center text-xs text-muted mb-4">
-                                Code expires in <span className="font-semibold text-text">{formatTime(otpTimeLeft)}</span>
+                        <div className="text-center text-xs text-muted mb-4 flex flex-col gap-1.5">
+                            {otpTimeLeft !== null && (
+                                <div>
+                                    Code expires in <span className="font-semibold text-text">{formatTime(otpTimeLeft)}</span>
+                                </div>
+                            )}
+                            <div>
+                                {resendCooldown > 0 ? (
+                                    <span>Resend code in <span className="font-semibold text-text">{resendCooldown}s</span></span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleResendCode}
+                                        className="text-accent hover:underline font-semibold focus:outline-none bg-transparent border-0 cursor-pointer text-xs"
+                                    >
+                                        Resend code
+                                    </button>
+                                )}
                             </div>
-                        )}
+                        </div>
 
                         <div className="space-y-2">
                             <button
@@ -495,5 +577,17 @@ export default function LoginPage() {
                 HomeBy Admin · Authorised staff only
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen w-full flex-col items-center justify-center bg-page px-4 font-sans antialiased text-sm text-muted">
+                Loading...
+            </div>
+        }>
+            <LoginPageContent />
+        </Suspense>
     );
 }

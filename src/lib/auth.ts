@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { buildBackendUrl } from "./api";
+import { redirect } from "next/navigation";
 
 export interface User {
     id: string;
@@ -30,11 +31,27 @@ export async function getUser(): Promise<User | null> {
         return null;
     }
 
+    let forwardedHeaders: Record<string, string> = {};
+    try {
+        const reqHeaders = await headers();
+        const xForwardedFor = reqHeaders.get("x-forwarded-for");
+        if (xForwardedFor) {
+            forwardedHeaders["x-forwarded-for"] = xForwardedFor;
+        }
+        const xRealIp = reqHeaders.get("x-real-ip");
+        if (xRealIp) {
+            forwardedHeaders["x-real-ip"] = xRealIp;
+        }
+    } catch {
+        // Safe fallback if headers() is called outside request context
+    }
+
     try {
         const response = await fetch(buildBackendUrl("/admin/me"), {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Content-Type": "application/json",
+                ...forwardedHeaders,
             },
             cache: "no-store",
         });
@@ -42,6 +59,17 @@ export async function getUser(): Promise<User | null> {
         console.log("response", response);
 
         if (!response.ok) {
+            if (response.status === 403) {
+                try {
+                    const clone = response.clone();
+                    const errBody = await clone.json();
+                    if (errBody?.error === "IP is blocked" || errBody?.message === "IP is blocked") {
+                        redirect("/login?error=blocked");
+                    }
+                } catch {
+                    // Ignore JSON parsing errors
+                }
+            }
             return null;
         }
 

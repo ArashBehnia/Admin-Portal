@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildBackendUrl } from "@/lib/api";
+import { buildBackendUrl, handleBffError } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     const refreshToken = request.cookies.get("refresh-token")?.value;
@@ -45,9 +45,12 @@ export async function POST(request: NextRequest) {
         const newAccessToken = data.accessToken || data["access-token"];
         const newRefreshToken = data.refreshToken || data["refresh-token"];
 
+        const isDevHost = request.url.includes("localhost") || request.url.includes("127.0.0.1") || request.url.includes("[::1]");
+        const isSecure = process.env.NODE_ENV === "production" && !isDevHost;
+
         res.cookies.set("access-token", newAccessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: accessTokenMaxAge,
             path: "/",
@@ -55,17 +58,14 @@ export async function POST(request: NextRequest) {
 
         res.cookies.set("refresh-token", newRefreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: refreshTokenMaxAge,
             path: "/",
         });
 
         return res;
-    } catch {
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 },
-        );
+    } catch (error) {
+        return handleBffError(error, "auth/refresh");
     }
 }

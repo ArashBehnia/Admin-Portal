@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildBackendUrl } from "@/lib/api";
+import { buildBackendUrl, handleBffError } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -43,9 +43,12 @@ export async function POST(request: NextRequest) {
         const { token, ...safeData } = data;
         const res = NextResponse.json({ success: true, ...safeData });
 
+        const isDevHost = request.url.includes("localhost") || request.url.includes("127.0.0.1") || request.url.includes("[::1]");
+        const isSecure = process.env.NODE_ENV === "production" && !isDevHost;
+
         res.cookies.set("otp-token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: cookieMaxAge,
             path: "/",
@@ -53,12 +56,6 @@ export async function POST(request: NextRequest) {
 
         return res;
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /auth/admin/login] error:", message);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 },
-        );
+        return handleBffError(error, "auth/admin/login");
     }
 }

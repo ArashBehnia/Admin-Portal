@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchPropertyReportsPage } from "@/lib/property-report-service";
 import type { PropertyReportFilters } from "@/types/propertyReportTypes";
@@ -27,9 +28,6 @@ export async function GET(request: Request) {
 
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /property-reports/page] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "property-reports/page");
     }
 }

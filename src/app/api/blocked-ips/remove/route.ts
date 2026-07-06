@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { removeBlock } from "@/lib/blocked-ip-service";
 
@@ -33,31 +34,9 @@ export async function POST(request: Request) {
             });
             return NextResponse.json({ success: true, data: result });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error &&
-                "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const message =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-            console.error(
-                `[API /blocked-ips/remove] Backend error ${status}:`,
-                message,
-            );
-            return NextResponse.json(
-                { success: false, error: message },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "blocked-ips/remove");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /blocked-ips/remove] POST error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "blocked-ips/remove");
     }
 }

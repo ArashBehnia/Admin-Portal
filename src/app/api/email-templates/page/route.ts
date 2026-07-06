@@ -17,20 +17,6 @@ export async function GET(request: Request) {
 
         return NextResponse.json(result);
     } catch (error) {
-        return handleBffError(error, "email-templates");
-    }
-}
-
-export async function POST(request: Request) {
-    try {
-        const { backendFetch } = await import("@/lib/api");
-        const body = await request.json();
-        const data = await backendFetch("/admin/template", {
-            method: "POST",
-            body: JSON.stringify(body),
-        });
-        return NextResponse.json(data, { status: 201 });
-    } catch (error) {
-        return handleBffError(error, "email-templates");
+        return handleBffError(error, "email-templates/page");
     }
 }

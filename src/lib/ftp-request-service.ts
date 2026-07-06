@@ -19,15 +19,19 @@ export async function fetchFtpRequestsPage(
     });
 
     if (filters?.status) params.set("status", filters.status);
-    if (filters?.filter) params.set("filter", filters.filter);
+    if (filters?.filter) {
+        params.set("search", filters.filter);
+        params.set("filter", filters.filter);
+    }
 
-    const raw = await backendFetch<{ content: FtpRequestListItemDto[] }>(
+    const raw = await backendFetch<{ content: FtpRequestListItemDto[]; total?: number }>(
         `/admin/agency-staff-ftp-requests/page?${params.toString()}`,
     );
 
     const items = Array.isArray(raw?.content) ? raw?.content : [];
+    const total = typeof raw?.total === "number" ? raw.total : items.length;
 
-    return { data: items, total: items.length, page, limit };
+    return { data: items, total, page, limit };
 }
 
 export async function approveFtpRequest(id: string) {

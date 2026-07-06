@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchBlockedIpsPage } from "@/lib/blocked-ip-service";
 import type { BlockedIpFilters } from "@/types/blockedIpTypes";
@@ -26,9 +27,6 @@ export async function GET(request: Request) {
 
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /blocked-ips/page] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "blocked-ips/page");
     }
 }

@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchFtpRequestsPage } from "@/lib/ftp-request-service";
 import type { FtpRequestFilters } from "@/types/ftpRequestTypes";
@@ -26,9 +27,6 @@ export async function GET(request: Request) {
 
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /ftp-requests/page] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "ftp-requests/page");
     }
 }

@@ -111,6 +111,8 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const searchQueryRef = useRef(searchQuery);
     searchQueryRef.current = searchQuery;
     const [activeFilter, setActiveFilter] = useState<AgencyFilter>("All");
+    const activeFilterRef = useRef(activeFilter);
+    activeFilterRef.current = activeFilter;
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     const loadPage = useCallback(
@@ -124,6 +126,11 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
                     limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
+
+                const currentFilter = activeFilterRef.current;
+                if (currentFilter && currentFilter !== "All") {
+                    params.set("status", currentFilter.toLowerCase());
+                }
 
                 const [summaryRes, pageRes] = await Promise.all([
                     api.get("/api/agencies/summary"),
@@ -151,9 +158,9 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
     const handlePageChange = useCallback(
         (page: number) => {
             setCurrentPage(page);
-            loadPage(page, searchQuery || undefined);
+            loadPage(page, searchQueryRef.current || undefined);
         },
-        [loadPage, searchQuery],
+        [loadPage],
     );
 
     useEffect(() => {
@@ -174,25 +181,12 @@ const useAgencies = ({ initialData }: UseAgenciesProps) => {
         loadPage(1, searchQueryRef.current || undefined);
     }, [pageSize, loadPage]);
 
-    const filteredAgencies = agencies.filter((agency) => {
-        const matchesFilter = (() => {
-            if (activeFilter === "All") return true;
-            if (activeFilter === "Active") return agency.onboarding === "Live";
-            if (activeFilter === "Onboarding")
-                return (
-                    agency.onboarding !== "Live" &&
-                    agency.subscription !== "Trial"
-                );
-            if (activeFilter === "Trial")
-                return agency.subscription === "Trial";
-            if (activeFilter === "Suspended")
-                return agency.highlight === "red";
-            if (activeFilter === "Pending")
-                return agency.onboarding === "Pending";
-            return true;
-        })();
-        return matchesFilter;
-    });
+    useEffect(() => {
+        setCurrentPage(1);
+        loadPage(1, searchQueryRef.current || undefined);
+    }, [activeFilter, loadPage]);
+
+    const filteredAgencies = agencies;
 
     const toggleMenu = (id: string) => {
         setOpenMenuId((prev) => (prev === id ? null : id));

@@ -122,6 +122,7 @@ const useAgencyDetail = ({ agencyId, detailData }: UseAgencyDetailProps) => {
             const data = res.data;
             setCurrentDetailData((prev) => ({
                 ...prev,
+                status: data?.status ?? prev.status,
                 abn: data?.abn ?? prev.abn,
                 memberSince: data?.memberSince ?? prev.memberSince,
                 crmProvider: data?.crmProvider ?? prev.crmProvider,

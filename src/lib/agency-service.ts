@@ -246,6 +246,7 @@ export async function fetchAgencyDetail(id: string): Promise<AgencyDetailData> {
     const overview = dto.overview ?? {};
     const onboardingSteps = mapOnboardingSteps(dto.onboarding);
     return {
+        status: overview.status || "",
         abn: String(overview.abn ?? ""),
         memberSince: formatDate(overview.createdAt),
         email: String(overview.email ?? ""),

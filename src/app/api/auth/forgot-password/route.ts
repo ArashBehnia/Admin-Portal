@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildBackendUrl } from "@/lib/api";
+import { buildBackendUrl, handleBffError } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -39,10 +39,7 @@ export async function POST(request: NextRequest) {
         // Strip the token from the response body to avoid browser exposure
         const { token, ...safeData } = data;
         return NextResponse.json({ success: true, ...safeData });
-    } catch {
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 },
-        );
+    } catch (error) {
+        return handleBffError(error, "auth/forgot-password");
     }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 export async function DELETE(request: Request) {
     try {
@@ -19,38 +19,10 @@ export async function DELETE(request: Request) {
             });
             return NextResponse.json({ success: true });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error && "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const rawMsg =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-
-            let detail = rawMsg;
-            try {
-                const parsed = JSON.parse(rawMsg);
-                detail = parsed.message || parsed.error || rawMsg;
-            } catch {
-                // not JSON, use as-is
-            }
-
-            console.error(`[API /agency] DELETE backend error ${status}:`, detail);
-
-            return NextResponse.json(
-                { success: false, error: detail },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "agency");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agency] DELETE error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agency");
     }
 }
 
@@ -145,38 +117,9 @@ export async function POST(request: Request) {
             });
             return NextResponse.json({ success: true, data: raw });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error && "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const rawMsg =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-
-            let detail = rawMsg;
-            try {
-                const parsed = JSON.parse(rawMsg);
-                detail = parsed.message || parsed.error || rawMsg;
-            } catch {
-                // not JSON, use as-is
-            }
-
-            console.error(`[API /agency] Backend error ${status}:`, detail);
-            console.error(`[API /agency] Full backend response:`, rawMsg);
-
-            return NextResponse.json(
-                { success: false, error: detail },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "agency");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agency] POST error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agency");
     }
 }

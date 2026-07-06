@@ -8,12 +8,14 @@ import {
     OnboardingBadge,
 } from "@/components/Agencies/AgencyBadges";
 import SuspendAgencyModal from "./SuspendAgencyModal";
+import UnsuspendAgencyModal from "./UnsuspendAgencyModal";
 import EditAgencySidebar, { EditAgencyData } from "./EditAgencySidebar";
 import DeleteAgencyModal from "./DeleteAgencyModal";
 
 interface AgencyHeaderProps {
     agency: Agency;
     agencyId: string;
+    status?: string;
     abn: string;
     memberSince: string;
     activeListings: number;
@@ -40,8 +42,11 @@ const AgencyHeader = ({
 }: AgencyHeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+    const [isUnsuspendModalOpen, setIsUnsuspendModalOpen] = useState(false);
     const [isEditSidebarOpen, setIsEditSidebarOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const isSuspended = status === "inactive" || agency?.onboarding?.toLowerCase() === "suspended";
 
     return (
         <>
@@ -93,15 +98,27 @@ const AgencyHeader = ({
                                     Edit details
                                 </button>
                                 <div className="border-t border-border my-1" />
-                                <button
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        setIsSuspendModalOpen(true);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
-                                >
-                                    Suspend agency
-                                </button>
+                                {isSuspended ? (
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            setIsUnsuspendModalOpen(true);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-[13px] text-green-600 hover:bg-green-50 cursor-pointer"
+                                    >
+                                        Unsuspend agency
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            setIsSuspendModalOpen(true);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                    >
+                                        Suspend agency
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => {
                                         setIsMenuOpen(false);
@@ -141,6 +158,14 @@ const AgencyHeader = ({
                 agencyId={agencyId}
                 agencyName={agency?.name ?? ""}
                 onClose={() => setIsSuspendModalOpen(false)}
+                onSuccess={onSuspendSuccess}
+            />
+
+            <UnsuspendAgencyModal
+                isOpen={isUnsuspendModalOpen}
+                agencyId={agencyId}
+                agencyName={agency?.name ?? ""}
+                onClose={() => setIsUnsuspendModalOpen(false)}
                 onSuccess={onSuspendSuccess}
             />
 

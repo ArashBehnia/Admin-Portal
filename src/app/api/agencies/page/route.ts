@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 export async function GET(request: Request) {
     try {
@@ -7,9 +7,11 @@ export async function GET(request: Request) {
         const offset = searchParams.get("offset") ?? "0";
         const limit = searchParams.get("limit") ?? "20";
         const keywords = searchParams.get("keywords") ?? undefined;
+        const status = searchParams.get("status") ?? undefined;
 
         const params = new URLSearchParams({ offset, limit });
         if (keywords) params.set("keywords", keywords);
+        if (status) params.set("status", status);
 
         const raw = await backendFetch<unknown>(
             `/admin/agencies/page?${params.toString()}`,
@@ -30,9 +32,6 @@ export async function GET(request: Request) {
             limit: Number(limit),
         });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agencies/page] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "agencies/page");
     }
 }

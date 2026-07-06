@@ -238,14 +238,14 @@ const StaffTable = ({
                                                         >
                                                             Edit
                                                         </button>
-                                                        <span className="p-1 text-muted select-none">
+                                                        {/* <span className="p-1 text-muted select-none">
                                                             <MoreHorizontal
                                                                 size={16}
                                                                 strokeWidth={
                                                                     2.5
                                                                 }
                                                             />
-                                                        </span>
+                                                        </span> */}
                                                     </div>
                                                 </td>
                                             </tr>

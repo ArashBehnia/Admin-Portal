@@ -42,6 +42,18 @@ async function fetchJson<T>(url: string): Promise<T> {
         window.location.href = "/login";
         throw new Error("Session expired");
     }
+    if (res.status === 403 || res.status === 500) {
+        try {
+            const clone = res.clone();
+            const data = await clone.json();
+            if (data?.error === "IP is blocked" || data?.message === "IP is blocked") {
+                window.location.href = "/login?error=blocked";
+                throw new Error("IP is blocked");
+            }
+        } catch {
+            // ignore
+        }
+    }
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     return res.json();
 }
@@ -116,6 +128,21 @@ export default function useDashboard() {
         }
     };
 
+    const isRefetching =
+        overview.isRefetching ||
+        attention.isRefetching ||
+        pipeline.isRefetching ||
+        userActivity.isRefetching ||
+        hotspots.isRefetching;
+
+    const refresh = () => {
+        overview.refetch();
+        attention.refetch();
+        pipeline.refetch();
+        userActivity.refetch();
+        hotspots.refetch();
+    };
+
     return {
         overview: overview.data,
         attention: attention.data,
@@ -124,6 +151,8 @@ export default function useDashboard() {
         hotspots: hotspots.data,
         isLoading,
         isError,
+        isRefetching,
+        refresh,
         getTrendClass,
         getAttentionLink,
     };

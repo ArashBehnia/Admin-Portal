@@ -7,30 +7,20 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const body = await request.json();
-        const reason = body?.reason ?? "";
-
-        if (!reason.trim()) {
-            return NextResponse.json(
-                { success: false, error: "Suspension reason is required" },
-                { status: 400 },
-            );
-        }
 
         try {
             const raw = await backendFetch<{ id?: string; status?: string }>(
-                `/admin/agencies/${id}/suspend`,
+                `/admin/agencies/${id}/unsuspend`,
                 {
                     method: "POST",
-                    body: JSON.stringify({ reason: reason.trim() }),
                 },
             );
 
             return NextResponse.json({ success: true, data: raw });
         } catch (backendError) {
-        return handleBffError(backendError, "agencies/[id]/suspend");
+        return handleBffError(backendError, "agencies/[id]/unsuspend");
     }
     } catch (error) {
-        return handleBffError(error, "agencies/[id]/suspend");
+        return handleBffError(error, "agencies/[id]/unsuspend");
     }
 }

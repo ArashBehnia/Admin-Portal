@@ -17,6 +17,15 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        const isIpBlocked =
+            error.response?.data?.error === "IP is blocked" ||
+            error.response?.data?.message === "IP is blocked";
+
+        if (isIpBlocked) {
+            window.location.href = "/login?error=blocked";
+            return new Promise(() => {}); // prevent further execution
+        }
+
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildBackendUrl } from "@/lib/api";
+import { buildBackendUrl, handleBffError } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -53,9 +53,12 @@ export async function POST(request: NextRequest) {
         const accessTokenMaxAge = 60 * 60; // 1 hour
         const refreshTokenMaxAge = 7 * 24 * 60 * 60; // 7 days
 
+        const isDevHost = request.url.includes("localhost") || request.url.includes("127.0.0.1") || request.url.includes("[::1]");
+        const isSecure = process.env.NODE_ENV === "production" && !isDevHost;
+
         res.cookies.set("access-token", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: accessTokenMaxAge,
             path: "/",
@@ -63,7 +66,7 @@ export async function POST(request: NextRequest) {
 
         res.cookies.set("refresh-token", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: refreshTokenMaxAge,
             path: "/",
@@ -72,17 +75,14 @@ export async function POST(request: NextRequest) {
         // Clear the OTP token cookie
         res.cookies.set("otp-token", "", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: 0,
             path: "/",
         });
 
         return res;
-    } catch {
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 },
-        );
+    } catch (error) {
+        return handleBffError(error, "auth/verify-2fa");
     }
 }

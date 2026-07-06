@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import {
     createStaffMember,
@@ -11,10 +12,7 @@ export async function POST(request: Request) {
         const result = await createStaffMember(body);
         return NextResponse.json(result, { status: 201 });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /staff] POST error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "staff");
     }
 }
 
@@ -31,10 +29,7 @@ export async function PUT(request: Request) {
         const result = await updateStaffMember(String(id), data);
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /staff] PUT error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "staff");
     }
 }
 
@@ -51,9 +46,6 @@ export async function DELETE(request: Request) {
         await deleteStaffMember(id);
         return NextResponse.json({ success: true });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /staff] DELETE error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "staff");
     }
 }

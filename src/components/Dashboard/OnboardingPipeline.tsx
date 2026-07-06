@@ -16,18 +16,18 @@ const OnboardingPipeline = ({ pipeline }: OnboardingPipelineProps) => {
                 <p className="text-xs text-muted mt-0.5">Counts by stage</p>
 
                 <div className="mt-8 select-none overflow-x-auto overflow-y-hidden pb-2 [&::-webkit-scrollbar]:hidden">
-                    <div className="flex items-end justify-between min-w-[500px]">
+                    <div className="flex items-end justify-between w-full min-w-[360px]">
                         {pipeline.stages.map((stage, idx) => (
                             <React.Fragment key={idx}>
                                 {idx > 0 && (
-                                    <div className="flex items-center justify-center pb-1.5 px-2">
-                                        <span className="text-muted/50 text-lg font-medium">
+                                    <div className="flex items-center justify-center pb-1.5 px-1.5">
+                                        <span className="text-muted/50 text-base font-medium">
                                             →
                                         </span>
                                     </div>
                                 )}
-                                <div className="flex flex-col gap-2 flex-1 min-w-[70px]">
-                                    <span className="text-[12px] text-muted font-semibold whitespace-nowrap">
+                                <div className="flex flex-col gap-2 flex-1 min-w-[60px]">
+                                    <span className="text-[12px] text-muted font-semibold leading-tight">
                                         {stage.stage}
                                     </span>
                                     <span className="text-[32px] font-bold text-text leading-none tracking-tight">
@@ -40,15 +40,17 @@ const OnboardingPipeline = ({ pipeline }: OnboardingPipelineProps) => {
                 </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-border/50">
-                <Link
-                    href="/agencies"
-                    className="text-[13px] text-[#E05C00] hover:underline font-semibold inline-flex items-center gap-1"
-                >
-                    <span>{pipeline.blockedMessage}</span>
-                    <span>→</span>
-                </Link>
-            </div>
+            {pipeline.blockedMessage && (
+                <div className="mt-8 pt-4 border-t border-border/50">
+                    <Link
+                        href="/agencies"
+                        className="text-[13px] text-[#E05C00] hover:underline font-semibold inline-flex items-center gap-1"
+                    >
+                        <span>{pipeline.blockedMessage}</span>
+                        <span>→</span>
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

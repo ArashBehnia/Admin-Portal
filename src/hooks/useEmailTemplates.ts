@@ -53,7 +53,8 @@ const useEmailTemplates = () => {
                 if (filter) params.set("filter", filter);
 
                 const res = await fetch(
-                    `/api/email-templates?${params.toString()}`,
+                    `/api/email-templates/page?${params.toString()}`,
+                    { cache: "no-store" }
                 );
                 if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
                 const json = await res.json();
@@ -159,6 +160,10 @@ const useEmailTemplates = () => {
         }
     };
 
+    const refresh = useCallback(() => {
+        loadPage(currentPage, searchQueryRef.current || undefined);
+    }, [loadPage, currentPage]);
+
     return {
         filteredTemplates,
         allFilteredCount: totalCount,
@@ -176,6 +181,7 @@ const useEmailTemplates = () => {
         selectedCategory,
         setSelectedCategory: () => {},
         getCategoryStyles,
+        refresh,
     };
 };
 

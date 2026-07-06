@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 type NoteItem = {
     note: string;
@@ -28,14 +28,11 @@ export async function GET(
             const notes = Array.isArray(raw?.notes) ? raw.notes : [];
 
             return NextResponse.json({ notes });
-        } catch {
-            return NextResponse.json({ notes: [] });
-        }
+        } catch (error) {
+        return handleBffError(error, "agencies/[id]/notes");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agencies/notes] GET error:", message);
-        return NextResponse.json({ notes: [] });
+        return handleBffError(error, "agencies/[id]/notes");
     }
 }
 
@@ -71,29 +68,9 @@ export async function POST(
                 notes,
             });
         } catch (backendError) {
-            console.warn(
-                "[API /agencies/notes] Backend unavailable, saving locally:",
-                backendError instanceof Error
-                    ? backendError.message
-                    : backendError,
-            );
-            const fallback: NoteItem = {
-                note,
-                authorId: "",
-                createdAt: new Date().toISOString(),
-            };
-            return NextResponse.json({
-                success: true,
-                notes: [fallback],
-            });
-        }
+        return handleBffError(backendError, "agencies/[id]/notes");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agencies/notes] POST error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "agencies/[id]/notes");
     }
 }

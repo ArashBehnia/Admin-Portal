@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { addApplicationNote } from "@/lib/application-service";
 
@@ -13,9 +14,6 @@ export async function POST(
         // console.log("[API /applications/[id]/notes] result:", JSON.stringify(result).slice(0, 500));
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        // console.error("[API /applications/[id]/notes] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "applications/[id]/notes");
     }
 }

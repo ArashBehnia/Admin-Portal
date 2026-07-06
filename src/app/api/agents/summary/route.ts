@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 export async function GET() {
     try {
@@ -16,9 +16,6 @@ export async function GET() {
             active_listings: typeof obj.active_listings === "number" ? obj.active_listings : 0,
         });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agents/summary] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "agents/summary");
     }
 }

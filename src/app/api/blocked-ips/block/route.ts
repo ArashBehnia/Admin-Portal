@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { createBlock } from "@/lib/blocked-ip-service";
 import type { CreateBlockPayload } from "@/types/blockedIpTypes";
@@ -39,31 +40,9 @@ export async function POST(request: Request) {
             const result = await createBlock(payload);
             return NextResponse.json({ success: true, data: result });
         } catch (backendError) {
-            const status =
-                backendError instanceof Error &&
-                "status" in backendError
-                    ? (backendError as { status: number }).status
-                    : 500;
-            const message =
-                backendError instanceof Error
-                    ? backendError.message
-                    : String(backendError);
-            console.error(
-                `[API /blocked-ips/block] Backend error ${status}:`,
-                message,
-            );
-            return NextResponse.json(
-                { success: false, error: message },
-                { status },
-            );
-        }
+        return handleBffError(backendError, "blocked-ips/block");
+    }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /blocked-ips/block] POST error:", message);
-        return NextResponse.json(
-            { success: false, error: message },
-            { status: 500 },
-        );
+        return handleBffError(error, "blocked-ips/block");
     }
 }

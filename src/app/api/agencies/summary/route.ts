@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch } from "@/lib/api";
+import { backendFetch, handleBffError } from "@/lib/api";
 
 function toNum(v: unknown): number {
     if (typeof v === "number") return v;
@@ -28,9 +28,6 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /agencies/summary] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "agencies/summary");
     }
 }

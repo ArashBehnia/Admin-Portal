@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchIntegrationDetail } from "@/lib/integration-service";
 
@@ -10,9 +11,6 @@ export async function GET(
         const data = await fetchIntegrationDetail(id);
         return NextResponse.json(data);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /integrations/[id]] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "integrations/[id]");
     }
 }

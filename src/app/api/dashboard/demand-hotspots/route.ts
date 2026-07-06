@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchDemandHotspots } from "@/lib/dashboard-service";
-import { BackendError } from "@/lib/api";
+import { BackendError, handleBffError } from "@/lib/api";
 
 export async function GET(request: NextRequest) {
     try {
@@ -10,9 +10,6 @@ export async function GET(request: NextRequest) {
         const data = await fetchDemandHotspots(days, limit);
         return NextResponse.json(data);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        const status = error instanceof BackendError ? error.status : 500;
-        return NextResponse.json({ error: message }, { status });
+        return handleBffError(error, "dashboard/demand-hotspots");
     }
 }

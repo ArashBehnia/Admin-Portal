@@ -24,6 +24,7 @@ const EmailTemplatesPageClient = () => {
         setSearchQuery,
         selectedCategory,
         setSelectedCategory,
+        refresh,
     } = useEmailTemplates();
 
     useEffect(() => {
@@ -131,6 +132,7 @@ const EmailTemplatesPageClient = () => {
                             onPageChange={setCurrentPage}
                             onRowsPerPageChange={setPageSize}
                             isSearching={isSearching}
+                            onDeleteSuccess={refresh}
                         />
                     </>
                 )}

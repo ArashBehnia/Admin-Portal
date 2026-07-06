@@ -67,6 +67,7 @@ interface EmailTemplatesTableProps {
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rows: number) => void;
     isSearching?: boolean;
+    onDeleteSuccess?: () => void;
 }
 
 const EmailTemplatesTable = ({
@@ -82,6 +83,7 @@ const EmailTemplatesTable = ({
     onPageChange,
     onRowsPerPageChange,
     isSearching = false,
+    onDeleteSuccess,
 }: EmailTemplatesTableProps) => {
     const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -123,7 +125,11 @@ const EmailTemplatesTable = ({
             }
 
             showToast("Template Deleted", `"${displayName}" has been deleted.`);
-            await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            } else {
+                await queryClient.invalidateQueries({ queryKey: ["email-templates"] });
+            }
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : "Failed to delete template";

@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { approveFtpRequest } from "@/lib/ftp-request-service";
 
@@ -10,9 +11,6 @@ export async function POST(
         const result = await approveFtpRequest(id);
         return NextResponse.json(result);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /ftp-requests/[id]/approve] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "ftp-requests/[id]/approve");
     }
 }

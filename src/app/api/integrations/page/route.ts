@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchIntegrationsPage } from "@/lib/integration-service";
 
@@ -24,9 +25,6 @@ export async function GET(request: Request) {
             limit: Number(limit),
         });
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : "Internal server error";
-        console.error("[API /integrations/page] error:", message);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "integrations/page");
     }
 }

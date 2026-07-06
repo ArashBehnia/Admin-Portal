@@ -1,3 +1,4 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { fetchEmailTemplateByName, fetchEmailTemplateById, updateTemplate, deleteTemplate } from "@/lib/email-templates-service";
 
@@ -32,8 +33,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         }
         return NextResponse.json(data);
     } catch (error) {
-        const message = error instanceof Error ? error.message : "Internal server error";
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "email-templates/[id]");
     }
 }
 
@@ -48,8 +48,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         const data = await updateTemplate(actualId, payload);
         return NextResponse.json(data);
     } catch (error) {
-        const message = error instanceof Error ? error.message : "Internal server error";
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "email-templates/[id]");
     }
 }
 
@@ -62,7 +61,6 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         await deleteTemplate(actualId);
         return NextResponse.json({ success: true });
     } catch (error) {
-        const message = error instanceof Error ? error.message : "Internal server error";
-        return NextResponse.json({ error: message }, { status: 500 });
+        return handleBffError(error, "email-templates/[id]");
     }
 }

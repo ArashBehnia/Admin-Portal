@@ -120,6 +120,14 @@ export async function middleware(request: NextRequest) {
 
     // Redirect authenticated users away from /login to /dashboard
     if (pathname === "/login") {
+        const errorParam = request.nextUrl.searchParams.get("error");
+        const isBlocked = errorParam === "blocked" || request.nextUrl.searchParams.get("blocked") === "true";
+        if (isBlocked) {
+            const response = NextResponse.next();
+            response.cookies.delete("access-token");
+            response.cookies.delete("refresh-token");
+            return response;
+        }
         if (accessToken) {
             return NextResponse.redirect(new URL("/dashboard", request.url));
         }

@@ -1,7 +1,8 @@
+import { handleBffError } from "@/lib/api";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const user = await getUser();
 
@@ -10,16 +11,16 @@ export async function GET() {
                 { error: "Not authenticated" },
                 { status: 401 },
             );
-            res.cookies.set("access-token", "", { maxAge: 0, path: "/" });
-            res.cookies.set("refresh-token", "", { maxAge: 0, path: "/" });
+            const isDevHost = request.url.includes("localhost") || request.url.includes("127.0.0.1") || request.url.includes("[::1]");
+            const isSecure = process.env.NODE_ENV === "production" && !isDevHost;
+
+            res.cookies.set("access-token", "", { httpOnly: true, secure: isSecure, sameSite: "lax", maxAge: 0, path: "/" });
+            res.cookies.set("refresh-token", "", { httpOnly: true, secure: isSecure, sameSite: "lax", maxAge: 0, path: "/" });
             return res;
         }
 
         return NextResponse.json({ user });
-    } catch {
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 },
-        );
+    } catch (error) {
+        return handleBffError(error, "auth/me");
     }
 }

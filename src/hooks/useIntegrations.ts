@@ -90,18 +90,36 @@ function mapPageData(
         failing: summary.feedErrors24h,
     };
 
-    const feeds: Feed[] = page.data.map((item) => ({
-        id: item.agencyId,
-        agencyName: item.agencyName,
-        crm: item.crmType ?? "—",
-        method: inferMethod(item.crmType, item.webhookUrl),
-        status: mapConnectionStatus(item.connectionStatus),
-        lastSync: formatLastSync(item.lastSyncAt),
-        listings24h: item.totalFeeds,
-        errors24h: item.errorFeeds,
-        distribution: "—",
-        onboarding: mapAgencyStatus(item.agencyStatus),
-    }));
+    const feeds: Feed[] = page.data.map((item) => {
+        let mappedStatus: Feed["status"] = "Healthy";
+        if (item.connectionStatus === "not_configured" || item.connectionStatus === "not configured") {
+            mappedStatus = "Pending setup";
+        } else if (item.errorFeeds > 0) {
+            mappedStatus = "Failing";
+        } else if (item.lastSyncAt) {
+            const diff = Date.now() - new Date(item.lastSyncAt).getTime();
+            if (diff > 24 * 60 * 60 * 1000) {
+                mappedStatus = "Warning";
+            } else {
+                mappedStatus = "Healthy";
+            }
+        } else {
+            mappedStatus = "Warning"; // Connected but never synced
+        }
+
+        return {
+            id: item.agencyId,
+            agencyName: item.agencyName,
+            crm: item.crmType ?? "—",
+            method: inferMethod(item.crmType, item.webhookUrl),
+            status: mappedStatus,
+            lastSync: formatLastSync(item.lastSyncAt),
+            listings24h: item.totalFeeds,
+            errors24h: item.errorFeeds,
+            distribution: "—",
+            onboarding: mapAgencyStatus(item.agencyStatus),
+        };
+    });
 
     return { stats, feeds, total: page.total };
 }
@@ -129,6 +147,7 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
     searchQueryRef.current = searchQuery;
     const [filterStatus, setFilterStatus] = useState<StatusFilter>("All");
     const filterStatusRef = useRef(filterStatus);
+    filterStatusRef.current = filterStatus;
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const pageSizeRef = useRef(pageSize);
@@ -159,20 +178,9 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
                 const pageData: ApiPage = pageRes.data;
                 const result = mapPageData(summary, pageData);
 
-                // Use summary stats for total count (page API total is unreliable)
-                let filteredTotal = summary.totalAgencies;
-                const s = (status ?? "All").toLowerCase();
-                if (s === "healthy") filteredTotal = summary.connected;
-                else if (s === "failing") filteredTotal = summary.feedErrors24h;
-                else if (s === "warning")
-                    filteredTotal = Math.max(
-                        0,
-                        summary.totalAgencies - summary.connected - summary.feedErrors24h,
-                    );
-
                 setStats(result.stats);
                 setFeeds(result.feeds);
-                setTotalCount(filteredTotal);
+                setTotalCount(result.total);
             } catch (err) {
                 console.error("Failed to load integrations:", err);
             } finally {

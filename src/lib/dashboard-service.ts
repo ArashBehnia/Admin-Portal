@@ -131,12 +131,17 @@ export async function fetchOnboardingPipeline(): Promise<OnboardingPipeline> {
         count: toNum(s.count ?? s.value ?? s.total),
     }));
 
+    const blockedCount = toNum(
+        data.blockedOver48h ?? data.blocked_over_48h ?? data.blockedOver48H,
+    );
+    const blockedMessage =
+        blockedCount > 0
+            ? `${blockedCount} application${blockedCount === 1 ? "" : "s"} blocked over 48h`
+            : "";
+
     return {
         stages,
-        blockedMessage: toStr(
-            data.blockedMessage ?? data.blocked_message ?? data.blocked,
-            "",
-        ),
+        blockedMessage,
     };
 }
 
@@ -158,10 +163,10 @@ export async function fetchDemandHotspots(
     );
     const arr = toArray<Record<string, unknown>>(raw);
     return arr.map((item) => ({
-        suburb: toStr(item.suburb ?? item.name ?? item.area),
-        state: toStr(item.state ?? item.region),
+        suburb: toStr(item.suburb ?? item.name ?? item.area ?? "Unknown"),
+        state: toStr(item.state ?? item.region ?? "Unknown"),
         activeUsers: toStr(item.activeUsers ?? item.active_users ?? item.users ?? "0"),
-        searches: toStr(item.searches ?? item.searchCount ?? item.search_count ?? "0"),
-        enquiries: toNum(item.enquiries ?? item.inquiries ?? item.enquiry_count),
+        searches: toStr(item.searches ?? item.propertyViews ?? item.property_views ?? item.searchCount ?? item.search_count ?? "0"),
+        enquiries: toNum(item.enquiries ?? item.enquiriesThisWeek ?? item.enquiries_this_week ?? item.inquiries ?? item.enquiry_count),
     }));
 }
