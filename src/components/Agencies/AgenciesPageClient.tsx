@@ -57,7 +57,7 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
                         <Plus className="w-4 h-4" /> Create
                     </button>
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={refreshPage}
                         className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
                         title="Refresh"
                     >
@@ -94,7 +94,10 @@ const AgenciesPageClient = ({ initialData }: AgenciesPageClientProps) => {
             <CreateAgencySidebar
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSuccess={() => window.location.reload()}
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                    refreshPage();
+                }}
             />
         </div>
     );

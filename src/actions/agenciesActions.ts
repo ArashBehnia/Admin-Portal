@@ -75,6 +75,7 @@ export type AgentRow = {
 };
 
 export type AgencyDetailData = {
+    name?: string;
     status?: string;
     abn: string;
     memberSince: string;

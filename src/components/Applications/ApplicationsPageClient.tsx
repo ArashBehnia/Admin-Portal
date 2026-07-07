@@ -116,6 +116,7 @@ const ApplicationsPageClient = ({
         handleRequestInfo,
         handleSaveNote,
         loadTimeline,
+        refreshPage,
     } = useApplications({
         initialApplications: mappedApplications,
         initialStats: mappedStats,
@@ -134,7 +135,7 @@ const ApplicationsPageClient = ({
                     </p>
                 </div>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={refreshPage}
                     className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
                     title="Refresh"
                 >

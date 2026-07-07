@@ -390,6 +390,7 @@ const useApplications = ({ initialApplications, initialStats }: UseApplicationsP
         handleRequestInfo,
         handleSaveNote,
         loadTimeline,
+        refreshPage: () => loadPage(statusFilter, currentPage, searchQueryRef.current),
     };
 };
 

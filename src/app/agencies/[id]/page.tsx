@@ -1,8 +1,9 @@
-import { fetchAgencyDetailData } from "@/actions/agenciesActions";
 import { fetchAgenciesData } from "@/actions/agenciesListActions";
+import { BackendError } from "@/lib/api";
 import { fetchAgencyDetail } from "@/lib/agency-service";
 import AgencyDetailClient from "@/components/AgencyDetail/AgencyDetailClient";
 import type { Agency } from "@/types/agencyTypes";
+import { notFound } from "next/navigation";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -11,34 +12,29 @@ interface PageProps {
 const AgencyDetailPage = async ({ params }: PageProps) => {
   const { id } = await params;
 
-  let agency: Agency | undefined;
   let detailData;
-
   try {
     detailData = await fetchAgencyDetail(id);
-    const { agencies } = await fetchAgenciesData(0, 100);
-    agency = agencies.find((a: Agency) => a.id === id);
-  } catch {
-    detailData = await fetchAgencyDetailData();
+  } catch (error) {
+    if (error instanceof BackendError && error.status === 404) {
+      notFound();
+    }
+    throw error;
   }
 
-  console.log(agency);
-  console.log(detailData);
-
-  if (!agency) {
-    const { agencies } = await fetchAgenciesData(0, 100);
-    agency = agencies.find((a: Agency) => a.id === id) ?? agencies[0];
-  }
+  const { agencies } = await fetchAgenciesData(0, 100);
+  let agency = agencies.find((a: Agency) => a.id === id);
 
   if (!agency) {
     agency = {
       id,
-      name: "Agency",
+      name: detailData.name || "Agency",
+      status: detailData.status || "pending",
       location: "",
       subscription: "Trial",
       onboarding: "Pending",
-      listings: 0,
-      agents: 0,
+      listings: detailData.activeListings,
+      agents: detailData.activeStaff,
       feed: "Not configured",
       mrr: "$0/mo",
       lastActivity: "Never",

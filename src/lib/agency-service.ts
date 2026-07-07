@@ -246,6 +246,7 @@ export async function fetchAgencyDetail(id: string): Promise<AgencyDetailData> {
     const overview = dto.overview ?? {};
     const onboardingSteps = mapOnboardingSteps(dto.onboarding);
     return {
+        name: String(overview.name ?? ""),
         status: overview.status || "",
         abn: String(overview.abn ?? ""),
         memberSince: formatDate(overview.createdAt),
@@ -276,6 +277,8 @@ export async function fetchAgencyDetailOverview(id: string): Promise<AgencyDetai
         : {};
 
     return {
+        name: String(obj.name ?? ""),
+        status: String(obj.status ?? ""),
         abn: String(obj.abn ?? ""),
         memberSince: formatDate(obj.memberSince ? String(obj.memberSince) : undefined),
         email: String(obj.email ?? ""),
@@ -380,6 +383,8 @@ export async function fetchAgencyListingDistribution(
 function fallbackDetailData(id: string): AgencyDetailData {
     void id;
     return {
+        name: "",
+        status: "",
         abn: "",
         memberSince: "",
         email: "",

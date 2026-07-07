@@ -30,6 +30,7 @@ interface AgencyHeaderProps {
 const AgencyHeader = ({
     agency,
     agencyId,
+    status,
     abn,
     memberSince,
     activeListings,
@@ -46,7 +47,10 @@ const AgencyHeader = ({
     const [isEditSidebarOpen, setIsEditSidebarOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const isSuspended = status === "inactive" || agency?.onboarding?.toLowerCase() === "suspended";
+    const isSuspended =
+        status?.toLowerCase() === "inactive" ||
+        agency?.status?.toLowerCase() === "inactive" ||
+        agency?.onboarding?.toLowerCase() === "suspended";
 
     return (
         <>

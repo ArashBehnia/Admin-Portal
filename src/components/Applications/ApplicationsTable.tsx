@@ -110,7 +110,12 @@ const ApplicationsTable = ({
                                     ))}
                                 </>
                             ) : applications.length > 0 ? (
-                                applications.map((app) => (
+                                applications.map((app) => {
+                                    const status = app.status.toLowerCase();
+                                    const canApprove = status === "pending" || status === "rejected";
+                                    const canReject = status === "pending";
+
+                                    return (
                                     <tr
                                         key={app.id}
                                         className={`border-b border-border/60 last:border-0 hover:bg-page/40 transition-colors ${
@@ -153,26 +158,33 @@ const ApplicationsTable = ({
                                                 >
                                                     Review
                                                 </button>
-                                                <button
-                                                    onClick={() =>
-                                                        onApprove(app.id)
-                                                    }
-                                                    className="text-green-500 hover:text-green-700 transition-colors cursor-pointer"
-                                                >
-                                                    <Check className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        onReject(app.id)
-                                                    }
-                                                    className="text-red-500 hover:text-red-700 transition-colors cursor-pointer"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
+                                                {canApprove && (
+                                                    <button
+                                                        onClick={() =>
+                                                            onApprove(app.id)
+                                                        }
+                                                        className="text-green-500 hover:text-green-700 transition-colors cursor-pointer"
+                                                        title="Approve application"
+                                                    >
+                                                        <Check className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {canReject && (
+                                                    <button
+                                                        onClick={() =>
+                                                            onReject(app.id)
+                                                        }
+                                                        className="text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                                                        title="Reject application"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <tr>
                                     <td

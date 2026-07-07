@@ -70,6 +70,7 @@ function mapPageData(
     const agencies: Agency[] = items.map((item) => ({
         id: item.id,
         name: item.name,
+        status: item.status,
         location: [item.agencyAddress, item.state, item.postcode]
             .filter(Boolean)
             .join(", "),
