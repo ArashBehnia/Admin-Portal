@@ -46,8 +46,6 @@ export async function PUT(
             );
         }
 
-        console.log("[API /agency/[id]] PUT payload:", JSON.stringify(payload, null, 2));
-
         try {
             const raw = await backendFetch<unknown>(`/admin/agency?id=${id}`, {
                 method: "PUT",

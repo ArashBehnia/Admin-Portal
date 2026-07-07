@@ -108,8 +108,6 @@ export async function POST(request: Request) {
         if (body.rentalRla?.trim()) payload.rentalRla = body.rentalRla.trim();
         if (body.description?.trim()) payload.description = body.description.trim();
 
-        console.log("[API /agency] POST payload:", JSON.stringify(payload, null, 2));
-
         try {
             const raw = await backendFetch<unknown>("/admin/agency", {
                 method: "POST",
