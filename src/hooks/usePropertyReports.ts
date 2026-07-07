@@ -209,6 +209,7 @@ const usePropertyReports = ({ initialData }: UsePropertyReportsProps) => {
         setShowFilters,
         hasActiveFilters,
         resetFilters,
+        refreshPage: () => loadPage(currentPage, currentFilters()),
     };
 };
 

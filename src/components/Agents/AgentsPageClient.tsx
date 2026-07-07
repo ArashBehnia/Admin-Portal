@@ -57,7 +57,7 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
                         <Plus className="w-4 h-4" /> Create
                     </button>
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={refreshPage}
                         className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
                         title="Refresh"
                     >
@@ -124,7 +124,10 @@ const AgentsPageClient = ({ initialAgents, initialTotal }: AgentsPageClientProps
             <CreateAgentDrawer
                 isOpen={showCreateDrawer}
                 onClose={() => setShowCreateDrawer(false)}
-                onSuccess={() => window.location.reload()}
+                onSuccess={() => {
+                    setShowCreateDrawer(false);
+                    refreshPage();
+                }}
             />
         </div>
     );
