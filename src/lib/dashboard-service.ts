@@ -71,7 +71,7 @@ export async function fetchOverview(): Promise<OverviewData> {
             kpis: {
                 activeAgencies: normalizeKpi(kpis.activeAgencies ?? data.activeAgencies),
                 pendingApplications: normalizeKpi(kpis.pendingApplications ?? data.pendingApplications),
-                feedFailures: normalizeKpi(kpis.feedFailures ?? data.feedFailures),
+                feedFailures: normalizeKpi(kpis.feedFailures ?? data.feedFailures ?? data.feedFailures24h),
                 mrr: normalizeKpi(kpis.mrr ?? data.mrr),
             },
             systemHealth: normalizeSystemHealth(data.systemHealth || data),
@@ -82,7 +82,7 @@ export async function fetchOverview(): Promise<OverviewData> {
         kpis: {
             activeAgencies: normalizeKpi(data.activeAgencies ?? data.active_agencies),
             pendingApplications: normalizeKpi(data.pendingApplications ?? data.pending_applications),
-            feedFailures: normalizeKpi(data.feedFailures ?? data.feed_failures),
+            feedFailures: normalizeKpi(data.feedFailures ?? data.feedFailures24h ?? data.feed_failures),
             mrr: normalizeKpi(data.mrr ?? data.MRR ?? data.revenue),
         },
         systemHealth: normalizeSystemHealth(data.systemHealth || data),
@@ -149,8 +149,9 @@ export async function fetchUserActivity(days: number): Promise<UserActivityPoint
     const raw = await backendFetch(`/admin/dashboard/user-activity?days=${days}`);
     const arr = toArray<Record<string, unknown>>(raw);
     return arr.map((item, idx) => ({
-        day: toNum(item.day ?? item.date ?? item.index ?? idx + 1),
-        active: toNum(item.active ?? item.activeUsers ?? item.count ?? item.value),
+        day: toStr(item.day ?? item.date ?? item.index ?? idx + 1),
+        active: toNum(item.active ?? item.activeUsers ?? item.active_users ?? item.count ?? item.value),
+        newUsers: toNum(item.newUsers ?? item.new_users ?? item.new ?? item.createdUsers),
     }));
 }
 

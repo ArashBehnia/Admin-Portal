@@ -76,6 +76,13 @@ function mapAgencyStatus(status?: string): string {
     return status;
 }
 
+function mapStatusFilter(status?: string): string | undefined {
+    if (!status || status === "All") return undefined;
+    const normalized = status.toLowerCase();
+    if (normalized === "pending setup") return "pending_setup";
+    return normalized;
+}
+
 function mapPageData(
     summary: ApiSummary,
     page: ApiPage,
@@ -164,7 +171,8 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
                     limit: String(pageSizeRef.current),
                 });
                 if (keywords) params.set("keywords", keywords);
-                if (status && status !== "All") params.set("status", status);
+                const mappedStatus = mapStatusFilter(status);
+                if (mappedStatus) params.set("status", mappedStatus);
 
                 const [summaryRes, pageRes] = await Promise.all([
                     api.get("/api/integrations/summary"),
@@ -265,6 +273,7 @@ const useIntegrations = ({ initialData }: UseIntegrationsProps) => {
         pageSize,
         setPageSize,
         setCurrentPage: handlePageChange,
+        refreshPage: () => loadPage(currentPage, searchQueryRef.current || undefined, filterStatusRef.current),
     };
 };
 

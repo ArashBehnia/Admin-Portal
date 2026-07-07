@@ -21,11 +21,16 @@ const CustomTooltip = ({ active, payload }: any) => {
         return (
             <div className="bg-card border border-border rounded-lg p-3 shadow-xl font-sans">
                 <p className="text-[11px] font-bold text-muted uppercase tracking-wider">
-                    Day {payload[0].payload.day}
+                    {payload[0].payload.day}
                 </p>
                 <p className="text-sm font-black text-text mt-0.5">
                     {payload[0].value.toLocaleString()} active
                 </p>
+                {typeof payload[0].payload.newUsers === "number" && (
+                    <p className="text-xs font-semibold text-muted mt-0.5">
+                        {payload[0].payload.newUsers.toLocaleString()} new
+                    </p>
+                )}
             </div>
         );
     }
@@ -33,6 +38,12 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const UserActivityChart = ({ data }: UserActivityChartProps) => {
+    const maxValue = Math.max(
+        1,
+        ...data.map((point) => Math.max(point.active, point.newUsers ?? 0)),
+    );
+    const yMax = Math.max(5, Math.ceil(maxValue * 1.25));
+
     return (
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm flex flex-col">
             <h2 className="text-[15px] font-bold text-text">
@@ -67,8 +78,8 @@ const UserActivityChart = ({ data }: UserActivityChartProps) => {
                                 fontSize: 10,
                                 fontWeight: 500,
                             }}
-                            domain={[0, 12000]}
-                            ticks={[0, 3000, 6000, 9000, 12000]}
+                            domain={[0, yMax]}
+                            allowDecimals={false}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Line
