@@ -524,9 +524,7 @@ const useStaffAndRoles = ({
                 mobile: formMobile || undefined,
             };
 
-            console.log("Edit Staff Request Payload:", payload);
             const res = await api.put(`/api/staff/${selectedStaff.id}`, payload);
-            console.log("Edit Staff Response Data:", res.data);
 
             setLocalStaff((prev) =>
                 prev.map((s) =>
@@ -671,6 +669,11 @@ const useStaffAndRoles = ({
         loadPage(searchQuery || undefined, page, roleFilter);
     };
 
+    const refreshPage = () => {
+        loadSummary();
+        loadPage(searchQueryRef.current || undefined, currentPage, roleFilterRef.current);
+    };
+
     return {
         // Data
         localStaff,
@@ -688,6 +691,7 @@ const useStaffAndRoles = ({
         pageSize,
         setPageSize,
         setPage,
+        refreshPage,
 
         // UI State
         searchQuery,

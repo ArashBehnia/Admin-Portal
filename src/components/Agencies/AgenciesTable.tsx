@@ -11,6 +11,7 @@ import {
 } from "./AgencyBadges";
 import EditAgencySidebar from "../AgencyDetail/EditAgencySidebar";
 import SuspendAgencyModal from "../AgencyDetail/SuspendAgencyModal";
+import UnsuspendAgencyModal from "../AgencyDetail/UnsuspendAgencyModal";
 import DeleteAgencyModal from "../AgencyDetail/DeleteAgencyModal";
 
 interface AgenciesTableProps {
@@ -43,6 +44,8 @@ const AgenciesTable = ({
   const [editAgencyId, setEditAgencyId] = useState<string | null>(null);
   const [suspendAgencyId, setSuspendAgencyId] = useState<string | null>(null);
   const [suspendAgencyName, setSuspendAgencyName] = useState("");
+  const [unsuspendAgencyId, setUnsuspendAgencyId] = useState<string | null>(null);
+  const [unsuspendAgencyName, setUnsuspendAgencyName] = useState("");
   const [deleteAgencyId, setDeleteAgencyId] = useState<string | null>(null);
   const [deleteAgencyName, setDeleteAgencyName] = useState("");
   return (
@@ -141,7 +144,12 @@ const AgenciesTable = ({
                   </td>
                 </tr>
               ) : (
-                filteredAgencies.map((agency) => (
+                filteredAgencies.map((agency) => {
+                  const isSuspended =
+                    agency.status?.toLowerCase() === "inactive" ||
+                    agency.onboarding?.toLowerCase() === "suspended";
+
+                  return (
                   <tr
                     key={agency?.id}
                     className={`border-b border-border/60 last:border-0 hover:bg-page/40 transition-colors group ${
@@ -222,16 +230,29 @@ const AgenciesTable = ({
                                 Edit
                               </button>
                               <div className="border-t border-border my-1" />
-                              <button
-                                onClick={() => {
-                                  onCloseMenu();
-                                  setSuspendAgencyId(agency?.id ?? null);
-                                  setSuspendAgencyName(agency?.name ?? "");
-                                }}
-                                className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
-                              >
-                                Suspend
-                              </button>
+                              {isSuspended ? (
+                                <button
+                                  onClick={() => {
+                                    onCloseMenu();
+                                    setUnsuspendAgencyId(agency?.id ?? null);
+                                    setUnsuspendAgencyName(agency?.name ?? "");
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[13px] text-green-600 hover:bg-green-50 cursor-pointer"
+                                >
+                                  Unsuspend
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    onCloseMenu();
+                                    setSuspendAgencyId(agency?.id ?? null);
+                                    setSuspendAgencyName(agency?.name ?? "");
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[13px] text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                >
+                                  Suspend
+                                </button>
+                              )}
                               <button
                                 onClick={() => {
                                   onCloseMenu();
@@ -248,7 +269,8 @@ const AgenciesTable = ({
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -276,6 +298,19 @@ const AgenciesTable = ({
           onClose={() => setSuspendAgencyId(null)}
           onSuccess={() => {
             setSuspendAgencyId(null);
+            onRefresh();
+          }}
+        />
+      )}
+
+      {unsuspendAgencyId && (
+        <UnsuspendAgencyModal
+          isOpen={true}
+          agencyId={unsuspendAgencyId}
+          agencyName={unsuspendAgencyName}
+          onClose={() => setUnsuspendAgencyId(null)}
+          onSuccess={() => {
+            setUnsuspendAgencyId(null);
             onRefresh();
           }}
         />

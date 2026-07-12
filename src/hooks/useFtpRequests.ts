@@ -224,6 +224,7 @@ const useFtpRequests = ({ initialData }: UseFtpRequestsProps) => {
         resetFilters,
         approveRequest,
         rejectRequest,
+        refreshPage: () => loadPage(currentPage, currentFilters()),
     };
 };
 

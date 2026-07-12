@@ -63,7 +63,7 @@ const EmailTemplatesPageClient = () => {
                             Create
                         </Link>
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={refresh}
                             className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
                             title="Refresh"
                         >
@@ -103,7 +103,7 @@ const EmailTemplatesPageClient = () => {
                         Create
                     </Link>
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={refresh}
                         className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
                         title="Refresh"
                     >

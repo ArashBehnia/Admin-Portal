@@ -74,9 +74,9 @@ export async function fetchStaffSummary(): Promise<{
             : {};
     return {
         total: toNumber(obj.total),
-        active: toNumber(obj.active),
-        mfaEnabled: toNumber(obj.mfaEnabled),
-        mfaNotSetUp: toNumber(obj.mfaNotSetUp),
+        active: toNumber(obj.active ?? obj.enabled),
+        mfaEnabled: toNumber(obj.mfaEnabled ?? obj.mfa_enabled),
+        mfaNotSetUp: toNumber(obj.mfaNotSetUp ?? obj.mfa_not_set_up),
     };
 }
 

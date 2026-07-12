@@ -159,6 +159,7 @@ export type AgencyHighlight = "orange" | "red" | null;
 export type Agency = {
     id: string;
     name: string;
+    status: string;
     location: string;
     subscription: string;
     onboarding: string;

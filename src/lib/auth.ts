@@ -56,8 +56,6 @@ export async function getUser(): Promise<User | null> {
             cache: "no-store",
         });
 
-        console.log("response", response);
-
         if (!response.ok) {
             if (response.status === 403) {
                 try {

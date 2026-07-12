@@ -23,8 +23,6 @@ export async function GET(request: Request) {
             Object.keys(filters).length > 0 ? filters : undefined,
         );
 
-        console.log("[API /ftp-requests/page] result:", result.data.length, "items");
-
         return NextResponse.json(result);
     } catch (error) {
         return handleBffError(error, "ftp-requests/page");

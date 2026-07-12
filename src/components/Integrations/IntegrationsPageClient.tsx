@@ -43,6 +43,7 @@ const IntegrationsPageClient = ({
     pageSize,
     setPageSize,
     setCurrentPage,
+    refreshPage,
   } = useIntegrations({ initialData });
 
   return (
@@ -71,7 +72,7 @@ const IntegrationsPageClient = ({
             Add integration
           </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={refreshPage}
             className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors cursor-pointer"
             title="Refresh"
           >

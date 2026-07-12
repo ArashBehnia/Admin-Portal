@@ -43,6 +43,9 @@ const ApplicationDrawer = ({
     onLoadTimeline,
 }: ApplicationDrawerProps) => {
     const timelineLoadedForApp = useRef<string | null>(null);
+    const status = selectedApp.status.toLowerCase();
+    const canApprove = status === "pending" || status === "rejected";
+    const canReject = status === "pending";
 
     useEffect(() => {
         if (activeDrawerTab === "Notes" && timelineLoadedForApp.current !== selectedApp.id) {
@@ -367,19 +370,21 @@ const ApplicationDrawer = ({
 
                 {/* Footer Actions */}
                 <div className="p-6 bg-card border-t border-border flex flex-col gap-2 shrink-0">
-                    <button
-                        onClick={() => onApprove(selectedApp.id)}
-                        disabled={isApproving || isRejecting}
-                        className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isApproving && (
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                        )}
-                        {isApproving ? "Approving..." : "Approve application"}
-                    </button>
+                    {canApprove && (
+                        <button
+                            onClick={() => onApprove(selectedApp.id)}
+                            disabled={isApproving || isRejecting}
+                            className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isApproving && (
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                            )}
+                            {isApproving ? "Approving..." : "Approve application"}
+                        </button>
+                    )}
                     <button
                         onClick={() => onRequestInfo(selectedApp.id)}
                         disabled={true}
@@ -388,19 +393,21 @@ const ApplicationDrawer = ({
                     >
                         Request more information (coming soon)
                     </button>
-                    <button
-                        onClick={() => onReject(selectedApp.id)}
-                        disabled={isApproving || isRejecting}
-                        className="w-full py-2.5 bg-card text-red-500 hover:text-red-700 rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isRejecting && (
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                        )}
-                        {isRejecting ? "Rejecting..." : "Reject application"}
-                    </button>
+                    {canReject && (
+                        <button
+                            onClick={() => onReject(selectedApp.id)}
+                            disabled={isApproving || isRejecting}
+                            className="w-full py-2.5 bg-card text-red-500 hover:text-red-700 rounded text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isRejecting && (
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                            )}
+                            {isRejecting ? "Rejecting..." : "Reject application"}
+                        </button>
+                    )}
                 </div>
             </div>
         </>

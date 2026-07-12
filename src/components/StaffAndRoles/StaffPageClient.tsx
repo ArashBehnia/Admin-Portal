@@ -25,6 +25,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
         staffActivity, isActivityLoading,
         isLoading,
         currentPage, totalPages, totalItems, pageSize, setPageSize, setPage,
+        refreshPage,
         searchQuery, setSearchQuery,
         roleFilter, setRoleFilter,
         activeTab, setActiveTab,
@@ -62,7 +63,7 @@ const StaffPageClient = ({ initialStaff, initialRoles, initialSummary }: StaffPa
                     <p className="text-[12px] sm:text-[13px] text-muted mt-0.5">Manage HomeBy internal staff accounts and access levels.</p>
                 </div>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={refreshPage}
                     className="text-muted hover:text-text p-2 rounded border border-border hover:bg-page transition-colors self-start shrink-0 cursor-pointer"
                     title="Refresh"
                 >

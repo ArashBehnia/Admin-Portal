@@ -16,8 +16,9 @@ export type OnboardingPipeline = {
 };
 
 export type UserActivityPoint = {
-    day: number;
+    day: string;
     active: number;
+    newUsers: number;
 };
 
 export type Hotspot = {

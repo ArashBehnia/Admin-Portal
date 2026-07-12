@@ -146,8 +146,6 @@ function LoginPageContent() {
         setError(null);
 
         try {
-            console.log("/api/auth/admin/login");
-            
             const res = await fetch("/api/auth/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -174,9 +172,7 @@ function LoginPageContent() {
             } else {
                 setError("MFA is required for admin accounts");
             }
-        } catch(error) {
-            console.log(error,"ssssssss");
-            
+        } catch {
             setError("Network error. Please try again.");
         } finally {
             setLoading(false);
